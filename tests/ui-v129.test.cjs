@@ -22,10 +22,10 @@ for(const id of [
 }
 
 assert(html.includes('排班設定'));
-assert.equal(ids.aiScheduleCard||0,0,'removed AI schedule card must stay absent');
-assert.equal(ids.aiScheduleUpload||0,0,'removed AI schedule upload button must stay absent');
-assert.equal(ids.aiScheduleFileInput||0,0,'removed AI schedule file input must stay absent');
-assert(!html.includes("smart_schedule_import:{label:'智慧匯入班表'"),'removed AI schedule import must not remain in plan catalog');
+assert.equal(ids.aiScheduleCard,1,'reference AI schedule card missing');
+assert.equal(ids.aiScheduleUpload,1,'reference AI schedule upload button missing');
+assert.equal(ids.aiScheduleFileInputV219,1,'reference AI schedule file input missing');
+assert(html.includes('AI 匯入班表'),'reference AI schedule label missing');
 assert(html.includes('--v129-accent:#c77a35'));
 assert(html.includes('--v129-honey-soft:#fff6e8'));
 assert(html.includes('id="themeSystem"'));
@@ -76,18 +76,17 @@ for(const id of [
 assert.equal(ids.scheduleMenuEvent||0,0,'schedule more menu must not duplicate itinerary add');
 assert.equal(ids.toggleSchedule||0,0,'calendar-plus must not be reused as schedule settings toggle');
 assert(scheduleSection.includes('schedule-card-v136'),'schedule page must keep approved calendar card layout');
-assert(scheduleSection.includes('>我的班表</b>'),'schedule page heading must say 我的班表');
+assert(scheduleSection.includes('班別模板'),'reference schedule page must include template block');
 assert(!scheduleSection.includes('schedule-v129-head'),'old visible schedule-settings header must be removed from schedule page');
-assert(!scheduleSection.includes('id="aiScheduleCard"'),'AI schedule import card must be removed from calendar');
+assert(scheduleSection.includes('id="aiScheduleCard"'),'AI schedule import card must appear in reference calendar');
 assert(scheduleSection.includes('id="scheduleAddDay"'),'calendar-plus dated shift action missing');
 assert(scheduleSection.includes('<use href="#i-calendar"/>'),'dated shift action should use calendar icon');
 assert(html.includes("scheduleOpen=!scheduleOpen;render()"),'three-dot schedule settings must toggle open/closed');
 assert(html.includes("source:'manual'"),'dated shift action must save a manual schedule override');
 console.log('PASS v138 schedule actions structure');
 
-assert.equal(ids.scheduleMenuClearAi||0,0,'removed AI schedule clear action must stay absent');
-assert(!scheduleSection.includes('智慧匯入班表'),'calendar must not advertise removed AI schedule import');
-console.log('PASS v171 removed AI schedule import UI');
+assert(scheduleSection.includes('AI 匯入班表'),'calendar must advertise the restored reference AI import card');
+console.log('PASS v219 restored reference AI schedule import UI');
 
 
 for(const id of [
