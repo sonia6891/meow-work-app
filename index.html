@@ -2328,6 +2328,131 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   #meowAssistantDialog .meow-assistant-sheet{height:100%!important;max-height:100%!important;border:0!important;border-radius:28px 28px 0 0!important;padding:18px!important;box-shadow:0 -12px 48px #44271c28!important;overflow:auto!important}
 }
 </style>
+<style id="mobile-layout-corrections-v222">
+@media(max-width:760px){
+  /* The approved mobile overview already fits its compact card grid. */
+  html[data-active-tab="dashboard"],html[data-active-tab="dashboard"] body{overflow:hidden!important;height:100dvh!important}
+  html[data-active-tab="dashboard"] .hero-wrap{display:none!important}
+  html[data-active-tab="dashboard"] .main{height:calc(100dvh - var(--nav-h) - env(safe-area-inset-bottom));overflow:hidden!important;padding:8px 10px 0!important}
+  html[data-active-tab="dashboard"] #page-dashboard.active{height:auto;min-height:0;overflow:hidden!important;padding:0 12px 0!important}
+  html[data-active-tab="dashboard"] .mobile-dashboard-approved{height:auto;grid-template-rows:auto;gap:8px!important;overflow:hidden}
+
+  /* Keep the same work type colors and selected state used by Overview. */
+  .ref-worktype-row button{background:rgba(255,255,255,.67)!important;color:#7d5b49!important;border-color:transparent!important;box-shadow:0 3px 10px rgba(80,57,42,.035)!important}
+  .ref-worktype-row button.active{background:#ffe7ae!important;border-color:#f5c76d!important;color:#7a4c29!important;box-shadow:none!important}
+  .ref-schedule-top-grid{display:block!important}
+  .ref-ai-card{display:none!important}
+  #page-calendar .schedule-card-v136{margin:0 0 9px!important}
+  #page-calendar .schedule-v136-tools{padding:8px 11px!important;border:0!important}
+  #page-calendar .schedule-v138-heading{display:none!important}
+  #page-calendar .schedule-v136-actions{justify-content:flex-end}
+  #page-calendar .schedule-v136-tools{padding:0!important;border:0!important}
+  #page-calendar .schedule-card-v136{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+  #page-calendar .schedule-v136-tools{margin:0 0 8px!important}
+  #page-calendar .schedule-v138-heading{display:flex!important;align-items:center!important;justify-content:flex-start!important;min-height:43px!important;padding:8px 11px!important;border:1px solid #eee2d8!important;border-radius:14px!important;background:#fff!important;cursor:pointer}
+  #page-calendar .schedule-v138-heading:before{content:'⚙';color:#9a6548;font-size:15px;margin-right:7px}
+  #page-calendar .schedule-v138-heading b{font-size:13px!important;color:#553429!important}
+  #page-calendar .schedule-v138-heading small{display:none!important}
+  #page-calendar .schedule-fold-chevron{margin-left:auto;margin-right:10px;color:#9a6548;font-size:19px;font-weight:900}
+  #page-calendar .schedule-v136-tools{position:relative!important}
+  #page-calendar .schedule-v136-more-toggle{display:none!important}
+  #page-calendar .schedule-v129-summary{display:none!important}
+  #page-calendar .schedule-v136-actions{display:none!important}
+  #page-calendar .schedule-v136-action:first-child{display:none!important}
+  #page-calendar .schedule-v136-more-toggle{width:32px!important;height:32px!important;border:0!important;background:#fff7ef!important;color:#8c583c!important}
+  #page-calendar .schedule-more-menu{right:25px!important;top:46px!important;z-index:8}
+  #page-calendar .v219-schedule-settings-strip{display:none!important}
+  #page-calendar .schedule-settings{margin:0 0 10px!important;padding:9px!important;border:1px solid #eee2d8!important;border-radius:15px!important;background:#fff!important}
+  #page-calendar .schedule-settings.hidden{display:none!important}
+  #page-calendar .schedule-settings:not(.hidden){display:block!important}
+  #page-calendar .schedule-settings .form-grid{grid-template-columns:1fr!important;gap:8px!important}
+  #page-calendar #patternPreset{display:none!important}
+
+  /* Add actions live in the matching agenda cards; no empty or duplicate blocks. */
+  #page-attendance .ref-itinerary-create{display:none!important}
+  #page-attendance .v219-board-card{position:relative;padding-top:13px}
+  .v219-board-title{padding-right:38px;min-height:27px}
+  .v219-card-add{position:absolute;right:9px;top:8px;width:30px;height:30px;border:0;border-radius:50%;background:#fff0de;color:#a45f39;font-size:23px;line-height:1;font-weight:700}
+  .v219-reminder-card,.v219-mini-calendar-card{display:none!important}
+  .itinerary-empty-list{display:none!important}
+  #page-attendance .v219-itinerary-board{grid-template-columns:1.15fr .95fr;gap:9px}
+  #page-attendance .v219-today-card .v219-board-link{display:none!important}
+
+  /* Match the supplied settings hierarchy and make the profile avatar the edit affordance. */
+  #page-settings .v219-settings-profile-card{grid-template-columns:74px 1fr;margin:0 0 10px}
+  #v219SettingsAvatar{cursor:pointer;outline:0}
+  #page-settings .v219-settings-profile-card button{display:none!important}
+  #page-settings .settings-account-v129 .settings-account-main{display:grid!important;grid-template-columns:1fr auto!important}
+  #page-settings .settings-account-v129 .settings-avatar-button,
+  #page-settings .settings-account-copy,
+  #page-settings .settings-account-details{display:none!important}
+  #page-settings .settings-account-v129{display:none!important}
+  #page-settings .settings-pro-v129{margin-top:0!important}
+  #page-settings .settings-modern-card,#page-settings .settings-modern-fold{border-radius:18px!important;background:#fff!important}
+  #page-settings .settings-modern-head{padding:9px 12px!important;min-height:44px!important}
+  #page-settings .v219-settings-section-title{margin:8px 4px 4px!important}
+  #page-settings #workSettingsCard{order:2}
+  #page-settings #schedulePrefCard{order:3}
+  #page-settings #dataSyncCard{order:4}
+  #page-settings #appearanceCard{order:5}
+  #page-settings #aboutCard{order:6}
+  #page-settings #accountPlanCard{order:1}
+}
+</style>
+<style id="mobile-reference-cards-v223">
+@media(max-width:760px){
+  #page-calendar .ref-template-card{position:relative;margin-bottom:9px!important}
+  #page-calendar .ref-template-card>.ref-block-title{display:flex;align-items:center;gap:7px}
+  #page-calendar .schedule-template-fold{margin-left:auto;border:0;border-radius:12px;padding:7px 9px;background:#fff3e4;color:#8c5537;font-size:11px;font-weight:850;white-space:nowrap}
+  #page-calendar .schedule-template-fold span{margin-left:5px;font-size:15px}
+  #page-calendar .schedule-settings{margin:10px 0 0!important;padding:10px!important;border:1px solid #eee2d8!important;border-radius:14px!important;background:#fffaf5!important}
+  #page-calendar .schedule-settings.hidden{display:none!important}
+  #page-calendar .schedule-settings:not(.hidden){display:block!important}
+  #page-calendar .schedule-settings .form-grid{grid-template-columns:1fr!important;gap:8px!important}
+  #page-settings .settings-stack{display:grid;gap:9px!important}
+  #page-settings .settings-stack>.v219-settings-section-title{display:none!important}
+  #page-settings .settings-account-v129,#page-settings #accountPlanCard{display:none!important}
+  #page-settings .ref-settings-card,#page-settings .settings-modern-card,#page-settings .settings-modern-fold{border:1px solid #f0e5db!important;border-radius:19px!important;background:#fff!important;box-shadow:0 5px 18px rgba(87,54,35,.055)!important;padding:10px!important;margin:0!important;overflow:hidden}
+  #page-settings .ref-settings-card-title{display:flex;align-items:center;gap:9px;padding:0 4px 8px;color:#43261d;font-size:14px;font-weight:950}
+  #page-settings .ref-settings-card-title>span{color:#986649;font-size:17px}
+  #page-settings .ref-settings-rows{border:1px solid #f3eee9;border-radius:15px;overflow:hidden;background:#fff}
+  #page-settings .ref-settings-row{width:100%;min-height:51px;display:grid;grid-template-columns:36px minmax(0,1fr) auto 14px;align-items:center;gap:8px;padding:7px 9px;border:0;border-bottom:1px solid #f1ece7;background:#fff;text-align:left;color:#35221b;font:inherit}
+  #page-settings .ref-settings-row:last-child{border-bottom:0}
+  #page-settings .ref-settings-row>span{min-width:0}
+  #page-settings .ref-settings-row b{display:block;font-size:12px;line-height:1.25}
+  #page-settings .ref-settings-row small{display:block;margin-top:2px;color:#907d72;font-size:10px;line-height:1.25}
+  #page-settings .ref-settings-row>strong{color:#543528;font-size:20px}
+  #page-settings .ref-settings-row em{font-style:normal;padding:5px 9px;border-radius:20px;background:#edf8ef;color:#468154;font-size:10px;font-weight:850;white-space:nowrap}
+  #page-settings .ref-settings-row em:where(#refGoogleBadge,#refLineBadge):not(:empty){background:#fff3dd;color:#986339}
+  #page-settings .ref-settings-row em.linked{background:#edf8ef!important;color:#468154!important}
+  #page-settings .ref-settings-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:11px;background:#fff5e7;color:#956244;font-size:17px;font-weight:900}
+  #page-settings .ref-settings-icon.google{color:#4285f4;font-family:Arial,sans-serif;font-size:22px}
+  #page-settings .ref-settings-icon.line{background:#eaf8ed;color:#09a34b;font-size:9px}
+  #page-settings .ref-settings-icon.crown{background:#fff5d8;color:#cc9429}
+  #page-settings .ref-settings-icon.blue{background:#edf5ff;color:#4f83ba}
+  #page-settings .ref-settings-icon.coral{background:#fff0ef;color:#cc6760}
+  #page-settings .ref-settings-icon.brown{background:#fff2e8;color:#a36b4c}
+  #page-settings #workSettingsCard>.settings-modern-head,#page-settings #dataSyncCard>.settings-modern-head{min-height:27px!important;padding:0 4px 7px!important;border:0!important;background:transparent!important}
+  #page-settings .settings-modern-head b{font-size:14px!important;color:#43261d!important}
+  #page-settings .settings-section-icon{font-size:16px!important}
+  #page-settings .settings-fold-state{font-size:10px!important;color:#977461!important}
+  #page-settings .work-settings-brief,#page-settings .data-sync-brief{display:none!important}
+  #page-settings #workSettingsCard>.ref-settings-rows,#page-settings #dataSyncCard>.ref-settings-rows{margin-bottom:7px}
+  #page-settings .settings-modern-head{border:0!important}
+  #page-settings .settings-modern-head .settings-fold-state{margin-left:auto}
+  #page-settings #appearanceCard{padding:10px!important}
+  #page-settings #appearanceCard>.settings-modern-head{display:none!important}
+  #page-settings #appearanceBody{display:block!important}
+  #page-settings #appearanceBody .settings-modern-row{display:block!important;padding:0!important;border:0!important}
+  #page-settings #appearanceBody .settings-modern-row>div:first-child{margin:0 4px 8px}
+  #page-settings #appearanceBody .settings-modern-row>div:first-child b{font-size:14px;color:#43261d}
+  #page-settings #appearanceBody .settings-modern-row>div:first-child small{display:block;color:#907d72;font-size:10px}
+  #page-settings #appearanceBody .settings-segmented{display:flex!important;gap:7px!important}
+  #page-settings #appearanceBody .settings-segmented button{flex:1;min-height:38px;border-radius:13px!important}
+  #page-settings #schedulePrefCard{display:none!important}
+  #page-settings #workSettingsBody:not(.hidden),#page-settings #dataSyncBody:not(.hidden){margin-top:6px}
+}
+</style>
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -2640,7 +2765,7 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
     </div>
     <div class="ref-schedule-top-grid">
       <div class="ref-template-card">
-        <div class="ref-block-title"><svg class="icon"><use href="#i-calendar"/></svg><b>班別模板</b></div>
+        <div class="ref-block-title"><svg class="icon"><use href="#i-calendar"/></svg><b>班別模板</b><button type="button" id="scheduleTemplateFold" class="schedule-template-fold" aria-expanded="false" aria-controls="scheduleSettings">排班設定 <span id="scheduleFoldChevron">⌄</span></button></div>
         <div class="ref-template-buttons">
           <button type="button" class="active" data-ref-preset="2-2">做2休2</button>
           <button type="button" data-ref-preset="4-3">做4休3</button>
@@ -2666,7 +2791,7 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
       <div class="schedule-v136-tools" aria-label="班表工具">
         <div class="schedule-v138-heading">
           <b>排班設定</b>
-          <small>調整班制、第一個上班日與班別資料</small>
+          <small>調整班制、第一個上班日與班別資料</small><span class="schedule-fold-chevron" id="scheduleFoldChevron">⌄</span>
         </div>
         <div class="schedule-v138-actions">
           <button type="button" class="schedule-v136-action" id="scheduleAddDay" aria-label="新增日期班表" title="新增日期班表">
@@ -2755,14 +2880,15 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
     <div class="v219-itinerary-board">
       <section class="v219-board-card v219-today-card">
         <div class="v219-board-title"><b>▣ 今天的安排</b><span id="v219TodayDate"></span></div>
+        <button type="button" class="v219-card-add" id="v219QuickEvent" aria-label="新增行程">＋</button>
         <div id="v219TodayList" class="v219-timeline"></div>
         <button type="button" id="v219ViewAllEvents" class="v219-board-link">查看完整行程 ›</button>
       </section>
       <div class="v219-board-right">
         <section class="v219-board-card v219-todo-card">
           <div class="v219-board-title"><b>☑ 待辦清單</b><span id="v219TodoCount"></span></div>
+          <button type="button" class="v219-card-add" id="v219QuickTodoCard" aria-label="新增待辦">＋</button>
           <div id="v219TodoList"></div>
-          <button type="button" id="v219QuickTodo" class="v219-board-link">＋ 新增待辦事項</button>
         </section>
         <section class="v219-board-card v219-conflict-card">
           <div class="v219-board-title danger"><b>⚠ 衝突提醒</b></div>
@@ -2986,7 +3112,7 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
       <img src="./workcat-home-v12.png" alt="" aria-hidden="true">
     </div>
     <div class="v219-settings-profile-card">
-      <img id="v219SettingsAvatar" src="./workcat-home-v12.png" alt="">
+        <img id="v219SettingsAvatar" src="./workcat-home-v12.png" alt="更換頭像" role="button" tabindex="0">
       <div><b id="v219SettingsName">喵星人</b><span>上班族・認真生活中</span><small>加班可以，但記得給罐罐！♡</small></div>
       <button type="button" id="v219EditProfile">編輯個人資料 ›</button>
     </div>
@@ -4275,6 +4401,9 @@ function syncScheduleEditing(){
   $('patternPreset').classList.toggle('hidden',!open);
   $('schedulePlanValue').classList.add('hidden');
   $('scheduleSettings').classList.toggle('hidden',!open);
+      const fold=document.querySelector('#page-calendar #scheduleTemplateFold');
+  if(fold)fold.setAttribute('aria-expanded',String(open));
+  const chevron=$('scheduleFoldChevron');if(chevron)chevron.textContent=open?'⌃':'⌄';
   if(summary)summary.classList.remove('hidden');
   if(card)card.classList.toggle('schedule-settings-open',open);
   $('editRotation').disabled=!open;
@@ -7249,6 +7378,47 @@ renderBillingHistory();
 renderSyncStatus();
 renderMeowAssistantLiveQualityReport();
 }
+function prepareReferenceSettings(){
+  const stack=document.querySelector('#page-settings .settings-stack');
+  if(!stack||stack.dataset.referenceReady)return;
+  stack.dataset.referenceReady='1';
+  const template=document.querySelector('#page-calendar .ref-template-card');
+  const scheduleTools=document.querySelector('#page-calendar .schedule-card-v136');
+  if(template&&scheduleTools){
+    ['schedulePlanValue','scheduleSummary','patternPreset','rotationActiveInfo','scheduleSettings'].forEach(id=>{const node=$(id);if(node)template.appendChild(node)});
+    const summary=document.querySelector('#page-calendar .schedule-v129-summary');if(summary)template.appendChild(summary);
+    scheduleTools.hidden=true;
+  }
+  const insertRows=(card,html)=>{if(card&&!card.querySelector('.ref-settings-rows'))card.insertAdjacentHTML('beforeend',html)};
+  const accountTitle=stack.querySelector('.v219-settings-section-title');
+  const account=document.createElement('section');account.className='ref-settings-card ref-account-card';account.id='refAccountCard';
+  account.innerHTML='<div class="ref-settings-card-title"><span>♙</span>帳號與方案</div><div class="ref-settings-rows"><button type="button" class="ref-settings-row"><i class="ref-settings-icon google">G</i><span><b>Google 帳號</b><small id="refGoogleStatus">尚未連結</small></span><em id="refGoogleBadge">連結</em><strong>›</strong></button><button type="button" class="ref-settings-row"><i class="ref-settings-icon line">LINE</i><span><b>LINE 帳號</b><small id="refLineStatus">尚未連結</small></span><em id="refLineBadge">連結</em><strong>›</strong></button><button type="button" class="ref-settings-row ref-plan-row" id="refPlanAction"><i class="ref-settings-icon crown">♛</i><span><b>目前方案</b><small>查看方案功能與升級選項</small></span><em id="refPlanBadge">免費方案</em><strong>›</strong></button></div>';
+  if(accountTitle)stack.insertBefore(account,accountTitle);else stack.prepend(account);
+  const work=stack.querySelector('#workSettingsCard');
+  const workHead=work?.querySelector('#toggleWorkSettings b');if(workHead)workHead.textContent='工作資料與假別額度';
+  insertRows(work,'<div class="ref-settings-rows ref-work-rows"><div class="ref-settings-row"><i class="ref-settings-icon blue">▦</i><span><b>工作類型</b><small id="refWorkType">—</small></span><strong>›</strong></div><div class="ref-settings-row"><i class="ref-settings-icon coral">▣</i><span><b>到職日</b><small id="refHireDate">尚未設定</small></span><strong>›</strong></div><div class="ref-settings-row"><i class="ref-settings-icon blue">☂</i><span><b>假別額度（本年度）</b><small id="refLeaveQuota">年假額度計算中</small></span><strong>›</strong></div></div>');
+  const sync=stack.querySelector('#dataSyncCard');
+  const syncHead=sync?.querySelector('#toggleDataSync b');if(syncHead)syncHead.textContent='資料與同步';
+  insertRows(sync,'<div class="ref-settings-rows"><button type="button" class="ref-settings-row"><i class="ref-settings-icon blue">☁</i><span><b>雲端同步</b><small id="refSyncSummary">本機自動保存</small></span><em id="refSyncBadge">本機</em><strong>›</strong></button><button type="button" class="ref-settings-row" id="refExportRow"><i class="ref-settings-icon brown">↕</i><span><b>匯出／匯入資料</b><small>備份或從其他裝置匯入資料</small></span><strong>›</strong></button><div class="ref-settings-row"><i class="ref-settings-icon brown">▤</i><span><b>手動備份</b><small id="refBackupSummary">儲存到本機裝置</small></span><strong>›</strong></div></div>');
+  stack.querySelectorAll(':scope > .v219-settings-section-title').forEach(el=>el.hidden=true);
+  const planAction=$('refPlanAction');if(planAction)planAction.onclick=()=>$('accountUpgrade')?.click();
+  const loginRows=account.querySelectorAll('.ref-settings-row');loginRows[0].onclick=()=>openWelcome(true);loginRows[1].onclick=()=>openWelcome(true);
+  const syncRow=sync?.querySelector('.ref-settings-row');if(syncRow)syncRow.onclick=()=>{dataSyncOpen=!dataSyncOpen;renderSettings()};
+  const exportRow=$('refExportRow');if(exportRow)exportRow.onclick=()=>$('exportBackup')?.click();
+  stack.querySelector('#appearanceCard')?.classList.add('ref-theme-card');
+}
+function renderReferenceSettings(){
+  const app=authUser?.app_metadata||{},providers=[app.provider,...(Array.isArray(app.providers)?app.providers:[])].filter(Boolean).map(x=>String(x).toLowerCase());
+  const google=!!authUser&&providers.includes('google'),line=!!authUser&&providers.includes('line');
+  const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};
+  set('refGoogleStatus',google?(authUser?.email||'已連結'):'尚未連結');set('refGoogleBadge',google?'已連結':'連結');$('refGoogleBadge')?.classList.toggle('linked',google);
+  set('refLineStatus',line?(authUser?.email||'已連結'):'尚未連結');set('refLineBadge',line?'已連結':'連結');$('refLineBadge')?.classList.toggle('linked',line);
+  const plan=currentPlan();set('refPlanBadge',plan==='free'?'免費方案':plan==='pro'?'Pro 方案':plan);
+  set('refWorkType',({hospital:'醫院',restaurant:'餐廳',security:'保全',factory:'工廠',custom:state.settings.customWorkType||'自訂'})[state.settings.workType]||'尚未設定');
+  set('refHireDate',state.settings.hireDate||'尚未設定');
+  set('refLeaveQuota','年假 '+($('settingAnnualQuota')?.value||'待計算')+'｜'+(($('annualBalanceMain')?.textContent||'').replace(/^剩\s*/,'')));
+  set('refSyncSummary',hasCloudEntitlement()?'自動備份資料，跨裝置同步':'自動備份你的資料，換裝置也不怕遺失');set('refSyncBadge',hasCloudEntitlement()?'已開啟':'本機');
+}
 function safeRender(name,fn){
   try{fn()}
   catch(e){
@@ -7334,9 +7504,11 @@ function syncReferencePageControls(){
 function render(){
   safeRender('dashboard',renderDashboard);
   safeRender('calendar',renderCalendar);
+  prepareReferenceSettings();
   safeRender('attendance',renderAttendance);
   safeRender('salary',renderSalary);
   safeRender('settings',renderSettings);
+  renderReferenceSettings();
   syncReferencePageControls();
   renderV219ReferenceArchitecture();
   placeMobileRestCard();
@@ -7361,8 +7533,14 @@ if($('v219DayEdit'))$('v219DayEdit').onclick=()=>openScheduleAddDialog();
 if($('v219FullMonth'))$('v219FullMonth').onclick=()=>window.scrollTo({top:document.querySelector('.calendar-card')?.offsetTop||0,behavior:'smooth'});
 if($('v219ViewAllEvents'))$('v219ViewAllEvents').onclick=()=>{itineraryShowAll=true;renderAttendance()};
 if($('v219QuickTodo'))$('v219QuickTodo').onclick=()=>openTodo();
+if($('v219QuickEvent'))$('v219QuickEvent').onclick=()=>openEvent(iso(new Date()));
+if($('v219QuickTodoCard'))$('v219QuickTodoCard').onclick=()=>openTodo();
 if($('v219MoreReminder'))$('v219MoreReminder').onclick=()=>openEvent(iso(new Date()));
 if($('v219EditProfile'))$('v219EditProfile').onclick=()=>{const b=$('settingsAvatarButton');if(b)b.click()};
+if($('v219SettingsAvatar')){
+  $('v219SettingsAvatar').onclick=()=>{$('avatarInput')&&$('avatarInput').click()};
+  $('v219SettingsAvatar').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('v219SettingsAvatar').click()}};
+}
 
 // v215 reference controls
 qsa('[data-ref-worktype]').forEach(button=>button.onclick=()=>{
@@ -7536,6 +7714,9 @@ if($('scheduleMoreToggle'))$('scheduleMoreToggle').onclick=e=>{
   $('scheduleMoreToggle').setAttribute('aria-expanded',String(!!open));
 };
 if($('scheduleMenuSettings'))$('scheduleMenuSettings').onclick=()=>{closeScheduleMoreMenu();scheduleOpen=!scheduleOpen;render()};
+const scheduleFoldHeading=document.querySelector('#page-calendar #scheduleTemplateFold');
+if(scheduleFoldHeading){scheduleFoldHeading.setAttribute('role','button');scheduleFoldHeading.setAttribute('tabindex','0');scheduleFoldHeading.setAttribute('aria-expanded','false');scheduleFoldHeading.onclick=()=>{scheduleOpen=!scheduleOpen;render()};scheduleFoldHeading.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();scheduleFoldHeading.click()}}}
+if($('scheduleFoldChevron'))$('scheduleFoldChevron').id='scheduleFoldChevron';
 document.addEventListener('click',e=>{
   const menu=$('scheduleMoreMenu'),toggle=$('scheduleMoreToggle');
   if(!menu||menu.classList.contains('hidden'))return;
@@ -9856,7 +10037,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=219',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=223',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
