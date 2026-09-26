@@ -133,7 +133,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     check('本機儲存使用 localStorage 與 IndexedDB 鏡像', html.includes("localStorage.setItem(SAVE_KEY") && html.includes("indexedDB.open(BACKUP_DB_NAME"));
     check('舊版雲端備份使用獨立唯讀資料表', html.includes("from('user_legacy_exports').select('payload,original_updated_at')"));
     check('單一雲端還原會自動檢查舊版備份，不再要求使用者另外開檔', html.includes('async function restoreLegacyCloud()') && html.includes("return await restoreLegacyCloud()") && html.includes('不需要另外開啟 JSON 檔'));
-    check('AI 班表匯入已從產品入口移除', !html.includes('id="aiScheduleCard"') && !html.includes('id="aiScheduleUpload"') && !html.includes("smart_schedule_import:{label:'智慧匯入班表'"));
+    check('參考圖 AI 班表匯入入口已恢復', html.includes('id="aiScheduleCard"') && html.includes('id="aiScheduleUpload"') && html.includes('id="aiScheduleFileInputV219"'));
     check('浮動喵助理使用定稿厭世喵素材', html.includes('./assets/meow-assistant-pro-v169.webp?v=169') && html.includes('<b>喵助理</b></button>'));
     check('喵助理語音會先寫入輸入框再自動送出', html.includes("input.value=text") && html.includes("setTimeout(()=>{if(token===meowAssistantRecognitionToken)void previewMeowAssistant()},120)"));
     check('喵助理文字位於貓咪下方且拖曳熱區加大', html.includes('flex-direction:column') && html.includes('min-width:98px;min-height:118px'));
@@ -379,12 +379,12 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.setViewportSize({width:390,height:844});
         await page.waitForTimeout(80);
 
-        check('月曆頁不再顯示 AI 班表匯入', await page.locator('#aiScheduleCard').count()===0 && await page.locator('#scheduleMenuClearAi').count()===0);
+        check('月曆頁顯示參考圖 AI 班表匯入', await page.locator('#aiScheduleCard').isVisible() && await page.locator('#aiScheduleUpload').isVisible());
         check('浮動喵助理顯示定稿圖與名稱', await page.locator('#meowAssistantFab img').getAttribute('src')==='./assets/meow-assistant-pro-v169.webp?v=169' && (await page.locator('#meowAssistantFab').innerText()).includes('喵助理') && await page.locator('#meowAssistantFab img').evaluate(img=>img.complete&&img.naturalWidth>0));
 
         await page.evaluate(() => window.__accountV119.attendance());
         await page.waitForTimeout(120);
-        check('第三頁使用參考圖的行程與待辦頁首', (await page.locator('.ref-itinerary-hero').innerText()).includes('行程與待辦事項'));
+        check('第三頁使用參考圖的行程與待辦架構', (await page.locator('.v219-itinerary-heading').innerText()).includes('行程與待辦事項') && await page.locator('.v219-itinerary-board').isVisible());
         check('參考圖的新增行程與新增待辦按鈕可見', await page.locator('#refAddEvent').isVisible() && await page.locator('#refAddTodo').isVisible());
         await page.locator('#refAddEvent').click();
         check('新增行程按鈕直接開啟行程視窗', await page.locator('#eventDialog').evaluate(x=>x.open));
