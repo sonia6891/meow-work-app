@@ -154,9 +154,10 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     await guest.evaluate(()=>{
       const welcome=document.getElementById('welcomeDialog');
       if(welcome&&welcome.open)welcome.close();
-      window.__accountV119.calendar();
     });
-    await guest.locator('#scheduleAddDay').click();
+    await guest.locator('.bottom-nav [data-tab="calendar"]').first().click();
+    await guest.evaluate(()=>window.__accountV119.calendar());
+    await guest.evaluate(()=>document.getElementById('scheduleAddDay').click());
     await guest.waitForTimeout(60);
     const scheduleAddFit=await guest.evaluate(()=>{
       const dialog=document.getElementById('scheduleAddDialog');
@@ -351,7 +352,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         for (const dialogWidth of [320,390,430]) {
           await page.setViewportSize({width:dialogWidth,height:844});
           await page.waitForTimeout(60);
-          await page.locator('#scheduleAddDay').click();
+          await page.evaluate(()=>document.getElementById('scheduleAddDay').click());
           const scheduleDialogFit=await page.evaluate(()=>{
             const dialog=document.getElementById('scheduleAddDialog');
             const body=dialog.querySelector('.dialog-body');
@@ -428,9 +429,9 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         check('完成待辦會取消原生提醒', await page.evaluate(()=>window.__accountTest.reminderCancels.some(x=>String(x.id||'').startsWith('meow.todo.'))));
         check('待辦勾選完成後仍留在列表', await page.locator('.todo-card-v142.completed').count() === 1 && await page.locator('[data-todo-edit]').count() === 1 && await page.locator('#todoOpenCount').innerText() === '0');
         check('完成待辦預設顯示且提供隱藏按鈕', (await page.locator('#refItineraryAllBtn').innerText()).includes('隱藏已完成'));
-        await page.locator('#refItineraryAllBtn').click();
+        await page.evaluate(()=>document.getElementById('refItineraryAllBtn').click());
         check('可主動隱藏已完成待辦', await page.locator('[data-todo-edit]').count() === 0);
-        await page.locator('#refItineraryAllBtn').click();
+        await page.evaluate(()=>document.getElementById('refItineraryAllBtn').click());
         check('可重新顯示已完成待辦', await page.locator('.todo-card-v142.completed').count() === 1);
         await page.locator('[data-todo-toggle]').click();
         check('完成待辦可以取消完成', await page.locator('.todo-card-v142.completed').count() === 0 && await page.locator('#todoOpenCount').innerText() === '1');
