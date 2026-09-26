@@ -98,10 +98,10 @@ assert(payslipEdge.includes('meow_claim_payslip_ai_usage'), 'payslip verifier mu
 assert(payslipEdge.includes('PRO_REQUIRED'), 'payslip verifier must enforce Pro entitlement');
 assert(!payslipEdge.includes('expectedSalary'), 'OpenAI verifier must not be biased by local expected salary');
 
-// AI schedule import was intentionally removed from the product surface.
-assert(!html.includes("smart_schedule_import:{label:'智慧匯入班表'"), 'removed smart schedule entitlement must stay absent');
-assert(!html.includes('id="aiScheduleCard"'), 'removed smart schedule card must stay absent');
-assert(!html.includes('id="aiScheduleUpload"'), 'removed smart schedule upload action must stay absent');
+// Reference UI restores the local iPhone schedule import surface.
+assert(html.includes('id="aiScheduleCard"'), 'reference smart schedule card missing');
+assert(html.includes('id="aiScheduleUpload"'), 'reference smart schedule upload action missing');
+assert(html.includes('function runAiSchedule(file)'), 'local schedule Vision import flow missing');
 
 // Final Pro Meow Assistant branding + voice flow.
 assert(html.includes('./assets/meow-assistant-pro-v169.webp?v=169'), 'final Pro Meow Assistant mascot missing');
@@ -132,7 +132,7 @@ assert(speechEdge.includes('OPENAI_API_KEY'), 'speech backend must keep OpenAI k
 
 require('./meow-assistant-100.test.cjs');
 require('./meow-assistant-round2-100.test.cjs'); // adversarial round two
-console.log('PASS cross-validated Pro payroll, final Meow Assistant, and removed schedule import checks');
+console.log('PASS cross-validated Pro payroll, final Meow Assistant, and restored reference schedule import checks');
 
 // round2-gross-priority-recheck
 
