@@ -2321,24 +2321,12 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   .v219-settings-profile-card{grid-template-columns:62px 1fr}.v219-settings-profile-card img{width:58px;height:58px}.v219-settings-profile-card button{grid-column:1/-1}
 }
 </style>
-<style id="ref-mobile-exact-v220">
+<style id="ref-mobile-exact-v221">
 @media(max-width:760px){
-  #page-calendar .ref-schedule-cat-hero{display:grid;grid-template-columns:minmax(0,1fr) 155px;align-items:center;min-height:180px;margin:0 -10px 10px;padding:12px 15px;background:#fffaf3;border-radius:22px;overflow:hidden}
-  #page-calendar .ref-schedule-cat-hero>div{min-width:0;position:relative;z-index:1}
-  #page-calendar .ref-schedule-cat-hero b{font-size:32px;line-height:1.03;color:#40170e;font-weight:950}
-  #page-calendar .ref-schedule-cat-hero small{display:block;max-width:220px;margin-top:10px;font-size:14px;line-height:1.35;color:#754d3d}
-  #page-calendar .ref-schedule-cat-hero img{width:155px;height:160px;grid-column:2;grid-row:1;object-fit:contain;align-self:end}
-  #page-attendance .ref-agenda-cat-hero{display:grid;grid-template-columns:minmax(0,1fr) 148px;align-items:center;min-height:150px;margin:0 -10px 8px;padding:10px 15px;background:#fffaf3;border-radius:22px;overflow:hidden}
-  #page-attendance .ref-agenda-cat-hero>div{grid-column:1;grid-row:1;z-index:1}
-  #page-attendance .ref-agenda-cat-hero>b{font-size:26px;line-height:1.1;color:#40170e}
-  #page-attendance .ref-agenda-cat-hero span{display:block;margin-top:7px;font-size:13px;color:#a15b37;font-weight:800}
-  #page-attendance .ref-agenda-cat-hero img{width:148px;height:130px;grid-column:2;grid-row:1;object-fit:contain;align-self:end}
-  #page-settings .ref-settings-hero{min-height:180px;grid-template-columns:minmax(0,1fr) 155px}
   #meowAssistantDialog{position:fixed!important;inset:auto 0 0!important;margin:0 auto!important;width:min(100vw,500px)!important;max-width:500px!important;height:min(88dvh,850px)!important;max-height:90dvh!important;border:0!important;border-radius:28px 28px 0 0!important;background:#fffdf9!important;overflow:hidden!important;z-index:120!important}
   #meowAssistantDialog::backdrop{background:#20130f88!important}
   #meowAssistantDialog .meow-assistant-sheet{height:100%!important;max-height:100%!important;border:0!important;border-radius:28px 28px 0 0!important;padding:18px!important;box-shadow:0 -12px 48px #44271c28!important;overflow:auto!important}
 }
-@media(max-width:390px){#page-calendar .ref-schedule-cat-hero{grid-template-columns:minmax(0,1fr) 135px;min-height:165px}#page-calendar .ref-schedule-cat-hero img{width:135px;height:145px}#page-calendar .ref-schedule-cat-hero b{font-size:29px}#page-attendance .ref-agenda-cat-hero{grid-template-columns:minmax(0,1fr) 130px}#page-attendance .ref-agenda-cat-hero img{width:130px;height:115px}}
 </style>
 </head>
 <body>
@@ -2637,9 +2625,8 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
 </section>
 
   <section class="page" id="page-calendar">
-    <div class="ref-schedule-page-heading ref-schedule-cat-hero">
-      <div><b>喵的，<br>又要上班了</b><small>把重要的事，也放進你的日子裡 ♡</small></div>
-      <img src="./workcat-home-v12.png" alt="灰貓咪" aria-hidden="true">
+    <div class="ref-schedule-page-heading">
+      <div><b>我的班表</b><small>排好班，生活也跟著有節奏。</small></div>
     </div>
     <div class="ref-worktype-panel">
       <div class="ref-block-title"><svg class="icon"><use href="#i-bag"/></svg><b>我的工作類型</b></div>
@@ -2741,9 +2728,9 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   </section>
 
   <section class="page" id="page-attendance">
-    <div class="v219-itinerary-heading ref-agenda-cat-hero">
-      <img src="./workcat-home-v12.png" alt="灰貓咪" aria-hidden="true">
-      <div><b>行程與待辦事項</b><span>工作再忙，也別忘了照顧自己！♡</span></div>
+    <div class="v219-itinerary-heading">
+      <b>行程與待辦事項</b>
+      <span>工作再忙，也別忘了照顧自己！♡</span>
     </div>
     <div class="itinerary-list-head attendance-v142-head">
       <div>
