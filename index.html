@@ -9043,7 +9043,8 @@ function renderMeowAssistantReply(message,type=''){
   box.classList.toggle('hidden',!value);
   if(value){
     const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
-    box.innerHTML='<div class="meow-assistant-message-head"><img src="./assets/meow-assistant-pro-v169.webp?v=169" alt="" aria-hidden="true"><b>喵助理 Pro</b><time>'+escapeHtml(time)+'</time></div><div class="meow-assistant-message-bubble">'+escapeHtml(value).replace(/\n/g,'<br>')+'<span class="meow-assistant-message-paw" aria-hidden="true">🐾</span></div>';
+    const safe=x=>String(x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    box.innerHTML='<div class="meow-assistant-message-head"><img src="./assets/meow-assistant-pro-v169.webp?v=169" alt="" aria-hidden="true"><b>喵助理 Pro</b><time>'+safe(time)+'</time></div><div class="meow-assistant-message-bubble">'+safe(value).replace(/\n/g,'<br>')+'<span class="meow-assistant-message-paw" aria-hidden="true">🐾</span></div>';
   }else box.innerHTML='';
   const transient=value==='我在理解你的意思…'||value==='正在把語音轉成文字…'||/^正在執行喵助理真實 OpenAI 語意測試/.test(value)||/正在處理…$/.test(value);
   if(value&&!transient)meowAssistantRemember('assistant',value);
