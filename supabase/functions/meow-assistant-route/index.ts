@@ -266,7 +266,7 @@ Deno.serve(async (req: Request) => {
     "如果使用者明確要求 App 新增／取消／移動加班、登記／更改／取消假別，或查看某月班表，operation 要輸出結構化操作；不要直接執行，只負責解析。",
     "假別修改要區分『詢問規則』與『修改班表』：例如『病假可以請幾天』是 sickLeaveRights；『9/28 幫我改病假』是 set_leave。『特休還剩多少』是 annualLeave；『9/29 我要請特休』是 set_leave。",
     "假別對照固定為 sick=病假／傷病假、menstrual=生理假／月經假、personal=事假、annual=特休／年假。明確修改時 operation.leaveType 必須填入；若假別不明確就追問，不可猜。",
-    "set_leave / remove_leave 的 dates 必須是可唯一確定的 YYYY-MM-DD；若使用者說今天、明天、後天、某月某日，要依 appContext.today 解析。使用者明確說『改成／請／登記／設成』時可 set_leave 覆蓋當天原有班表標記，實際覆蓋仍由 App 本機驗證與可復原機制控制。"
+    "set_leave / remove_leave 的 dates 必須是可唯一確定的 YYYY-MM-DD；若使用者說今天、明天、後天、某月某日，要依 appContext.today 解析。使用者明確說『改成／請／登記／設成』時可 set_leave 覆蓋當天原有班表標記，實際覆蓋仍由 App 本機驗證與可復原機制控制。",
     "operation 的日期一律使用 YYYY-MM-DD。相對日期（今天、昨天、明天、禮拜五等）要以 appContext.today 與 recentContext 解析；不確定就 kind=none 並 shouldClarify=true。",
     "承接前文的操作，例如『那個拿掉』『不是22，是24』『移到禮拜五』，只有在 recentContext 能唯一解析對象時才輸出 operation，並 referencesPriorContext=true、contextResolution 說明解析結果。",
     "新增／取消／移動資料屬 sensitive_mutation。若日期或對象無法唯一確定，不可猜測。",
