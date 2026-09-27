@@ -46,7 +46,7 @@ let checkResult=null;
 
 const factory=new Function('__calls','__getCheck',`
   const num=v=>Number(v)||0;
-  const state={settings:{defaultOvertimeHours:10}};
+  const state={settings:{defaultOvertimeHours:10,dailyWorkHours:8}};
   const pad=n=>String(n).padStart(2,'0');
   const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
   const renderMeowAssistantReply=(m,t='')=>__calls.renders.push({m,t});
@@ -70,6 +70,24 @@ const api=factory(calls,()=>checkResult);
   assert.strictEqual(calls.checks.length,1,'AI mutation must pass local plan check');
   assert.strictEqual(calls.executes.length,1,'validated mutation should execute');
   assert.deepStrictEqual(calls.executes[0],{ok:true,type:'remove',dates:['2026-09-22']});
+
+  // High-confidence leave mutations support all calendar leave types.
+  calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
+  handled=await api.run({
+    confidence:.99,
+    operation:{kind:'set_leave',dates:['2026-09-28'],fromDate:null,toDate:null,hours:null,year:null,month:null,leaveType:'menstrual'}
+  });
+  assert.strictEqual(handled,true);
+  assert.strictEqual(calls.checks.length,1,'leave mutation must pass local validation');
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:8});
+
+  calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
+  handled=await api.run({
+    confidence:.99,
+    operation:{kind:'remove_leave',dates:['2026-09-29'],fromDate:null,toDate:null,hours:null,year:null,month:null,leaveType:'annual'}
+  });
+  assert.strictEqual(handled,true);
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'removeLeave',leaveType:'annual',dates:['2026-09-29']});
 
   // Low confidence may never mutate.
   calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
@@ -114,11 +132,12 @@ const api=factory(calls,()=>checkResult);
   assert.strictEqual(calls.executes.length,0);
 
   // Router contract must explicitly support contextual operations.
-  for(const token of ['add_overtime','remove_overtime','move_overtime','view_schedule']){
+  for(const token of ['add_overtime','remove_overtime','move_overtime','set_leave','remove_leave','view_schedule']){
     assert(edge.includes(token),'edge operation enum missing '+token);
   }
   assert(edge.includes('referencesPriorContext=true'),'contextual-operation prompt guard missing');
   assert(edge.includes('YYYY-MM-DD'),'operation date normalization missing');
+  assert(edge.includes('leaveType'),'leave mutation type contract missing');
   assert(edge.includes('sensitive_mutation'),'mutation risk classification missing');
   assert(html.includes('if(num(route.confidence)<.88)'),'confidence gate missing');
   assert(html.includes('meowAssistantPlanCheck'),'local validation bridge missing');
