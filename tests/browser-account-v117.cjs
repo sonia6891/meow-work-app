@@ -273,7 +273,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         const account=document.querySelector('.settings-account-v129'),plan=document.getElementById('accountPlanCard');
         return account && plan && account.nextElementSibling===plan;
       }));
-      check(`${width}px 帳號狀態登入方式與登出集中在帳號卡`, await page.evaluate(() => ['accountTitle','accountLoginMethod','accountLogout'].every(id => document.querySelector('.settings-account-v129').contains(document.getElementById(id)))));
+      check(`${width}px 帳號狀態留在帳號資料、登出收在個人資料展開區`, await page.evaluate(() => ['accountTitle','accountLoginMethod'].every(id => document.querySelector('.settings-account-v129').contains(document.getElementById(id))) && document.querySelector('#refAccountCard').contains(document.getElementById('accountLogout'))));
       check(`${width}px 帳號區不顯示 Email`, await page.evaluate(() => !document.getElementById('accountEmail') && !document.querySelector('.settings-account-v129').innerText.includes('member@example.test')));
       check(`${width}px 登入方式正確顯示 Google`, (await page.locator('#accountLoginMethod').innerText()).includes('Google'));
       await page.locator('.settings-account-details > summary').click();
@@ -380,31 +380,31 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.setViewportSize({width:390,height:844});
         await page.waitForTimeout(80);
 
-        check('月曆頁顯示參考圖 AI 班表匯入', await page.locator('#aiScheduleCard').isVisible() && await page.locator('#aiScheduleUpload').isVisible());
+        check('手機排班頁隱藏 AI 班表匯入入口', !(await page.locator('#aiScheduleCard').isVisible()));
         check('浮動喵助理顯示定稿圖與名稱', await page.locator('#meowAssistantFab img').getAttribute('src')==='./assets/meow-assistant-pro-v169.webp?v=169' && (await page.locator('#meowAssistantFab').innerText()).includes('喵助理') && await page.locator('#meowAssistantFab img').evaluate(img=>img.complete&&img.naturalWidth>0));
 
         await page.evaluate(() => window.__accountV119.attendance());
         await page.waitForTimeout(120);
         check('第三頁使用參考圖的行程與待辦架構', (await page.locator('.v219-itinerary-heading').innerText()).includes('行程與待辦事項') && await page.locator('.v219-itinerary-board').isVisible());
-        check('參考圖的新增行程與新增待辦按鈕可見', await page.locator('#refAddEvent').isVisible() && await page.locator('#refAddTodo').isVisible());
-        await page.locator('#refAddEvent').click();
+        check('行程與待辦卡片的加號按鈕可見', await page.locator('#v219QuickEvent').isVisible() && await page.locator('#v219QuickTodoCard').isVisible());
+        await page.locator('#v219QuickEvent').click();
         check('新增行程按鈕直接開啟行程視窗', await page.locator('#eventDialog').evaluate(x=>x.open));
         check('新行程預設前 1 小時提醒', await page.locator('#eventReminder').inputValue() === '1h');
         check('行程提醒提供前 3 天、前 1 天、前 1 小時', await page.locator('#eventReminder option').count() === 4);
         await page.locator('#eventDialogClose').click();
         check('新增行程未填資料也能用叉叉關閉', !(await page.locator('#eventDialog').evaluate(x=>x.open)));
-        await page.locator('#refAddEvent').click();
+        await page.locator('#v219QuickEvent').click();
         await page.locator('#eventDialogCancel').click();
         check('新增行程未填資料也能用取消關閉', !(await page.locator('#eventDialog').evaluate(x=>x.open)));
 
         await page.locator('#attendanceTabTodos').click();
         check('待辦事項分頁可切換', await page.locator('#attendanceTabTodos').getAttribute('aria-selected') === 'true');
-        await page.locator('#refAddTodo').click();
+        await page.locator('#v219QuickTodoCard').click();
         check('新增待辦按鈕直接開啟待辦視窗', await page.locator('#todoDialog').evaluate(x=>x.open));
         check('新待辦預設前一天上午 9 點提醒', await page.locator('#todoReminder').inputValue() === '1d');
         await page.locator('#todoDialogClose').click();
         check('新增待辦未填資料也能用叉叉關閉', !(await page.locator('#todoDialog').evaluate(x=>x.open)));
-        await page.locator('#refAddTodo').click();
+        await page.locator('#v219QuickTodoCard').click();
         await page.locator('#todoTitle').fill('測試繳費');
         await page.locator('#todoDate').fill('2026-10-01');
         await page.locator('#todoTime').fill('18:30');
