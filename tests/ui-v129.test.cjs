@@ -233,7 +233,7 @@ assert.equal(ids.meowAssistantPreview||0,0,'old assistant confirmation preview m
 assert.equal(ids.meowAssistantApply||0,0,'old assistant confirm button must be removed');
 assert.equal((html.match(/data-meow-example=/g)||[]).length,0,'assistant example chips must be removed');
 assert(!html.includes('用一句話幫你改加班日期'),'old assistant subtitle must be removed');
-assert(html.includes("if(!d.open)d.show();"),'assistant must open non-modally');
+assert(html.includes("if(mobile&&typeof d.showModal==='function')d.showModal();") && html.includes("else d.show();"),'assistant must use the approved mobile modal sheet and retain desktop floating mode');
 assert(html.includes('function bindMeowAssistantDrag()'),'assistant drag behavior missing');
 assert(html.includes("type:'viewSchedule'"),'assistant month schedule intent missing');
 assert(html.includes("from('user_sync_state').select('payload,updated_at')"),'assistant month viewer must read Pro cloud work data');
