@@ -2779,6 +2779,329 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
 }
 </style>
 
+
+<style id="meow-assistant-reference-v230">
+/* v230 — Pro assistant bottom sheet rebuilt to match the approved reference image. */
+@media(max-width:760px){
+  #meowAssistantDialog{
+    position:fixed!important;
+    inset:auto 0 0 0!important;
+    margin:0!important;
+    width:100vw!important;
+    max-width:none!important;
+    height:min(76dvh,760px)!important;
+    max-height:88dvh!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:34px 34px 0 0!important;
+    background:#fffdf9!important;
+    color:#3d241b!important;
+    overflow:hidden!important;
+    box-shadow:0 -18px 55px rgba(47,31,24,.24)!important;
+    transform:none!important;
+  }
+  #meowAssistantDialog::backdrop{
+    display:block!important;
+    background:rgba(24,24,22,.47)!important;
+    backdrop-filter:blur(1.5px)!important;
+    -webkit-backdrop-filter:blur(1.5px)!important;
+  }
+  #meowAssistantDialog .meow-assistant-sheet{
+    position:relative!important;
+    height:100%!important;
+    max-height:none!important;
+    padding:0 18px calc(15px + env(safe-area-inset-bottom))!important;
+    border:0!important;
+    border-radius:34px 34px 0 0!important;
+    background:
+      radial-gradient(circle at 20% 5%,rgba(255,180,87,.06),transparent 27%),
+      linear-gradient(180deg,#fffdf9 0%,#fffaf5 100%)!important;
+    box-shadow:none!important;
+    overflow:auto!important;
+    overscroll-behavior:contain;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+
+  /* Reference top handle + close circle; hide the old movable-window title/minimise UI. */
+  #meowAssistantDialog .meow-assistant-head{
+    position:relative!important;
+    top:auto!important;
+    z-index:8!important;
+    min-height:48px!important;
+    padding:0!important;
+    background:transparent!important;
+    border:0!important;
+    cursor:default!important;
+    touch-action:auto!important;
+  }
+  #meowAssistantDialog .meow-assistant-head::before{
+    content:"";
+    position:absolute;
+    left:50%;top:14px;
+    width:54px;height:6px;
+    transform:translateX(-50%);
+    border-radius:999px;
+    background:#d7d4d2;
+  }
+  #meowAssistantDialog .meow-assistant-title,
+  #meowAssistantDialog .meow-assistant-minimize{display:none!important}
+  #meowAssistantDialog .meow-assistant-head-actions{
+    position:absolute!important;right:0!important;top:7px!important;z-index:10!important;
+  }
+  #meowAssistantDialog #meowAssistantClose{
+    width:42px!important;height:42px!important;
+    display:grid!important;place-items:center!important;
+    border:0!important;border-radius:50%!important;
+    background:#fff2e7!important;color:#7a3e28!important;
+    font-size:29px!important;line-height:1!important;
+    padding:0!important;
+  }
+
+  /* Hero: left cat, large 喵助理 Pro wordmark, handwritten note on the right. */
+  #meowAssistantDialog .ref-assistant-hero{
+    position:relative!important;
+    min-height:154px!important;
+    display:grid!important;
+    grid-template-columns:33% 67%!important;
+    align-items:center!important;
+    gap:0!important;
+    padding:0 0 10px!important;
+    border:0!important;
+    overflow:visible!important;
+  }
+  #meowAssistantDialog .ref-assistant-hero>img{
+    width:132px!important;height:148px!important;max-width:36vw!important;
+    align-self:end!important;justify-self:start!important;
+    object-fit:contain!important;object-position:left bottom!important;
+    filter:drop-shadow(0 7px 12px rgba(70,45,31,.12))!important;
+  }
+  #meowAssistantDialog .ref-assistant-brand{
+    position:relative!important;
+    min-width:0!important;
+    align-self:center!important;
+    padding:7px 4px 0 4px!important;
+  }
+  #meowAssistantDialog .ref-assistant-brand-title{
+    display:flex!important;align-items:flex-end!important;gap:7px!important;
+    white-space:nowrap!important;
+    color:#6e2d18!important;
+    line-height:1!important;
+  }
+  #meowAssistantDialog .ref-assistant-brand-title b{
+    font-size:clamp(29px,8.5vw,42px)!important;
+    font-weight:950!important;letter-spacing:-2px!important;
+    text-shadow:0 2px #fff0dd!important;
+  }
+  #meowAssistantDialog .ref-assistant-brand-title em{
+    position:relative!important;
+    font-style:italic!important;
+    font-family:ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif!important;
+    font-size:clamp(31px,9vw,45px)!important;
+    font-weight:950!important;
+    color:#a64d19!important;
+    letter-spacing:-2px!important;
+  }
+  #meowAssistantDialog .ref-assistant-brand-title em::before{
+    content:"♛";
+    position:absolute;left:22%;top:-27px;
+    color:#e19a22;font-size:25px;line-height:1;
+    transform:rotate(-8deg);
+  }
+  #meowAssistantDialog .ref-assistant-brand>strong{
+    display:inline-block!important;
+    margin:10px 0 0!important;
+    padding:7px 12px!important;
+    border-radius:999px 18px 999px 18px!important;
+    background:#fff1c9!important;
+    color:#3c271f!important;
+    font-size:12px!important;line-height:1.2!important;font-weight:900!important;
+    white-space:nowrap!important;
+  }
+  #meowAssistantDialog .ref-assistant-brand>small{
+    position:absolute!important;
+    right:-2px!important;top:77px!important;
+    display:block!important;
+    color:#b55c35!important;
+    font-family:"Kaiti TC","DFKai-SB","BiauKai","STKaiti","KaiTi",serif!important;
+    font-size:11px!important;line-height:1.45!important;font-weight:700!important;
+    text-align:center!important;
+    transform:rotate(-5deg)!important;
+  }
+
+  /* White card containing the six reference shortcuts. */
+  #meowAssistantDialog .ref-assistant-quick{
+    padding:14px 13px!important;
+    margin:0 0 10px!important;
+    border:1px solid #f0e8e1!important;
+    border-radius:20px!important;
+    background:rgba(255,255,255,.93)!important;
+    box-shadow:0 5px 17px rgba(89,58,38,.045)!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick>b{
+    display:block!important;
+    margin:0 0 10px!important;
+    font-size:16px!important;font-weight:950!important;color:#3d251d!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick>div{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;margin:0!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick button{
+    min-width:0!important;min-height:58px!important;
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    gap:7px!important;
+    padding:9px 10px!important;
+    border:0!important;border-radius:15px!important;
+    background:linear-gradient(135deg,#fff4ef,#fff9f8)!important;
+    color:#4b3026!important;
+    font-size:10.5px!important;line-height:1.25!important;font-weight:900!important;
+    text-align:left!important;
+    box-shadow:none!important;
+  }
+
+  /* Assistant answer now uses the avatar/name/time row + large rounded reply bubble. */
+  #meowAssistantDialog .meow-assistant-chat{
+    margin:2px 0 9px!important;
+    padding:0!important;
+    min-height:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    color:#34241d!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-head{
+    display:flex!important;align-items:center!important;gap:8px!important;
+    padding:0 2px 7px!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-head img{
+    width:42px!important;height:42px!important;border-radius:50%!important;
+    object-fit:cover!important;background:#fff0de!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-head b{
+    color:#8b431f!important;font-size:14px!important;font-weight:950!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-head time{
+    color:#8f837c!important;font-size:10px!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-bubble{
+    position:relative!important;
+    padding:15px 17px 22px!important;
+    border:1px solid #f0e3d8!important;
+    border-radius:24px!important;
+    background:linear-gradient(135deg,#fff9f1,#fffdf9)!important;
+    color:#33241e!important;
+    font-size:13px!important;line-height:1.72!important;
+    box-shadow:0 4px 14px rgba(91,60,41,.04)!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-paw{
+    position:absolute!important;right:14px!important;bottom:9px!important;
+    opacity:.45!important;font-size:18px!important;
+  }
+  #meowAssistantDialog .meow-assistant-chat[data-state="error"] .meow-assistant-message-bubble{
+    background:#fff4f4!important;border-color:#f1d9d9!important;
+  }
+  #meowAssistantDialog .meow-assistant-chat[data-state="success"] .meow-assistant-message-bubble{
+    background:#f6fff6!important;border-color:#dcebdc!important;
+  }
+
+  #meowAssistantDialog .meow-assistant-pro-strip{
+    flex:0 0 auto!important;
+    margin:0 0 9px!important;padding:8px 12px!important;
+    border-radius:999px!important;
+    background:linear-gradient(90deg,#fff5df,#fff8eb)!important;
+    color:#d0692e!important;
+    font-size:9.5px!important;line-height:1.35!important;font-weight:900!important;
+    text-align:center!important;
+    white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  }
+
+  /* Input row: paperclip inside field, separate microphone and orange plane button. */
+  #meowAssistantDialog .meow-assistant-compose{
+    position:relative!important;
+    flex:0 0 auto!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 54px 58px!important;
+    gap:9px!important;
+    align-items:center!important;
+    margin:0!important;
+  }
+  #meowAssistantDialog .meow-assistant-compose textarea{
+    grid-column:1!important;
+    min-height:58px!important;max-height:96px!important;
+    resize:none!important;
+    padding:17px 44px 13px 14px!important;
+    border:2px solid #e7e3e0!important;
+    border-radius:20px!important;
+    background:#fff!important;color:#3b302a!important;
+    font-size:13px!important;line-height:1.35!important;
+    outline:0!important;
+  }
+  #meowAssistantDialog .meow-assistant-attach{
+    position:absolute!important;
+    right:130px!important;bottom:18px!important;
+    width:28px!important;height:28px!important;
+    display:grid!important;place-items:center!important;
+    color:#5c514b!important;pointer-events:none!important;
+  }
+  #meowAssistantDialog .meow-assistant-attach svg{
+    width:25px!important;height:25px!important;fill:none!important;stroke:currentColor!important;
+    stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+  #meowAssistantDialog .meow-assistant-mic{
+    grid-column:2!important;
+    width:54px!important;height:54px!important;
+    display:grid!important;place-items:center!important;
+    border:0!important;border-radius:18px!important;
+    background:#fff3ed!important;color:#83462e!important;
+    font-size:0!important;
+  }
+  #meowAssistantDialog .meow-assistant-mic svg{
+    width:26px!important;height:26px!important;fill:none!important;stroke:currentColor!important;
+    stroke-width:2.1!important;stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+  #meowAssistantDialog #meowAssistantSend{
+    grid-column:3!important;
+    width:58px!important;min-width:58px!important;height:54px!important;
+    margin:0!important;padding:0!important;
+    border:0!important;border-radius:18px!important;
+    background:linear-gradient(135deg,#ff9b3e,#ff7315)!important;
+    color:#fff!important;font-size:0!important;
+    box-shadow:0 7px 14px rgba(255,120,25,.20)!important;
+  }
+  #meowAssistantDialog #meowAssistantSend::before{
+    content:"➤";display:block;font-size:27px;line-height:1;
+    transform:rotate(-28deg) translate(1px,-1px);
+  }
+  #meowAssistantDialog .meow-assistant-undo{
+    flex:0 0 auto!important;margin:7px 0 0!important;
+  }
+  #meowAssistantDialog .v219-assistant-footnote{
+    flex:0 0 auto!important;
+    padding:10px 4px 0!important;
+    color:#81766f!important;
+    font-size:8.5px!important;line-height:1.45!important;
+  }
+}
+@media(max-width:390px){
+  #meowAssistantDialog .meow-assistant-sheet{padding-left:14px!important;padding-right:14px!important}
+  #meowAssistantDialog .ref-assistant-hero{grid-template-columns:31% 69%!important;min-height:145px!important}
+  #meowAssistantDialog .ref-assistant-hero>img{width:118px!important;height:138px!important}
+  #meowAssistantDialog .ref-assistant-brand-title b{font-size:30px!important}
+  #meowAssistantDialog .ref-assistant-brand-title em{font-size:32px!important}
+  #meowAssistantDialog .ref-assistant-brand>strong{font-size:10.5px!important;padding:6px 9px!important}
+  #meowAssistantDialog .ref-assistant-brand>small{font-size:9.5px!important;top:72px!important}
+  #meowAssistantDialog .ref-assistant-quick{padding:12px 10px!important}
+  #meowAssistantDialog .ref-assistant-quick>div{gap:6px!important}
+  #meowAssistantDialog .ref-assistant-quick button{min-height:54px!important;padding:8px 7px!important;font-size:9.3px!important}
+  #meowAssistantDialog .meow-assistant-compose{grid-template-columns:minmax(0,1fr) 50px 54px!important;gap:7px!important}
+  #meowAssistantDialog .meow-assistant-mic{width:50px!important;height:52px!important}
+  #meowAssistantDialog #meowAssistantSend{width:54px!important;min-width:54px!important;height:52px!important}
+  #meowAssistantDialog .meow-assistant-attach{right:118px!important}
+}
+</style>
+
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -3738,7 +4061,11 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
     </div>
     <div class="ref-assistant-hero">
       <img src="./assets/meow-assistant-pro-v169.webp?v=169" alt="" aria-hidden="true">
-      <div><b>喵助理 Pro</b><strong>你的職場大小事，我來幫你！♡</strong><small>更懂社畜，也更懂你！</small></div>
+      <div class="ref-assistant-brand">
+        <div class="ref-assistant-brand-title"><b>喵助理</b><em>Pro</em></div>
+        <strong>你的職場大小事，我來幫你！♡</strong>
+        <small>更懂社畜<br>更懂你！♡</small>
+      </div>
     </div>
     <div class="ref-assistant-quick">
       <b>你可以直接問我：</b>
@@ -3752,10 +4079,12 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
       </div>
     </div>
     <div class="meow-assistant-chat hidden" id="meowAssistantReply" aria-live="polite"></div>
+    <div class="meow-assistant-pro-strip">☼　Pro 用戶可詢問：班表、薪資、勞動法規、請假、對帳⋯等各種職場問題！　🐾</div>
     <div class="meow-assistant-compose">
-      <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="直接輸入你要做的事"></textarea>
-      <button type="button" class="meow-assistant-mic" id="meowAssistantMic" aria-label="語音輸入">🎙</button>
-      <button type="button" class="btn primary" id="meowAssistantSend">送出</button>
+      <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="有任何職場問題，問我吧…"></textarea>
+      <span class="meow-assistant-attach" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8.5 12.5l6.2-6.2a3.4 3.4 0 014.8 4.8l-8.4 8.4a5 5 0 01-7.1-7.1l8-8"/><path d="M6.8 14.2l7.3-7.3"/></svg></span>
+      <button type="button" class="meow-assistant-mic" id="meowAssistantMic" aria-label="語音輸入"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4M8.5 21h7"/></svg></button>
+      <button type="button" class="btn primary" id="meowAssistantSend" aria-label="送出">送出</button>
     </div>
     <button type="button" class="meow-assistant-undo hidden" id="meowAssistantUndo">↶ 復原上一步</button>
     <div class="v219-assistant-footnote">ⓘ 喵助理 Pro 可能會參考相關法規與公司制度提供建議，但不構成法律意見，仍請以正式文件為準。</div>
@@ -8709,9 +9038,13 @@ function undoMeowAssistant(){
 }
 function renderMeowAssistantReply(message,type=''){
   const box=$('meowAssistantReply');if(!box)return;
-  box.textContent=message||'';box.dataset.state=type;
-  box.classList.toggle('hidden',!message);
   const value=String(message||'').trim();
+  box.dataset.state=type;
+  box.classList.toggle('hidden',!value);
+  if(value){
+    const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+    box.innerHTML='<div class="meow-assistant-message-head"><img src="./assets/meow-assistant-pro-v169.webp?v=169" alt="" aria-hidden="true"><b>喵助理 Pro</b><time>'+escapeHtml(time)+'</time></div><div class="meow-assistant-message-bubble">'+escapeHtml(value).replace(/\n/g,'<br>')+'<span class="meow-assistant-message-paw" aria-hidden="true">🐾</span></div>';
+  }else box.innerHTML='';
   const transient=value==='我在理解你的意思…'||value==='正在把語音轉成文字…'||/^正在執行喵助理真實 OpenAI 語意測試/.test(value)||/正在處理…$/.test(value);
   if(value&&!transient)meowAssistantRemember('assistant',value);
 }
@@ -9509,9 +9842,20 @@ function setMeowAssistantMinimized(minimized){
   const b=$('meowAssistantMinimize');if(b){b.textContent=minimized?'□':'—';b.setAttribute('aria-label',minimized?'展開喵助理':'縮小喵助理')}
 }
 function openMeowAssistant(){
-  const d=$('meowAssistantDialog');if(!d.open)d.show();
+  const d=$('meowAssistantDialog');if(!d)return;
+  const mobile=window.matchMedia&&window.matchMedia('(max-width:760px)').matches;
+  if(!d.open){
+    if(mobile&&typeof d.showModal==='function')d.showModal();
+    else d.show();
+  }
+  d.setAttribute('aria-modal',mobile?'true':'false');
   setMeowAssistantMinimized(false);
-  positionMeowAssistantDefault();bindMeowAssistantDrag();
+  if(mobile){
+    d.dataset.dragged='0';
+    d.style.left='';d.style.top='';d.style.right='';d.style.bottom='';
+  }else{
+    positionMeowAssistantDefault();bindMeowAssistantDrag();
+  }
   renderMeowAssistantReply('');
   const mic=$('meowAssistantMic');if(mic)mic.classList.remove('listening');
   if(!canUse('meow_schedule_assistant'))renderMeowAssistantReply('喵助理是 Pro 功能。','error');
