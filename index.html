@@ -4059,13 +4059,8 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
         <button type="button" class="dialog-close" id="meowAssistantClose" aria-label="關閉">×</button>
       </div>
     </div>
-    <div class="ref-assistant-hero">
-      <img src="./assets/meow-assistant-pro-v169.webp?v=169" alt="" aria-hidden="true">
-      <div class="ref-assistant-brand">
-        <div class="ref-assistant-brand-title"><b>喵助理</b><em>Pro</em></div>
-        <strong>你的職場大小事，我來幫你！♡</strong>
-        <small>更懂社畜<br>更懂你！♡</small>
-      </div>
+    <div class="ref-assistant-hero ref-assistant-hero-image">
+      <img src="./assets/meow-assistant-pro-reference-v232.webp?v=232" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
     </div>
     <div class="ref-assistant-quick">
       <b>你可以直接問我：</b>
@@ -7319,7 +7314,52 @@ function buildSalaryPrintHtml(){
     return '<!doctype html><html><head><meta charset="utf-8"><title>'+year+' 年薪資對帳</title><style>'+baseStyle+'</style></head><body><h1>喵的，又要上班了｜'+year+' 年薪資對帳</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>對帳月份</b><strong>'+rows.length+'</strong></div><div class="card"><b>全年公司實發</b><strong>'+money(actual)+'</strong></div><div class="card"><b>全年差額</b><strong>'+signedMoney(diff)+'</strong></div></div><table><thead><tr><th>月份</th><th>App 預估實領</th><th>公司實發</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">此報告依 App 中已儲存的排班、薪資與對帳資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
   }
   const r=exportMonthRecord(),tr=r.rows.map(x=>'<tr><td>'+escapeHtml(x.label)+'</td><td>'+money(x.expected)+'</td><td>'+(x.actual===null?'—':money(x.actual))+'</td><td>'+(x.actual===null?'—':signedMoney(x.actual-x.expected))+'</td></tr>').join('');
-  return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style></head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
+  return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style>
+<style id="meow-assistant-exact-hero-v232">
+@media(max-width:760px){
+  #meowAssistantDialog .meow-assistant-head{
+    position:absolute!important;
+    left:0!important;right:0!important;top:0!important;
+    height:72px!important;min-height:72px!important;
+    padding:0!important;background:transparent!important;
+    z-index:40!important;pointer-events:none!important;
+  }
+  #meowAssistantDialog .meow-assistant-head::before{display:none!important}
+  #meowAssistantDialog .meow-assistant-title,
+  #meowAssistantDialog .meow-assistant-minimize{display:none!important}
+  #meowAssistantDialog .meow-assistant-head-actions{
+    position:absolute!important;right:11px!important;top:9px!important;
+    pointer-events:auto!important;
+  }
+  #meowAssistantDialog #meowAssistantClose{
+    width:58px!important;height:58px!important;padding:0!important;
+    opacity:0!important;border:0!important;background:transparent!important;
+  }
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image{
+    display:block!important;min-height:0!important;height:auto!important;
+    margin:0 -18px!important;padding:0!important;border:0!important;
+    overflow:hidden!important;background:#fffdf9!important;
+  }
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image>img{
+    display:block!important;width:calc(100% + 36px)!important;max-width:none!important;
+    height:auto!important;min-height:0!important;margin:0!important;
+    object-fit:contain!important;object-position:center top!important;
+    filter:none!important;border:0!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick{
+    position:relative!important;z-index:3!important;margin-top:-12px!important;
+  }
+}
+@media(max-width:390px){
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image{
+    margin-left:-14px!important;margin-right:-14px!important;
+  }
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image>img{
+    width:calc(100% + 28px)!important;
+  }
+}
+</style>
+</head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
 }
 function exportSalaryPdf(){
   if(!canUse('salary_export'))return;
