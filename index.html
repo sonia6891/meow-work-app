@@ -3418,6 +3418,38 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   }
 }
 </style>
+
+<style id="assistant-actions-v237">
+@media(max-width:760px){
+  #meowAssistantDialog .ref-assistant-voice-hint{
+    display:block!important;
+    margin:-2px 0 11px!important;
+    color:#9a715d!important;
+    font-size:12.5px!important;
+    line-height:1.45!important;
+    font-weight:750!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick button{
+    justify-content:center!important;
+    text-align:center!important;
+    font-size:14px!important;
+    min-height:62px!important;
+  }
+  #meowAssistantDialog .meow-assistant-pro-strip{
+    font-size:12.5px!important;
+    line-height:1.45!important;
+    padding:9px 12px!important;
+  }
+}
+@media(max-width:390px){
+  #meowAssistantDialog .ref-assistant-voice-hint{
+    font-size:12px!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick button{
+    font-size:13.5px!important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -4379,18 +4411,19 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
       <img src="./assets/meow-assistant-pro-reference-v232.webp?v=235" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
     </div>
     <div class="ref-assistant-quick">
-      <b>你可以直接問我：</b>
+      <b>可以直接打字，也可以按麥克風用語音：</b>
+      <small class="ref-assistant-voice-hint">例如：「9/30 改晚班」、「明天加班 4 小時」、「10/2 請病假」</small>
       <div>
-        <button type="button" data-meow-prompt="我今天上什麼班？">📅 我今天上什麼班？</button>
-        <button type="button" data-meow-prompt="婚假有幾天？">✈ 婚假有幾天？</button>
-        <button type="button" data-meow-prompt="家庭照顧假怎麼請？">♥ 家庭照顧假怎麼請？</button>
-        <button type="button" data-meow-prompt="幫我看薪資差額">💰 幫我看薪資差額</button>
-        <button type="button" data-meow-prompt="下次發薪日是哪天？">📆 下次發薪日是哪天？</button>
-        <button type="button" data-meow-prompt="這筆加班費對嗎？">▤ 這筆加班費對嗎？</button>
+        <button type="button" data-meow-prompt="我要更動班表">🎙 更動班表</button>
+        <button type="button" data-meow-prompt="我要登記加班">⏱ 登記加班</button>
+        <button type="button" data-meow-prompt="我要請病假">🤒 登記病假</button>
+        <button type="button" data-meow-prompt="幫我做薪資對帳">💰 薪資對帳</button>
+        <button type="button" data-meow-prompt="我還有幾天假？">🏖 假還剩幾天？</button>
+        <button type="button" data-meow-prompt="其他假別要怎麼請？">📘 其他假別怎麼請？</button>
       </div>
     </div>
     <div class="meow-assistant-chat hidden" id="meowAssistantReply" aria-live="polite"></div>
-    <div class="meow-assistant-pro-strip">☼　Pro 用戶可詢問：班表、薪資、勞動法規、請假、對帳⋯等各種職場問題！　🐾</div>
+    <div class="meow-assistant-pro-strip">☼　Pro 可用語音更動班表、登記加班／病假，也能查假別與薪資對帳　🐾</div>
     <div class="meow-assistant-compose">
       <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="有任何職場問題，問我吧…"></textarea>
       <span class="meow-assistant-attach" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8.5 12.5l6.2-6.2a3.4 3.4 0 014.8 4.8l-8.4 8.4a5 5 0 01-7.1-7.1l8-8"/><path d="M6.8 14.2l7.3-7.3"/></svg></span>
