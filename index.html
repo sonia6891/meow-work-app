@@ -10043,7 +10043,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=223',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=225',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
