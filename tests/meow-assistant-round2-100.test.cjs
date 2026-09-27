@@ -44,7 +44,7 @@ const parseSource=extractFunction('meowAssistantParse');
 
 const factory=new Function(`
   const current=new Date(2026,8,1);
-  const state={settings:{defaultOvertimeHours:10}};
+  const state={settings:{defaultOvertimeHours:10,dailyWorkHours:8}};
   const num=v=>Number(v)||0;
   const pad=n=>String(n).padStart(2,'0');
   const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
@@ -200,7 +200,27 @@ for(let i=0;i<cases.length;i++){
 }
 
 if(failures.length)console.error(JSON.stringify(failures,null,2));
+
 assert.strictEqual(failures.length,0,'round two adversarial corpus has routing failures');
+
+const leaveMutationCases=[
+  ['9月28號幫我改成生理假',{type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:8}],
+  ['9月29號我要請特休',{type:'leave',leaveType:'annual',dates:['2026-09-29'],hours:8}],
+  ['9月30號幫我請病假4小時',{type:'leave',leaveType:'sick',dates:['2026-09-30'],hours:4}],
+  ['27號改事假',{type:'leave',leaveType:'personal',dates:['2026-09-27'],hours:8}],
+  ['28號生理假不要了',{type:'removeLeave',leaveType:'menstrual',dates:['2026-09-28']}],
+  ['9/29幫我請特休',{type:'leave',leaveType:'annual',dates:['2026-09-29'],hours:8}],
+  ['明天幫我請病假半天',{type:'leave',leaveType:'sick',hours:4}]
+];
+for(const [q,expected] of leaveMutationCases){
+  const actual=api.meowAssistantParse(q);
+  assert(actual&&actual.ok===true,'leave command should parse: '+q);
+  assert.strictEqual(actual.type,expected.type,'wrong leave mutation type: '+q);
+  assert.strictEqual(actual.leaveType,expected.leaveType,'wrong leave type: '+q);
+  if(expected.dates)assert.deepStrictEqual(actual.dates,expected.dates,'wrong leave date: '+q);
+  if(expected.hours!==undefined)assert(Math.abs(Number(actual.hours)-expected.hours)<.001,'wrong leave hours: '+q);
+}
+
 assert(html.includes("type:'knowledgeMulti'"),'mixed-question parser support missing');
 assert(html.includes('handleMeowAssistantKnowledgeMulti'),'mixed-question response handler missing');
 const build=(html.match(/<meta name="meow-ui-build" content="v(\d+)[^"]*">/)||[])[1];
