@@ -10386,11 +10386,11 @@ if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catc
     if(template&&fold){
       if(!fold.dataset.v226){
         fold.dataset.v226='1';
-        fold.innerHTML=gearSvg+'<span class="schedule-fold-label">排班設定</span><span id="scheduleFoldChevron">⌄</span>';
+        fold.innerHTML=gearSvg+'<span class="schedule-fold-label">排班設定</span><span class="schedule-fold-chevron-v226">⌄</span>';
         const sync=()=>{
           const open=fold.getAttribute('aria-expanded')==='true';
           template.classList.toggle('is-collapsed',!open);
-          const chev=byId('scheduleFoldChevron');if(chev)chev.textContent=open?'⌃':'⌄';
+          const chev=fold.querySelector('.schedule-fold-chevron-v226');if(chev)chev.textContent=open?'⌃':'⌄';
         };
         sync();
         new MutationObserver(sync).observe(fold,{attributes:true,attributeFilter:['aria-expanded']});
