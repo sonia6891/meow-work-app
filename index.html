@@ -3450,6 +3450,163 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   }
 }
 </style>
+
+<style id="ui-consistency-v238">
+@media(max-width:760px){
+  :root{
+    --overview-option-bg:rgba(255,255,255,.67);
+    --overview-option-fg:#7d5b49;
+    --overview-option-active-bg:#ffe7ae;
+    --overview-option-active-border:#f5c76d;
+    --overview-option-active-fg:#7a4c29;
+    --overview-option-shadow:0 3px 10px rgba(80,57,42,.035);
+  }
+
+  /* Use Overview's exact option colors across Schedule / Itinerary / Salary / Settings. */
+  #page-calendar .ref-template-buttons button,
+  #page-attendance .attendance-v142-tabs button,
+  #page-attendance .v219-reminder-options button,
+  #page-salary .salary-tab,
+  #page-settings .settings-segmented button{
+    border:1px solid transparent!important;
+    background:var(--overview-option-bg)!important;
+    color:var(--overview-option-fg)!important;
+    box-shadow:var(--overview-option-shadow)!important;
+  }
+
+  #page-calendar .ref-template-buttons button.active,
+  #page-attendance .attendance-v142-tabs button.active,
+  #page-attendance .v219-reminder-options button.active,
+  #page-salary .salary-tab.active,
+  #page-settings .settings-segmented button.active{
+    background:var(--overview-option-active-bg)!important;
+    border-color:var(--overview-option-active-border)!important;
+    color:var(--overview-option-active-fg)!important;
+    box-shadow:none!important;
+  }
+
+  /* "排班設定" itself should use the same selected cream-yellow as Overview's selected work type. */
+  #page-calendar .schedule-template-fold{
+    background:var(--overview-option-active-bg)!important;
+    border:1px solid var(--overview-option-active-border)!important;
+    color:var(--overview-option-active-fg)!important;
+    box-shadow:none!important;
+  }
+
+  /* Remove the orange/pink page-specific segmented backgrounds so the controls feel like one system. */
+  #page-attendance .attendance-v142-tabs,
+  #page-salary .salary-tabs,
+  #page-settings .settings-segmented{
+    background:transparent!important;
+    border-color:transparent!important;
+    box-shadow:none!important;
+  }
+
+  /* Keep typography on secondary pages as readable as the Overview. */
+  #page-calendar,
+  #page-attendance,
+  #page-salary,
+  #page-settings{
+    font-size:14px!important;
+  }
+  #page-calendar .ref-template-buttons button,
+  #page-attendance .attendance-v142-tabs button,
+  #page-salary .salary-tab,
+  #page-settings .settings-segmented button{
+    font-size:13.5px!important;
+    font-weight:900!important;
+  }
+  #page-settings .ref-settings-row b{font-size:15px!important}
+  #page-settings .ref-settings-row small{font-size:12.5px!important}
+  #page-attendance .v219-timeline-content b{font-size:14px!important}
+  #page-attendance .v219-timeline-content small{font-size:12px!important}
+  #page-salary .salary-section-title{font-size:18px!important}
+
+  /* Bottom navigation: same compact footprint, but materially larger icon + label. */
+  .bottom-nav{
+    height:calc(64px + env(safe-area-inset-bottom))!important;
+    padding:5px 8px calc(5px + env(safe-area-inset-bottom))!important;
+  }
+  .bottom-nav button{
+    min-height:0!important;
+    padding:3px 0!important;
+    gap:2px!important;
+    font-size:11.5px!important;
+    line-height:1.1!important;
+    font-weight:850!important;
+  }
+  .bottom-nav button .icon{
+    font-size:24px!important;
+    width:24px!important;
+    height:24px!important;
+  }
+  .main{
+    padding-bottom:calc(64px + 14px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-active-tab="dashboard"] .main{
+    height:calc(100dvh - 64px - env(safe-area-inset-bottom))!important;
+  }
+
+  /* Meow Assistant text should not feel tiny next to the rest of the app. */
+  #meowAssistantDialog .ref-assistant-quick>b{
+    font-size:21px!important;
+  }
+  #meowAssistantDialog .ref-assistant-voice-hint{
+    font-size:13.5px!important;
+    line-height:1.5!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick button{
+    font-size:15px!important;
+    line-height:1.35!important;
+    min-height:64px!important;
+  }
+  #meowAssistantDialog .meow-assistant-pro-strip{
+    font-size:13.5px!important;
+    line-height:1.45!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-bubble{
+    font-size:16.5px!important;
+    line-height:1.65!important;
+  }
+  #meowAssistantDialog .meow-assistant-compose textarea{
+    font-size:16px!important;
+  }
+  #meowAssistantDialog .v219-assistant-footnote{
+    font-size:12px!important;
+    line-height:1.5!important;
+  }
+
+  html.dark{
+    --overview-option-bg:linear-gradient(180deg,rgba(31,40,56,.92),rgba(23,30,43,.92));
+    --overview-option-fg:#e6e2de;
+    --overview-option-active-bg:linear-gradient(180deg,#f2c879 0%,#d8a657 100%);
+    --overview-option-active-border:rgba(255,224,164,.72);
+    --overview-option-active-fg:#2e2114;
+    --overview-option-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  }
+}
+
+@media(max-width:390px){
+  .bottom-nav{
+    height:calc(62px + env(safe-area-inset-bottom))!important;
+  }
+  .bottom-nav button{
+    font-size:11px!important;
+  }
+  .bottom-nav button .icon{
+    font-size:23px!important;
+    width:23px!important;
+    height:23px!important;
+  }
+  .main{
+    padding-bottom:calc(62px + 14px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-active-tab="dashboard"] .main{
+    height:calc(100dvh - 62px - env(safe-area-inset-bottom))!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
