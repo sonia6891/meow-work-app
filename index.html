@@ -3607,6 +3607,130 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
 }
 </style>
 
+
+<style id="mobile-ui-consistency-v236">
+@media(max-width:760px){
+  :root{
+    --ui-choice-bg:rgba(255,255,255,.72);
+    --ui-choice-ink:#7d5b49;
+    --ui-choice-line:#eadfd3;
+    --ui-choice-active:#ffe7ae;
+    --ui-choice-active-line:#f5c76d;
+    --ui-choice-active-ink:#7a4c29;
+    --nav-h:64px;
+  }
+
+  /* All selectable controls use the same warm palette as Overview > 我的工作類型. */
+  #page-calendar .ref-template-buttons button,
+  #page-attendance .attendance-v142-tabs button,
+  #page-salary .salary-tab,
+  #page-settings .settings-segmented button{
+    background:var(--ui-choice-bg)!important;
+    color:var(--ui-choice-ink)!important;
+    border:1px solid var(--ui-choice-line)!important;
+    box-shadow:none!important;
+    font-size:12px!important;
+    font-weight:900!important;
+  }
+  #page-calendar .ref-template-buttons button.active,
+  #page-attendance .attendance-v142-tabs button.active,
+  #page-attendance .attendance-v142-tabs button[aria-selected="true"],
+  #page-salary .salary-tab.active,
+  #page-settings .settings-segmented button.active{
+    background:var(--ui-choice-active)!important;
+    color:var(--ui-choice-active-ink)!important;
+    border-color:var(--ui-choice-active-line)!important;
+    box-shadow:none!important;
+  }
+  #page-calendar .schedule-template-fold{
+    background:var(--ui-choice-active)!important;
+    color:var(--ui-choice-active-ink)!important;
+    border:1px solid var(--ui-choice-active-line)!important;
+    font-size:12px!important;
+  }
+
+  /* Bring text scale on Schedule / Itinerary / Salary / Settings up to the Overview scale. */
+  #page-calendar .ref-block-title b,
+  #page-attendance .v219-board-title b,
+  #page-salary .salary-section-title,
+  #page-settings .settings-modern-head b{font-size:15px!important}
+  #page-calendar .ref-template-buttons button,
+  #page-attendance .ref-itinerary-create button,
+  #page-attendance .attendance-v142-tabs button,
+  #page-salary .salary-tab,
+  #page-settings .settings-segmented button{min-height:42px!important}
+  #page-settings .ref-settings-row b{font-size:13px!important}
+  #page-settings .ref-settings-row small{font-size:11px!important;line-height:1.35!important}
+  #page-salary .salary-field label{font-size:12px!important}
+  #page-attendance .v219-timeline-content b{font-size:12px!important}
+  #page-attendance .v219-timeline-content small{font-size:10.5px!important}
+
+  /* Bottom navigation: larger and easier to read/tap. */
+  .bottom-nav{
+    height:calc(64px + env(safe-area-inset-bottom))!important;
+    padding:5px 7px calc(5px + env(safe-area-inset-bottom))!important;
+  }
+  .bottom-nav button{
+    min-height:52px!important;
+    padding:3px 0!important;
+    gap:2px!important;
+    font-size:12px!important;
+    font-weight:900!important;
+  }
+  .bottom-nav button .icon{font-size:24px!important;width:24px!important;height:24px!important}
+  .main{padding-bottom:calc(64px + 15px + env(safe-area-inset-bottom))!important}
+  html[data-active-tab="dashboard"] .main{height:calc(100dvh - 64px - env(safe-area-inset-bottom))!important}
+
+  /* Calendar legend stays completely inside the calendar card. */
+  #page-calendar .calendar-card .legend{
+    left:10px!important;right:106px!important;top:8px!important;
+    max-width:calc(100% - 116px)!important;
+    display:flex!important;flex-wrap:nowrap!important;gap:7px!important;
+    align-items:center!important;overflow:hidden!important;
+    box-sizing:border-box!important;
+  }
+  #page-calendar .calendar-card .legend-item{
+    flex:0 0 auto!important;min-width:0!important;
+    gap:4px!important;font-size:10px!important;white-space:nowrap!important;
+  }
+  #page-calendar .calendar-card .legend .dot{
+    width:10px!important;height:10px!important;flex:0 0 10px!important;
+  }
+
+  /* Meow Assistant text must remain readable on a phone. */
+  #meowAssistantDialog .ref-assistant-quick>b{font-size:17px!important;line-height:1.35!important}
+  #meowAssistantDialog .ref-assistant-voice-hint{
+    display:block!important;margin:5px 0 11px!important;
+    color:#80695d!important;font-size:12px!important;line-height:1.5!important;
+  }
+  #meowAssistantDialog .ref-assistant-quick button{
+    font-size:12.5px!important;line-height:1.35!important;min-height:62px!important;
+  }
+  #meowAssistantDialog .meow-assistant-message-head b{font-size:15px!important}
+  #meowAssistantDialog .meow-assistant-message-head time{font-size:11px!important}
+  #meowAssistantDialog .meow-assistant-message-bubble{font-size:14px!important;line-height:1.72!important}
+  #meowAssistantDialog .meow-assistant-pro-strip{font-size:11px!important;line-height:1.4!important}
+  #meowAssistantDialog .meow-assistant-compose textarea{font-size:14px!important}
+  #meowAssistantDialog .v219-assistant-footnote{font-size:10px!important;line-height:1.5!important}
+
+  html.dark #page-calendar .ref-template-buttons button,
+  html.dark #page-attendance .attendance-v142-tabs button,
+  html.dark #page-salary .salary-tab,
+  html.dark #page-settings .settings-segmented button{
+    background:linear-gradient(145deg,#25262a,#202124)!important;
+    color:#dfd2c7!important;border-color:rgba(230,211,194,.10)!important;
+  }
+  html.dark #page-calendar .ref-template-buttons button.active,
+  html.dark #page-attendance .attendance-v142-tabs button.active,
+  html.dark #page-attendance .attendance-v142-tabs button[aria-selected="true"],
+  html.dark #page-salary .salary-tab.active,
+  html.dark #page-settings .settings-segmented button.active,
+  html.dark #page-calendar .schedule-template-fold{
+    background:linear-gradient(145deg,#4a3827,#3d3024)!important;
+    border-color:rgba(239,190,105,.50)!important;color:#ffe0a4!important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -4568,19 +4692,19 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
       <img src="./assets/meow-assistant-pro-reference-v232.webp?v=235" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
     </div>
     <div class="ref-assistant-quick">
-      <b>可以直接打字，也可以按麥克風用語音：</b>
-      <small class="ref-assistant-voice-hint">例如：「9/30 改晚班」、「明天加班 4 小時」、「10/2 請特休」、「28 號改生理假」</small>
+      <b>直接用語音告訴喵助理要做什麼：</b>
+      <small class="ref-assistant-voice-hint">可以更動班表、登記加班、病假／生理假／事假／特休，也能幫你做薪資對帳。</small>
       <div>
-        <button type="button" data-meow-prompt="我要更動班表">🎙 更動班表</button>
-        <button type="button" data-meow-prompt="我要登記加班">⏱ 登記加班</button>
-        <button type="button" data-meow-prompt="9月28號幫我改成生理假">🌙 登記生理假</button>
-        <button type="button" data-meow-prompt="9月29號我要請特休">🏖 登記特休</button>
-        <button type="button" data-meow-prompt="9月30號幫我請病假">🤒 登記病假</button>
+        <button type="button" data-meow-prompt="9月30號幫我改成晚班">🎙 更動班表</button>
+        <button type="button" data-meow-prompt="明天幫我登記加班4小時">⏱ 登記加班</button>
+        <button type="button" data-meow-prompt="9月30號幫我請病假">☂ 登記請假</button>
         <button type="button" data-meow-prompt="幫我做薪資對帳">💰 薪資對帳</button>
+        <button type="button" data-meow-prompt="我的特休還剩幾天">🏖 查特休餘額</button>
+        <button type="button" data-meow-prompt="其他特別假別怎麼請">📖 假別怎麼請</button>
       </div>
     </div>
     <div class="meow-assistant-chat hidden" id="meowAssistantReply" aria-live="polite"></div>
-    <div class="meow-assistant-pro-strip">☼　Pro 可用語音更動班表、加班、病假、生理假、事假、特休，也能做薪資對帳　🐾</div>
+    <div class="meow-assistant-pro-strip">☼　按麥克風直接說：改班、加班、請假、特休、生理假，或幫我薪資對帳　🐾</div>
     <div class="meow-assistant-compose">
       <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="有任何職場問題，問我吧…"></textarea>
       <span class="meow-assistant-attach" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8.5 12.5l6.2-6.2a3.4 3.4 0 014.8 4.8l-8.4 8.4a5 5 0 01-7.1-7.1l8-8"/><path d="M6.8 14.2l7.3-7.3"/></svg></span>
@@ -4949,7 +5073,7 @@ async function getAuthClient(){
   return authClient;
 }
 // Account identity, local workspaces and Pro cloud access are independent.
-const WELCOME_KEY='meow-work-welcome-v1',OWNER_KEY='meow-work-local-owner-v1';
+const WELCOME_KEY='meow-work-welcome-v1',OWNER_KEY='meow-work-local-owner-v1',LAST_AUTH_USER_KEY='meow-work-last-auth-user-v1';
 // Separate UI acknowledgement; never clear account, workspace or saved data.
 const WELCOME_FRAME_KEY='meow-work-welcome-frame-v1';
 // Pending login choice survives a restart, without resetting any work data.
@@ -5185,20 +5309,36 @@ async function handleSignedIn(user,session=null){
   const changed=!authUser||authUser.id!==user.id;
   if(changed){accessEpoch++;await stopAccountRealtime();resetEntitlement();cloudReady=false;pendingCloud=null}
   authUser=user;
-  if(!switchWorkspace(user.id,true)){setAccountStatus('已登入，但工作區尚未切換；雲端未啟用');return}
-  setAccountStatus('已登入・正在載入雲端資料');
-  await initStoreTransactionListener();
-  void loadNativeStoreProducts();
-  await syncUnfinishedStoreTransactions();
-  await loadEntitlement();
-  if(authUser&&authUser.id===user.id){
-    if(canCloudSync()&&!cloudReady)await loadAccountState();
-    if(canCloudSync())await refreshCloudBackupStatus();
-    document.documentElement.classList.remove('auth-needs-login');
-    if($('welcomeDialog').open&&!welcomeManual)finishWelcome();
-    applyTheme();render();await loadBillingHistory();setAccountStatus('帳號已登入');renderSettings();
-    void refreshMeowLaborRulesIfDue();
-  }
+  const uid=user.id,epoch=accessEpoch;
+  try{localStorage.setItem(LAST_AUTH_USER_KEY,uid)}catch(e){}
+  if(!switchWorkspace(uid,true)){setAccountStatus('已登入，但工作區尚未切換；雲端未啟用');return}
+
+  // Do not block the app on StoreKit, entitlement or cloud reads.
+  document.documentElement.classList.remove('auth-needs-login');
+  if($('welcomeDialog').open&&!welcomeManual)finishWelcome();
+  applyTheme();render();setAccountStatus('帳號已登入');
+
+  void (async()=>{
+    try{
+      await initStoreTransactionListener();
+      if(!sameAccess(uid,epoch))return;
+      void loadNativeStoreProducts();
+      await syncUnfinishedStoreTransactions();
+      if(!sameAccess(uid,epoch))return;
+      await loadEntitlement();
+      if(!sameAccess(uid,epoch))return;
+      if(canCloudSync()&&!cloudReady)await loadAccountState();
+      if(!sameAccess(uid,epoch))return;
+      if(canCloudSync())await refreshCloudBackupStatus();
+      if(!sameAccess(uid,epoch))return;
+      await loadBillingHistory();
+      if(!sameAccess(uid,epoch))return;
+      setAccountStatus('帳號已登入');renderSettings();
+      void refreshMeowLaborRulesIfDue();
+    }catch(e){
+      if(sameAccess(uid,epoch)){setAccountStatus('帳號已登入・雲端服務稍後重試');renderSettings()}
+    }
+  })();
 }
 function showSignedOutSplash(){
   let splash=$('app-splash');
@@ -5217,6 +5357,7 @@ function showSignedOutSplash(){
 async function handleSignedOut(){
   const epoch=++accessEpoch;
   entitlementRequest++;authUser=null;resetEntitlement();billingHistory=[];clearTimeout(expiryTimer);
+  try{localStorage.removeItem(LAST_AUTH_USER_KEY)}catch(e){}
   await stopAccountRealtime();
   if(epoch!==accessEpoch||authUser)return;
   cloudReady=false;pendingCloud=null;switchWorkspace('guest');
@@ -5228,7 +5369,14 @@ async function initAuth(){
   const callbackIssue=readOAuthCallbackError();
   try{
     const client=await getAuthClient();
-    const {data,error}=await client.auth.getSession();
+    let data=null,error=null;
+    const remembered=readLocalString(LAST_AUTH_USER_KEY);
+    for(let attempt=0;attempt<3;attempt++){
+      const result=await client.auth.getSession();
+      data=result.data;error=result.error;
+      if(error||data&&data.session&&data.session.user||!remembered)break;
+      await new Promise(resolve=>setTimeout(resolve,220+attempt*160));
+    }
     if(error)throw error;
     if(data&&data.session&&data.session.user){
       clearOAuthCallbackError();
@@ -5248,13 +5396,26 @@ async function initAuth(){
       clearTimeout(authEventTimer);
       if(event==='SIGNED_OUT'){accessEpoch++;accessCheckedUser='';clearTimeout(authTimer)}
       authEventTimer=setTimeout(()=>{
+        if((event==='TOKEN_REFRESHED'||event==='USER_UPDATED')&&session&&session.user){
+          authUser=session.user;
+          document.documentElement.classList.remove('auth-needs-login');
+          if($('welcomeDialog').open&&!welcomeManual)finishWelcome();
+          setAccountStatus('帳號已登入');
+          return;
+        }
         if(session&&session.user)void handleSignedIn(session.user,session);
         else if(event==='SIGNED_OUT')void handleSignedOut();
       },0);
     });
   }catch(e){
-    setAccountStatus('登入服務暫時無法連線');
-    openWelcome(false);
+    const remembered=readLocalString(LAST_AUTH_USER_KEY);
+    if(remembered&&localOwner!=='guest'){
+      document.documentElement.classList.remove('auth-needs-login');
+      applyTheme();render();setAccountStatus('本機資料可使用・登入服務重新連線中');
+    }else{
+      setAccountStatus('登入服務暫時無法連線');
+      openWelcome(false);
+    }
   }finally{
     document.documentElement.classList.remove('auth-booting');
   }
@@ -5998,7 +6159,7 @@ const TW_OFFICIAL_HOLIDAYS={
 };
 function twOfficialHoliday(date){return TW_OFFICIAL_HOLIDAYS[date]||null}
 
-function renderCalendar(){const y=current.getFullYear(),m=current.getMonth(),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),today=iso(new Date()),own=state.schedule.shiftName||'A班',other=otherShiftName(own);$('calendarMonth').textContent=`${y} 年 ${m+1} 月`;$('scheduleSummary').textContent=`${scheduleFamily()==='custom'?workRestLabel()+'｜':''}${own}｜第一個上班日 ${state.schedule.startDate}`;if($('settingsScheduleSummary'))$('settingsScheduleSummary').textContent=`${scheduleName()}・${workRestLabel()}・${own}・${state.schedule.startDate}`;syncScheduleChoices();$('shiftName').value=own;$('workDays').value=state.schedule.workDays;$('offDays').value=state.schedule.offDays;setDateControlValue('scheduleStart',state.schedule.startDate);$('workDaysWrap').classList.toggle('hidden',state.schedule.preset!=='custom');$('offDaysWrap').classList.toggle('hidden',state.schedule.preset!=='custom');let html='';for(let i=0;i<first;i++){const prev=new Date(y,m,1-first+i);html+=`<div class="day empty"><span class="date-num">${prev.getDate()}</span></div>`}for(let d=1;d<=days;d++){const dt=new Date(y,m,d),date=iso(dt),base=scheduleForDate(dt),st=state.dayStatus[date],meta=typeMeta(st),holiday=twOfficialHoliday(date);let pills='';if(meta){if(st.type==='overtime'&&base==='work')pills=(scheduleOverridePill(dt)||threeShiftPill(dt)||`<div class="status-pill st-a">${own}</div>`)+`<div class="status-pill st-ot">${icon('i-clock')}加班</div>`;else pills=`<div class="status-pill ${meta.cls}">${meta.icon?icon(meta.icon):''}${meta.label}</div>`}else{pills=scheduleOverridePill(dt)||threeShiftPill(dt)||(base==='work'?`<div class="status-pill st-a">${own}</div>`:`<div class="status-pill st-b">${other}</div><div class="base-note">休假</div>`)}const holidayHtml=holiday?`<div class="holiday-tag ${holiday.kind}" title="${escapeHtml(holiday.full)}">${escapeHtml(holiday.name)}</div>`:'';html+=`<div class="day ${date===today?'today':''} ${holiday?'has-holiday':''}"><span class="date-num">${d}</span>${holidayHtml}<div class="day-status">${pills}</div><button class="day-hit" data-date="${date}" aria-label="編輯 ${date}${holiday?'，'+holiday.full:''}"></button></div>`}const rem=(7-((first+days)%7))%7;for(let i=1;i<=rem;i++)html+=`<div class="day empty"><span class="date-num">${i}</span></div>`;$('calendarDays').innerHTML=html;qsa('.day-hit').forEach(b=>b.onclick=()=>openDay(b.dataset.date));$('calendarLegend').innerHTML=`<span class="legend-item"><span class="dot a"></span>${own}</span><span class="legend-item"><span class="dot b"></span>${other}</span><span class="legend-item"><span class="dot off"></span>休假</span><span class="legend-item"><span class="dot ot"></span>加班</span><span class="legend-item"><span class="dot sick"></span>病假</span><span class="legend-item"><span class="dot menstrual"></span>生理假</span><span class="legend-item"><span class="dot personal"></span>事假</span><span class="legend-item"><span class="dot annual"></span>特休</span><span class="legend-item"><span class="dot custom"></span>自訂假別</span><span class="legend-item"><span class="dot national"></span>國定假日</span><span class="legend-item"><span class="dot govcomp"></span>政府補假</span>`;updateRotationSummary()}
+function renderCalendar(){const y=current.getFullYear(),m=current.getMonth(),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),today=iso(new Date()),own=state.schedule.shiftName||'A班',other=otherShiftName(own);$('calendarMonth').textContent=`${y} 年 ${m+1} 月`;$('scheduleSummary').textContent=`${scheduleFamily()==='custom'?workRestLabel()+'｜':''}${own}｜第一個上班日 ${state.schedule.startDate}`;if($('settingsScheduleSummary'))$('settingsScheduleSummary').textContent=`${scheduleName()}・${workRestLabel()}・${own}・${state.schedule.startDate}`;syncScheduleChoices();$('shiftName').value=own;$('workDays').value=state.schedule.workDays;$('offDays').value=state.schedule.offDays;setDateControlValue('scheduleStart',state.schedule.startDate);$('workDaysWrap').classList.toggle('hidden',state.schedule.preset!=='custom');$('offDaysWrap').classList.toggle('hidden',state.schedule.preset!=='custom');let html='';for(let i=0;i<first;i++){const prev=new Date(y,m,1-first+i);html+=`<div class="day empty"><span class="date-num">${prev.getDate()}</span></div>`}for(let d=1;d<=days;d++){const dt=new Date(y,m,d),date=iso(dt),base=scheduleForDate(dt),st=state.dayStatus[date],meta=typeMeta(st),holiday=twOfficialHoliday(date);let pills='';if(meta){if(st.type==='overtime'&&base==='work')pills=(scheduleOverridePill(dt)||threeShiftPill(dt)||`<div class="status-pill st-a">${own}</div>`)+`<div class="status-pill st-ot">${icon('i-clock')}加班</div>`;else pills=`<div class="status-pill ${meta.cls}">${meta.icon?icon(meta.icon):''}${meta.label}</div>`}else{pills=scheduleOverridePill(dt)||threeShiftPill(dt)||(base==='work'?`<div class="status-pill st-a">${own}</div>`:`<div class="status-pill st-b">${other}</div><div class="base-note">休假</div>`)}const holidayHtml=holiday?`<div class="holiday-tag ${holiday.kind}" title="${escapeHtml(holiday.full)}">${escapeHtml(holiday.name)}</div>`:'';html+=`<div class="day ${date===today?'today':''} ${holiday?'has-holiday':''}"><span class="date-num">${d}</span>${holidayHtml}<div class="day-status">${pills}</div><button class="day-hit" data-date="${date}" aria-label="編輯 ${date}${holiday?'，'+holiday.full:''}"></button></div>`}const rem=(7-((first+days)%7))%7;for(let i=1;i<=rem;i++)html+=`<div class="day empty"><span class="date-num">${i}</span></div>`;$('calendarDays').innerHTML=html;qsa('.day-hit').forEach(b=>b.onclick=()=>openDay(b.dataset.date));$('calendarLegend').innerHTML=`<span class="legend-item"><span class="dot a"></span>${own}</span><span class="legend-item"><span class="dot b"></span>${other}</span><span class="legend-item"><span class="dot off"></span>休</span><span class="legend-item"><span class="dot ot"></span>加班</span>`;updateRotationSummary()}
 function chooseScheduleStartFromCalendar(date){
   if(!date||scheduleFamily()==='four-three')return;
   if(state.schedule.startDate!==date){state.schedule.startDate=date;saveSchedulePrefs()}
@@ -8910,7 +9071,9 @@ function normalizeMeowAssistantText(raw){
     .replace(/對賬|对账|對仗|兌帳|兑账/g,'對帳')
     .replace(/班錶|板表|班标|班標/g,'班表')
     .replace(/排半/g,'排班').replace(/家班/g,'加班')
-    .replace(/特修/g,'特休').replace(/老保/g,'勞保').replace(/建保/g,'健保')
+    .replace(/生理(?:架|價|甲|家)/g,'生理假').replace(/月經(?:架|價)/g,'月經假')
+    .replace(/特修|特休日|特休假/g,'特休').replace(/年(?:架|價)/g,'年假')
+    .replace(/老保/g,'勞保').replace(/建保/g,'健保')
     .replace(/津贴/g,'津貼').replace(/实领/g,'實領').replace(/实发/g,'實發')
     .replace(/發新日|发薪日/g,'發薪日').replace(/扣款明细/g,'扣款明細')
     .replace(/帮我/g,'幫我').replace(/带我去/g,'帶我去').replace(/打开/g,'打開').replace(/钟头/g,'鐘頭')
@@ -8960,6 +9123,18 @@ function meowAssistantLeaveType(text){
 function meowAssistantLeaveLabel(type){
   return({sick:'病假',menstrual:'生理假',personal:'事假',annual:'特休'})[type]||'假別';
 }
+function meowAssistantShiftTarget(text){
+  const t=normalizeMeowAssistantText(text);
+  if(/(?:改|排|設|設定|換|調).{0,3}(?:休|休假)|(?:休假|放假|不上班)/.test(t))return{kind:'off',shiftName:'休'};
+  const m=t.match(/(?:改成|改為|更改成|調成|換成|排成|設成|設定成|改|調)?\s*(A班|B班|早班|中班|晚班|夜班|大夜班?|小夜班?)/i);
+  if(!m)return null;
+  let label=String(m[1]||'').trim();
+  if(/^a班?$/i.test(label))label='A班';
+  else if(/^b班?$/i.test(label))label='B班';
+  else if(/^大夜/i.test(label))label='大夜班';
+  else if(/^小夜/i.test(label))label='小夜班';
+  return{kind:'work',shiftName:label};
+}
 function meowAssistantLeaveHours(text,leaveType=''){
   const t=normalizeMeowAssistantText(text),daily=leaveType==='annual'?8:Math.max(.5,num(state.settings.dailyWorkHours)||8);
   if(/半天|半日/.test(t))return Math.max(.5,daily/2);
@@ -8974,6 +9149,9 @@ function meowAssistantMutationDates(raw){
     if(dt.getFullYear()===Number(y)&&dt.getMonth()===Number(m)-1&&dt.getDate()===Number(d))add(iso(dt));
   };
   for(const m of t.matchAll(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/g))make(m[1],m[2],m[3]);
+  for(const m of t.matchAll(/(?:(\d{4})年)?(\d{1,2})月(\d{1,2})(?:號|日)?/g)){
+    const base=meowAssistantMonthStart(current);make(m[1]||base.getFullYear(),m[2],m[3]);
+  }
   for(const m of t.matchAll(/(?<!\d)(\d{1,2})[\/-](\d{1,2})(?!\d)/g)){
     const base=meowAssistantMonthStart(current);make(base.getFullYear(),m[1],m[2]);
   }
@@ -9232,9 +9410,17 @@ function meowAssistantParse(raw){
   }
   const wantsPayslipReconcile=/(智慧.{0,6}對帳|薪資.{0,6}對帳|對帳.{0,6}薪資|對.{0,5}薪資單|核對.{0,6}薪資單|幫我.{0,8}(對|核對|看看).{0,6}薪資單|薪資單.{0,8}(對帳|核對|幫我對|算對|正不正確)|薪資單.{0,8}(有沒有|是否).{0,5}(算對|正確))/.test(text);
   if(wantsPayslipReconcile)return{ok:true,type:'smartPayslipReconcile',raw:text};
+
+  const shiftTarget=meowAssistantShiftTarget(text),shiftDates=shiftTarget?meowAssistantMutationDates(text):[];
+  const shiftMutationVerb=/(幫我|我要|想要|改成|改為|更改|更動|調成|調班|換成|排成|設成|設定成)/.test(text);
+  if(shiftTarget&&shiftDates.length&&shiftMutationVerb){
+    return{ok:true,type:'shiftChange',dates:shiftDates,kind:shiftTarget.kind,shiftName:shiftTarget.shiftName,raw:text};
+  }
+
   const leaveType=meowAssistantLeaveType(text),leaveDates=leaveType?meowAssistantMutationDates(text):[];
   const leaveMutationVerb=/(幫我|我要|我要請|想請|要請|請|改成|改為|改|更改|換成|設成|設定成|標記|登記|記成|排成|取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
-  if(leaveType&&leaveDates.length&&leaveMutationVerb){
+  const leaveQuestion=/(怎麼請|如何請|可以請|能請|幾天|多少|剩|還有|規定|權益|有薪|無薪|扣薪|薪水|工資)/.test(text);
+  if(leaveType&&leaveDates.length&&(leaveMutationVerb||!leaveQuestion)){
     const cancel=/(取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
     return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text,leaveType),raw:text};
   }
@@ -9266,6 +9452,13 @@ function meowAssistantDateLabel(date){
 function meowAssistantPlanCheck(plan){
   if(!plan||!plan.ok)return plan;
   if(plan.type==='viewSchedule'||plan.type==='smartPayslipReconcile'||plan.type==='knowledge'||plan.type==='knowledgeMulti')return plan;
+  if(plan.type==='shiftChange'){
+    if(!(plan.dates||[]).length)return{ok:false,message:'我有抓到改班需求，但沒有辨識出日期。'};
+    if(!['work','off'].includes(plan.kind))return{ok:false,message:'我有抓到改班需求，但沒有辨識出要改成哪個班別。'};
+    const blocked=(plan.dates||[]).filter(date=>{const st=state.dayStatus[date];return st&&st.type&&st.type!=='none'});
+    if(blocked.length)return{ok:false,message:blocked.map(meowAssistantDateLabel).join('、')+' 已有加班或請假紀錄，我先不覆蓋。請先取消原紀錄再改班。'};
+    return plan;
+  }
   if(plan.type==='leave'){
     if(!['sick','menstrual','personal','annual'].includes(plan.leaveType))return{ok:false,message:'我有抓到請假需求，但沒有辨識出假別。'};
     if(!(plan.dates||[]).length)return{ok:false,message:'我有抓到請假需求，但沒有辨識出日期。'};
@@ -9289,6 +9482,7 @@ function meowAssistantPlanCheck(plan){
   return plan;
 }
 function meowAssistantPlanText(plan){
+  if(plan.type==='shiftChange')return '把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 改成 '+(plan.kind==='off'?'休假':plan.shiftName)+'。';
   if(plan.type==='leave')return '把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 設為'+meowAssistantLeaveLabel(plan.leaveType)+'，'+plan.hours+' 小時。';
   if(plan.type==='removeLeave')return '取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(plan.leaveType)+'標記。';
   if(plan.type==='move')return '把 '+meowAssistantDateLabel(plan.from)+' 的加班移到 '+meowAssistantDateLabel(plan.to)+'，保留原本時數、日別與備註。';
@@ -9564,6 +9758,11 @@ function executeMeowAssistantPlan(plan){
     state.dayStatus[plan.to]=JSON.parse(JSON.stringify(state.dayStatus[plan.from]));
     state.dayStatus[plan.to].note=state.dayStatus[plan.to].note||'';
     delete state.dayStatus[plan.from];
+  }else if(plan.type==='shiftChange'){
+    state.scheduleOverrides=state.scheduleOverrides||{};
+    plan.dates.forEach(date=>{
+      state.scheduleOverrides[date]={kind:plan.kind,shiftName:plan.kind==='off'?'':plan.shiftName,source:'assistant',updatedAt:new Date().toISOString()};
+    });
   }else if(plan.type==='leave'){
     plan.dates.forEach(date=>{
       state.dayStatus[date]={type:plan.leaveType,hours:plan.hours,note:'',label:'',overtimeKind:''};
@@ -9588,11 +9787,13 @@ function executeMeowAssistantPlan(plan){
   if($('meowAssistantUndo'))$('meowAssistantUndo').classList.remove('hidden');
   if($('meowAssistantPreview'))$('meowAssistantPreview').classList.add('hidden');
   meowAssistantPending=null;
-  const reply=plan.type==='leave'
-    ?'已把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 改成'+meowAssistantLeaveLabel(plan.leaveType)+'。'
-    :plan.type==='removeLeave'
-      ?'已取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(plan.leaveType)+'。'
-      :'已更新班表。';
+  const reply=plan.type==='shiftChange'
+    ?'已把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 改成'+(plan.kind==='off'?'休假':plan.shiftName)+'。'
+    :plan.type==='leave'
+      ?'已把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 改成'+meowAssistantLeaveLabel(plan.leaveType)+'。'
+      :plan.type==='removeLeave'
+        ?'已取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(plan.leaveType)+'。'
+        :'已更新班表。';
   renderMeowAssistantReply(reply,'success');
   return true;
 }
