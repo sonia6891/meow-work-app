@@ -2332,7 +2332,6 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
 @media(max-width:760px){
   /* The approved mobile overview already fits its compact card grid. */
   html[data-active-tab="dashboard"],html[data-active-tab="dashboard"] body{overflow:hidden!important;height:100dvh!important}
-  html[data-active-tab="dashboard"] .hero-wrap{display:none!important}
   html[data-active-tab="dashboard"] .main{height:calc(100dvh - var(--nav-h) - env(safe-area-inset-bottom));overflow:hidden!important;padding:8px 10px 0!important}
   html[data-active-tab="dashboard"] #page-dashboard.active{height:auto;min-height:0;overflow:hidden!important;padding:0 12px 0!important}
   html[data-active-tab="dashboard"] .mobile-dashboard-approved{height:auto;grid-template-rows:auto;gap:8px!important;overflow:hidden}
@@ -2399,7 +2398,7 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   #page-settings #accountPlanCard{order:1}
 }
 </style>
-<style id="mobile-reference-cards-v223">
+<style id="mobile-reference-cards-v224">
 @media(max-width:760px){
   #page-calendar .ref-template-card{position:relative;margin-bottom:9px!important}
   #page-calendar .ref-template-card>.ref-block-title{display:flex;align-items:center;gap:7px}
@@ -10034,7 +10033,7 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v223';
+    const reloadKey='meow-sw-reloaded-v224';
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
         if(sessionStorage.getItem(reloadKey))return;
