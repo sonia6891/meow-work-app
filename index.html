@@ -2500,6 +2500,23 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
     height:calc(100dvh - 56px - env(safe-area-inset-bottom))!important;
     padding-bottom:0!important;
   }
+  /* Overview uses the exact same 10px page gutter as the other mobile tabs. */
+  html[data-active-tab="dashboard"] #page-dashboard.active{
+    width:100%!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    box-sizing:border-box!important;
+  }
+  html[data-active-tab="dashboard"] .mobile-dashboard-approved{
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box!important;
+  }
+  html[data-active-tab="dashboard"] .mobile-dashboard-approved>section,
+  html[data-active-tab="dashboard"] .mobile-dashboard-approved>div{
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
 
   /* Schedule / work type uses the same card language as Overview. */
   #page-calendar .ref-worktype-panel{
