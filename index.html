@@ -5075,7 +5075,7 @@ function renderAttendance(){
   const rows=todoShowCompleted?todos:todos.filter(t=>!t.completed);
   box.className='itinerary-upcoming-list todo-list-v142';
   if(!rows.length){
-    box.innerHTML='<div class="todo-empty-v142"><b>'+(todoShowCompleted?'目前還沒有待辦事項':'目前沒有未完成待辦')+'</b><span>使用右上角「＋」新增行程或待辦事項。</span></div>';
+    box.innerHTML='';
     return;
   }
   box.innerHTML=rows.map(t=>{
@@ -6686,7 +6686,284 @@ function buildSalaryPrintHtml(){
     return '<!doctype html><html><head><meta charset="utf-8"><title>'+year+' 年薪資對帳</title><style>'+baseStyle+'</style></head><body><h1>喵的，又要上班了｜'+year+' 年薪資對帳</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>對帳月份</b><strong>'+rows.length+'</strong></div><div class="card"><b>全年公司實發</b><strong>'+money(actual)+'</strong></div><div class="card"><b>全年差額</b><strong>'+signedMoney(diff)+'</strong></div></div><table><thead><tr><th>月份</th><th>App 預估實領</th><th>公司實發</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">此報告依 App 中已儲存的排班、薪資與對帳資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
   }
   const r=exportMonthRecord(),tr=r.rows.map(x=>'<tr><td>'+escapeHtml(x.label)+'</td><td>'+money(x.expected)+'</td><td>'+(x.actual===null?'—':money(x.actual))+'</td><td>'+(x.actual===null?'—':signedMoney(x.actual-x.expected))+'</td></tr>').join('');
-  return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style></head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
+  return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style>
+<style id="mobile-ui-rebuild-v226">
+/* v226 — rebuild the five mobile pages around one consistent visual system. */
+@media(max-width:760px){
+  :root{--nav-h:56px}
+
+  /* One shared branded Hero on every mobile tab. */
+  html[data-active-tab] .hero-wrap{
+    display:block!important;
+    margin-bottom:9px!important;
+  }
+  html[data-active-tab="attendance"] .main,
+  html[data-active-tab="salary"] .main,
+  html[data-active-tab="settings"] .main{
+    padding-top:8px!important;
+  }
+  #page-attendance .ref-itinerary-hero,
+  #page-settings .ref-settings-hero,
+  #page-salary .ref-salary-hero{
+    display:none!important;
+  }
+
+  /* Bottom tabs: compact, no oversized empty band. */
+  .bottom-nav{
+    height:calc(56px + env(safe-area-inset-bottom))!important;
+    min-height:0!important;
+    padding:4px 8px calc(4px + env(safe-area-inset-bottom))!important;
+    align-items:stretch!important;
+  }
+  .bottom-nav button{
+    min-height:0!important;
+    padding:2px 0!important;
+    border-radius:11px!important;
+    font-size:9px!important;
+    gap:1px!important;
+  }
+  .bottom-nav button .icon{font-size:19px!important}
+  .main{
+    padding-bottom:calc(56px + 14px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-active-tab="dashboard"] .main{
+    height:calc(100dvh - 56px - env(safe-area-inset-bottom))!important;
+    padding-bottom:0!important;
+  }
+
+  /* Schedule / work type uses the same card language as Overview. */
+  #page-calendar .ref-worktype-panel{
+    border:1px solid #eadfd3!important;
+    background:rgba(255,253,249,.97)!important;
+    box-shadow:0 7px 20px rgba(90,62,43,.055)!important;
+    border-radius:18px!important;
+    padding:13px 12px 12px!important;
+    margin:0 0 9px!important;
+  }
+  #page-calendar .ref-worktype-panel>.ref-block-title{
+    display:flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    margin:0 0 10px!important;
+    color:#4c2b1e!important;
+  }
+  #page-calendar .ref-worktype-panel>.ref-block-title .icon{
+    width:25px!important;height:25px!important;color:#9d7059!important;
+  }
+  #page-calendar .ref-worktype-panel>.ref-block-title b{
+    font-size:17px!important;font-weight:950!important;
+  }
+  #page-calendar .ref-worktype-row{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:6px!important;margin:0!important;
+  }
+  #page-calendar .ref-worktype-row button{
+    min-width:0!important;
+    border:1px solid transparent!important;
+    background:rgba(255,255,255,.67)!important;
+    color:#7d5b49!important;
+    border-radius:13px!important;
+    padding:8px 4px 7px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    font-weight:900!important;
+    box-shadow:0 3px 10px rgba(80,57,42,.035)!important;
+  }
+  #page-calendar .ref-worktype-row button.active{
+    background:#ffe7ae!important;border-color:#f5c76d!important;color:#7a4c29!important;
+  }
+  #page-calendar .ref-worktype-row .mda-worktype-icon{
+    width:18px;height:18px;display:inline-grid;place-items:center;flex:0 0 auto;
+  }
+  #page-calendar .ref-worktype-row .mda-worktype-icon svg{
+    width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  #page-calendar .ref-worktype-row .mda-worktype-icon.hospital{color:#dc865d}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.restaurant{color:#936550}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.security{color:#7f6858}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.factory{color:#8a6a58}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.custom{color:#916954}
+  #page-calendar .ref-worktype-row b{
+    min-width:0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* Schedule template is the single collapsible schedule-control card. */
+  #page-calendar .ref-schedule-top-grid{
+    display:block!important;margin:0 0 9px!important;
+  }
+  #page-calendar #aiScheduleCard{display:none!important}
+  #page-calendar .ref-template-card{
+    min-height:0!important;
+    padding:0!important;margin:0!important;
+    border:1px solid #eadfd3!important;
+    border-radius:18px!important;
+    background:#fffdf9!important;
+    box-shadow:0 7px 20px rgba(90,62,43,.055)!important;
+    overflow:hidden!important;
+  }
+  #page-calendar .ref-template-card>.ref-block-title{
+    min-height:50px!important;
+    padding:10px 12px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    border:0!important;
+  }
+  #page-calendar .ref-template-card>.ref-block-title>.icon{
+    width:22px!important;height:22px!important;color:#9d6548!important;
+  }
+  #page-calendar .ref-template-card>.ref-block-title>b{
+    font-size:15px!important;font-weight:950!important;color:#4b2b20!important;
+  }
+  #page-calendar .schedule-template-fold{
+    margin-left:auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:5px!important;
+    border:0!important;
+    border-radius:11px!important;
+    padding:7px 9px!important;
+    background:#fff3e5!important;
+    color:#8c5537!important;
+    font-size:11px!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+  }
+  #page-calendar .schedule-template-fold svg{
+    width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  #page-calendar .schedule-template-fold #scheduleFoldChevron{
+    font-size:15px;line-height:1;
+  }
+  #page-calendar .ref-template-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px!important;
+    margin:0!important;
+    padding:0 10px 10px!important;
+  }
+  #page-calendar .ref-template-buttons button{
+    padding:8px 10px!important;
+    border-radius:11px!important;
+    font-size:10px!important;
+  }
+  #page-calendar .ref-template-card.is-collapsed .ref-template-buttons{
+    display:none!important;
+  }
+  #page-calendar .ref-template-card.is-collapsed .schedule-settings{
+    display:none!important;
+  }
+  #page-calendar .schedule-settings{
+    margin:0 10px 10px!important;
+    padding:10px!important;
+    border:1px solid #eee2d8!important;
+    border-radius:14px!important;
+    background:#fffaf5!important;
+  }
+  #page-calendar .schedule-settings .form-grid{
+    grid-template-columns:1fr!important;gap:8px!important;
+  }
+  #page-calendar .schedule-card-v136{
+    display:none!important;
+  }
+
+  /* Itinerary: keep Todo itself, remove duplicate "nothing here" cards. */
+  #page-attendance .todo-empty-v142,
+  #page-attendance .itinerary-empty-list{
+    display:none!important;
+  }
+  #page-attendance #v219TodoList:empty{
+    display:none!important;
+  }
+  #page-attendance .v219-itinerary-heading{
+    margin-top:0!important;
+  }
+
+  /* Salary: branded Hero is already the page title; do not repeat 薪資 again. */
+  #page-salary .salary-card>.page-head{
+    display:none!important;
+  }
+  #page-salary .salary-tabs{
+    margin-top:0!important;
+  }
+
+  /* Settings: match the supplied compact hierarchy, without a second plan card. */
+  #page-settings #accountPlanCard{
+    display:none!important;
+  }
+  #page-settings .ref-settings-icon{
+    overflow:hidden!important;
+    padding:0!important;
+    font-size:0!important;
+  }
+  #page-settings .ref-settings-icon svg{
+    width:21px;height:21px;display:block;
+  }
+  #page-settings .ref-settings-icon.google{
+    background:#fff!important;
+    border:1px solid #ece7e2!important;
+  }
+  #page-settings .ref-settings-icon.line{
+    background:#06c755!important;
+    color:#fff!important;
+  }
+  #page-settings .ref-settings-icon.crown{
+    background:#fff3cf!important;
+    color:#d49a21!important;
+  }
+  #page-settings #themeSystem{
+    display:none!important;
+  }
+  #page-settings #appearanceBody .settings-modern-row>div:first-child{
+    display:none!important;
+  }
+  #page-settings #appearanceBody .settings-segmented{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+  }
+  #page-settings #appearanceBody .settings-segmented button{
+    min-height:40px!important;
+  }
+
+  html.dark #page-calendar .ref-worktype-panel,
+  html.dark #page-calendar .ref-template-card{
+    background:#302923!important;border-color:#765f51!important;
+  }
+  html.dark #page-calendar .ref-worktype-panel>.ref-block-title,
+  html.dark #page-calendar .ref-template-card>.ref-block-title>b{
+    color:#fff4eb!important;
+  }
+  html.dark #page-calendar .ref-worktype-row button{
+    background:#241f1b!important;color:#e8d2c3!important;
+  }
+  html.dark #page-calendar .ref-worktype-row button.active{
+    background:#4c3a28!important;border-color:#a97d3f!important;color:#ffe0a7!important;
+  }
+  html.dark #page-calendar .schedule-template-fold{
+    background:#403323!important;color:#ffe0a7!important;
+  }
+  html.dark #page-calendar .schedule-settings{
+    background:#2b2521!important;border-color:#59493f!important;
+  }
+}
+
+@media(max-width:390px){
+  .bottom-nav{
+    height:calc(54px + env(safe-area-inset-bottom))!important;
+  }
+  .bottom-nav button .icon{font-size:18px!important}
+}
+</style>
+
+</head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
 }
 function exportSalaryPdf(){
   if(!canUse('salary_export'))return;
@@ -7478,7 +7755,7 @@ function renderV219ItineraryBoard(){
 
   const todos=todoItems().slice().sort((a,b)=>Boolean(a.completed)-Boolean(b.completed)).slice(0,4);
   if($('v219TodoCount'))$('v219TodoCount').textContent=todos.length?todos.filter(t=>t.completed).length+' / '+todos.length:'0 / 0';
-  $('v219TodoList').innerHTML=(todos.length?todos:[{title:'目前沒有待辦事項',completed:false}]).map(t=>'<div class="v219-todo-row '+(t.completed?'done':'')+'"><i></i><span>'+escapeHtml(t.title||'未命名待辦')+'</span></div>').join('');
+  $('v219TodoList').innerHTML=todos.length?todos.map(t=>'<div class="v219-todo-row '+(t.completed?'done':'')+'"><i></i><span>'+escapeHtml(t.title||'未命名待辦')+'</span></div>').join(''):'';
 
   const conflicts=[];
   itineraryEvents().forEach(e=>{const found=eventConflictDetails(e,e.id);if(found&&found.length)conflicts.push({event:e,detail:found[0]})});
@@ -10085,5 +10362,83 @@ if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catc
   },50);
 }());
 </script>
+
+<script id="mobile-ui-rebuild-v226-js">
+(()=>{
+  const byId=id=>document.getElementById(id);
+  const gearSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9A1.7 1.7 0 0 0 21 10h.1v4H21a1.7 1.7 0 0 0-1.6 1Z"></path></svg>';
+
+  const workIcons={
+    hospital:'<span class="mda-worktype-icon hospital"><svg viewBox="0 0 24 24"><path d="M9 4h6v5h5v6h-5v5H9v-5H4V9h5z"/></svg></span><b>醫院</b>',
+    restaurant:'<span class="mda-worktype-icon restaurant"><svg viewBox="0 0 24 24"><path d="M7 3v7M4.5 3v7M9.5 3v7M4.5 10h5M7 10v11M16 3v7c0 2 1.2 3 3 3V3M19 13v8"/></svg></span><b>餐廳</b>',
+    security:'<span class="mda-worktype-icon security"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.6-2.8 8.3-7 10-4.2-1.7-7-5.4-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span><b>保全</b>',
+    factory:'<span class="mda-worktype-icon factory"><svg viewBox="0 0 24 24"><path d="M3 20V9l6 3V8l6 4V5h4v15z"/><path d="M7 16h2M12 16h2M17 16h2"/></svg></span><b>工廠</b>',
+    custom:'<span class="mda-worktype-icon custom"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><b>自訂</b>'
+  };
+
+  const googleSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.24-.2-1.8H12v3.47h5.52c-.11.86-.72 2.16-2.06 3.03l-.02.12 2.99 2.26.21.02c1.94-1.75 2.96-4.34 2.96-7.1z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.87 6.63-2.37l-3.17-2.4c-.85.57-1.99.97-3.46.97-2.65 0-4.9-1.75-5.7-4.17l-.12.01-3.11 2.35-.04.11C4.67 19.9 8.07 22 12 22z"/><path fill="#FBBC05" d="M6.3 14.03A6.1 6.1 0 0 1 6 12c0-.71.12-1.39.29-2.03l-.01-.14-3.15-2.39-.1.05A9.77 9.77 0 0 0 2 12c0 1.62.4 3.15 1.03 4.5l3.27-2.47z"/><path fill="#EA4335" d="M12 5.8c1.93 0 3.23.81 3.96 1.47l2.74-2.61C17.02 3.13 14.7 2 12 2 8.07 2 4.67 4.1 3.03 7.5L6.3 9.97C7.11 7.55 9.35 5.8 12 5.8z"/></svg>';
+  const lineSvg='<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#fff" d="M26.8 15.1C26.8 9.8 22 5.5 16 5.5S5.2 9.8 5.2 15.1c0 4.7 4.2 8.7 9.9 9.4.4.1.9.3 1 .7.1.3.1.8 0 1.2l-.2 1c-.1.4-.3 1.4 1.2.7 1.5-.6 7.9-4.7 10.1-8.1.5-1 .6-2 .6-3 0-.6-.1-1.2-.2-1.9h-.8Z"/><path fill="#06c755" d="M10.4 12.3h1.7v5.8h-1.7zm2.6 0h1.6l2.1 3v-3h1.7v5.8h-1.5l-2.2-3.1v3.1H13zm6.3 0h3.8v1.4H21v.8h2v1.3h-2v.9h2.2v1.4h-3.9z"/></svg>';
+  const crownSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.4 6.8a1 1 0 0 1 1.4-.2l3.4 2.5 2.9-4.4a1 1 0 0 1 1.7 0l2.9 4.4 3.5-2.5a1 1 0 0 1 1.5 1l-1.7 9.8H5L3.2 7.6a1 1 0 0 1 .2-.8ZM6.2 19h11.6v2H6.2z"/></svg>';
+
+  function normalizeSchedule(){
+    const template=document.querySelector('#page-calendar .ref-template-card');
+    const fold=byId('scheduleTemplateFold');
+    if(template&&fold){
+      if(!fold.dataset.v226){
+        fold.dataset.v226='1';
+        fold.innerHTML=gearSvg+'<span class="schedule-fold-label">排班設定</span><span id="scheduleFoldChevron">⌄</span>';
+        const sync=()=>{
+          const open=fold.getAttribute('aria-expanded')==='true';
+          template.classList.toggle('is-collapsed',!open);
+          const chev=byId('scheduleFoldChevron');if(chev)chev.textContent=open?'⌃':'⌄';
+        };
+        sync();
+        new MutationObserver(sync).observe(fold,{attributes:true,attributeFilter:['aria-expanded']});
+      }else{
+        template.classList.toggle('is-collapsed',fold.getAttribute('aria-expanded')!=='true');
+      }
+    }
+    document.querySelectorAll('#page-calendar [data-ref-worktype]').forEach(btn=>{
+      const key=btn.dataset.refWorktype;
+      if(workIcons[key]&&btn.dataset.v226!=='1'){
+        btn.innerHTML=workIcons[key];btn.dataset.v226='1';
+      }
+    });
+    const ai=byId('aiScheduleCard');if(ai)ai.hidden=true;
+    const tools=document.querySelector('#page-calendar .schedule-card-v136');if(tools)tools.hidden=true;
+  }
+
+  function normalizeSettings(){
+    const account=byId('refAccountCard');
+    if(account){
+      const titleIcon=account.querySelector('.ref-settings-card-title>span');
+      if(titleIcon&&titleIcon.dataset.v226!=='1'){titleIcon.textContent='👤';titleIcon.dataset.v226='1'}
+      const g=account.querySelector('.ref-settings-icon.google');
+      const l=account.querySelector('.ref-settings-icon.line');
+      const c=account.querySelector('.ref-settings-icon.crown');
+      if(g&&g.dataset.v226!=='1'){g.innerHTML=googleSvg;g.dataset.v226='1'}
+      if(l&&l.dataset.v226!=='1'){l.innerHTML=lineSvg;l.dataset.v226='1'}
+      if(c&&c.dataset.v226!=='1'){c.innerHTML=crownSvg;c.dataset.v226='1'}
+    }
+    const themeHead=document.querySelector('#toggleAppearance b');
+    if(themeHead)themeHead.textContent='顏色模式';
+    const light=byId('themeLight');
+    const dark=byId('themeDark');
+    if(light&&light.dataset.v226!=='1'){light.innerHTML='<span>☀ 淺色</span><span>○</span>';light.dataset.v226='1'}
+    if(dark&&dark.dataset.v226!=='1'){dark.innerHTML='<span>☾ 深色</span><span>○</span>';dark.dataset.v226='1'}
+  }
+
+  function run(){
+    normalizeSchedule();
+    normalizeSettings();
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{run();setTimeout(run,80);setTimeout(run,500)},{once:true});
+  }else{
+    run();setTimeout(run,80);setTimeout(run,500);
+  }
+})();
+</script>
+
 </body>
 </html>
