@@ -4569,18 +4569,18 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
     </div>
     <div class="ref-assistant-quick">
       <b>可以直接打字，也可以按麥克風用語音：</b>
-      <small class="ref-assistant-voice-hint">例如：「9/30 改晚班」、「明天加班 4 小時」、「10/2 請病假」</small>
+      <small class="ref-assistant-voice-hint">例如：「9/30 改晚班」、「明天加班 4 小時」、「10/2 請特休」、「28 號改生理假」</small>
       <div>
         <button type="button" data-meow-prompt="我要更動班表">🎙 更動班表</button>
         <button type="button" data-meow-prompt="我要登記加班">⏱ 登記加班</button>
-        <button type="button" data-meow-prompt="我要請病假">🤒 登記病假</button>
+        <button type="button" data-meow-prompt="9月28號幫我改成生理假">🌙 登記生理假</button>
+        <button type="button" data-meow-prompt="9月29號我要請特休">🏖 登記特休</button>
+        <button type="button" data-meow-prompt="9月30號幫我請病假">🤒 登記病假</button>
         <button type="button" data-meow-prompt="幫我做薪資對帳">💰 薪資對帳</button>
-        <button type="button" data-meow-prompt="我還有幾天假？">🏖 假還剩幾天？</button>
-        <button type="button" data-meow-prompt="其他假別要怎麼請？">📘 其他假別怎麼請？</button>
       </div>
     </div>
     <div class="meow-assistant-chat hidden" id="meowAssistantReply" aria-live="polite"></div>
-    <div class="meow-assistant-pro-strip">☼　Pro 可用語音更動班表、登記加班／病假，也能查假別與薪資對帳　🐾</div>
+    <div class="meow-assistant-pro-strip">☼　Pro 可用語音更動班表、加班、病假、生理假、事假、特休，也能做薪資對帳　🐾</div>
     <div class="meow-assistant-compose">
       <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="有任何職場問題，問我吧…"></textarea>
       <span class="meow-assistant-attach" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8.5 12.5l6.2-6.2a3.4 3.4 0 014.8 4.8l-8.4 8.4a5 5 0 01-7.1-7.1l8-8"/><path d="M6.8 14.2l7.3-7.3"/></svg></span>
@@ -8949,6 +8949,42 @@ function meowAssistantHours(text){
   const v=m?Number(m[1]):NaN;
   return Number.isFinite(v)&&v>0&&v<=24?v:Math.max(.5,num(state.settings.defaultOvertimeHours)||10);
 }
+function meowAssistantLeaveType(text){
+  const t=normalizeMeowAssistantText(text);
+  if(/生理假|月經假|月事假/.test(t))return'menstrual';
+  if(/特休|年假|特別休假/.test(t))return'annual';
+  if(/病假|傷病假/.test(t))return'sick';
+  if(/事假/.test(t))return'personal';
+  return'';
+}
+function meowAssistantLeaveLabel(type){
+  return({sick:'病假',menstrual:'生理假',personal:'事假',annual:'特休'})[type]||'假別';
+}
+function meowAssistantLeaveHours(text){
+  const t=normalizeMeowAssistantText(text),daily=Math.max(.5,num(state.settings.dailyWorkHours)||8);
+  if(/半天|半日/.test(t))return Math.max(.5,daily/2);
+  const m=t.match(/(\d+(?:\.\d+)?)\s*(?:小時|鐘頭|HRS?|H)(?![A-Z])/i),v=m?Number(m[1]):NaN;
+  return Number.isFinite(v)&&v>0&&v<=24?v:daily;
+}
+function meowAssistantMutationDates(raw){
+  const t=normalizeMeowAssistantText(raw),dates=[];
+  const add=value=>{if(value&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&!dates.includes(value))dates.push(value)};
+  const make=(y,m,d)=>{
+    const dt=new Date(Number(y),Number(m)-1,Number(d));
+    if(dt.getFullYear()===Number(y)&&dt.getMonth()===Number(m)-1&&dt.getDate()===Number(d))add(iso(dt));
+  };
+  for(const m of t.matchAll(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/g))make(m[1],m[2],m[3]);
+  for(const m of t.matchAll(/(?<!\d)(\d{1,2})[\/-](\d{1,2})(?!\d)/g)){
+    const base=meowAssistantMonthStart(current);make(base.getFullYear(),m[1],m[2]);
+  }
+  const now=new Date();
+  if(/後天/.test(t)){const d=new Date(now);d.setDate(d.getDate()+2);add(iso(d))}
+  else if(/明天|明日/.test(t)){const d=new Date(now);d.setDate(d.getDate()+1);add(iso(d))}
+  else if(/今天|今日/.test(t))add(iso(now));
+  const month=meowAssistantContextDate(t,current);
+  meowAssistantExtractDays(t).forEach(day=>add(meowAssistantDate(month,day)));
+  return dates;
+}
 
 const MEOW_ASSISTANT_KNOWLEDGE_VERSION='2026-09-shift-payroll-v1';
 
@@ -9196,6 +9232,12 @@ function meowAssistantParse(raw){
   }
   const wantsPayslipReconcile=/(智慧.{0,6}對帳|薪資.{0,6}對帳|對帳.{0,6}薪資|對.{0,5}薪資單|核對.{0,6}薪資單|幫我.{0,8}(對|核對|看看).{0,6}薪資單|薪資單.{0,8}(對帳|核對|幫我對|算對|正不正確)|薪資單.{0,8}(有沒有|是否).{0,5}(算對|正確))/.test(text);
   if(wantsPayslipReconcile)return{ok:true,type:'smartPayslipReconcile',raw:text};
+  const leaveType=meowAssistantLeaveType(text),leaveDates=leaveType?meowAssistantMutationDates(text):[];
+  const leaveMutationVerb=/(幫我|我要|我要請|想請|要請|請|改成|改為|改|更改|換成|設成|設定成|標記|登記|記成|排成|取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
+  if(leaveType&&leaveDates.length&&leaveMutationVerb){
+    const cancel=/(取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
+    return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text),raw:text};
+  }
   const knowledgeList=meowAssistantKnowledgeIntents(text);
   if(knowledgeList.length>1)return{ok:true,type:'knowledgeMulti',knowledgeList,raw:text};
   const knowledge=knowledgeList[0]||'';
@@ -9224,6 +9266,18 @@ function meowAssistantDateLabel(date){
 function meowAssistantPlanCheck(plan){
   if(!plan||!plan.ok)return plan;
   if(plan.type==='viewSchedule'||plan.type==='smartPayslipReconcile'||plan.type==='knowledge'||plan.type==='knowledgeMulti')return plan;
+  if(plan.type==='leave'){
+    if(!['sick','menstrual','personal','annual'].includes(plan.leaveType))return{ok:false,message:'我有抓到請假需求，但沒有辨識出假別。'};
+    if(!(plan.dates||[]).length)return{ok:false,message:'我有抓到請假需求，但沒有辨識出日期。'};
+    plan.hours=Number(plan.hours)>0?Number(plan.hours):Math.max(.5,num(state.settings.dailyWorkHours)||8);
+    return plan;
+  }
+  if(plan.type==='removeLeave'){
+    if(!['sick','menstrual','personal','annual'].includes(plan.leaveType))return{ok:false,message:'我有抓到取消請假，但沒有辨識出要取消哪一種假。'};
+    const missing=(plan.dates||[]).filter(date=>!state.dayStatus[date]||state.dayStatus[date].type!==plan.leaveType);
+    if(missing.length)return{ok:false,message:missing.map(meowAssistantDateLabel).join('、')+' 目前沒有'+meowAssistantLeaveLabel(plan.leaveType)+'紀錄，所以我沒有刪除其他資料。'};
+    return plan;
+  }
   if(plan.type==='move'){
     const src=state.dayStatus[plan.from],dest=state.dayStatus[plan.to];
     if(!src||src.type!=='overtime')return{ok:false,message:'目前 '+meowAssistantDateLabel(plan.from)+' 沒有加班紀錄，所以我沒有移動任何資料。'};
@@ -9235,6 +9289,8 @@ function meowAssistantPlanCheck(plan){
   return plan;
 }
 function meowAssistantPlanText(plan){
+  if(plan.type==='leave')return '把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 設為'+meowAssistantLeaveLabel(plan.leaveType)+'，'+plan.hours+' 小時。';
+  if(plan.type==='removeLeave')return '取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(plan.leaveType)+'標記。';
   if(plan.type==='move')return '把 '+meowAssistantDateLabel(plan.from)+' 的加班移到 '+meowAssistantDateLabel(plan.to)+'，保留原本時數、日別與備註。';
   if(plan.type==='remove')return '取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的加班標記。';
   const def=Math.max(.5,num(state.settings.defaultOvertimeHours)||10),suffix=plan.hours===def?'（使用你的預設加班時數）':'';
@@ -9508,6 +9564,12 @@ function executeMeowAssistantPlan(plan){
     state.dayStatus[plan.to]=JSON.parse(JSON.stringify(state.dayStatus[plan.from]));
     state.dayStatus[plan.to].note=state.dayStatus[plan.to].note||'';
     delete state.dayStatus[plan.from];
+  }else if(plan.type==='leave'){
+    plan.dates.forEach(date=>{
+      state.dayStatus[date]={type:plan.leaveType,hours:plan.hours,note:'',label:'',overtimeKind:''};
+    });
+  }else if(plan.type==='removeLeave'){
+    plan.dates.forEach(date=>{if(state.dayStatus[date]&&state.dayStatus[date].type===plan.leaveType)delete state.dayStatus[date]});
   }else if(plan.type==='remove'){
     plan.dates.forEach(date=>{if(state.dayStatus[date]&&state.dayStatus[date].type==='overtime')delete state.dayStatus[date]});
   }else{
@@ -9526,7 +9588,12 @@ function executeMeowAssistantPlan(plan){
   if($('meowAssistantUndo'))$('meowAssistantUndo').classList.remove('hidden');
   if($('meowAssistantPreview'))$('meowAssistantPreview').classList.add('hidden');
   meowAssistantPending=null;
-  renderMeowAssistantReply('已更新班表。','success');
+  const reply=plan.type==='leave'
+    ?'已把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 改成'+meowAssistantLeaveLabel(plan.leaveType)+'。'
+    :plan.type==='removeLeave'
+      ?'已取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(plan.leaveType)+'。'
+      :'已更新班表。';
+  renderMeowAssistantReply(reply,'success');
   return true;
 }
 function undoMeowAssistant(){
@@ -9858,7 +9925,12 @@ const MEOW_ASSISTANT_LIVE_QUALITY_CASES=[
   {q:'我做滿三年了，依法到底有幾天特休？',intent:'annualLeaveRule'},
   {q:'現在最低時薪多少？明年是不是又要調？',intent:'minimumWage'},
   {q:'事假一年依法最多可以請幾天？有薪水嗎？',intent:'personalLeaveRule'},
-  {q:'我不是問依法幾天，我是問我自己的特休還剩多少？',intent:'annualLeave'}
+  {q:'我不是問依法幾天，我是問我自己的特休還剩多少？',intent:'annualLeave'},
+  {q:'9月28號幫我改成生理假',operation:{kind:'set_leave',date:'2026-09-28',leaveType:'menstrual'}},
+  {q:'9月29號我要請特休',operation:{kind:'set_leave',date:'2026-09-29',leaveType:'annual'}},
+  {q:'9月30號幫我請病假4小時',operation:{kind:'set_leave',date:'2026-09-30',leaveType:'sick'}},
+  {q:'9月27號改事假',operation:{kind:'set_leave',date:'2026-09-27',leaveType:'personal'}},
+  {q:'9月29號特休不要了',operation:{kind:'remove_leave',date:'2026-09-29',leaveType:'annual'}}
 ];
 function meowAssistantLiveCasePass(route,test){
   if(!route||route.understood===false)return false;
@@ -9880,6 +9952,7 @@ function meowAssistantLiveCasePass(route,test){
     if(test.operation.to&&op.toDate!==test.operation.to)return false;
     if(test.operation.year&&Number(op.year)!==Number(test.operation.year))return false;
     if(test.operation.month&&Number(op.month)!==Number(test.operation.month))return false;
+    if(test.operation.leaveType&&op.leaveType!==test.operation.leaveType)return false;
   }
   return true;
 }
@@ -9905,6 +9978,7 @@ function meowAssistantLiveFailureKind(route,test,error=''){
     if(test.operation.to&&op.toDate!==test.operation.to)return{code:'operation_argument',label:'目的日期解析錯誤',layer:'第 2 層'};
     if(test.operation.year&&Number(op.year)!==Number(test.operation.year))return{code:'operation_argument',label:'年份解析錯誤',layer:'第 2 層'};
     if(test.operation.month&&Number(op.month)!==Number(test.operation.month))return{code:'operation_argument',label:'月份解析錯誤',layer:'第 2 層'};
+    if(test.operation.leaveType&&op.leaveType!==test.operation.leaveType)return{code:'operation_argument',label:'假別解析錯誤',layer:'第 2 層'};
   }
   return{code:'unknown',label:'未分類失敗',layer:'待確認'};
 }
@@ -10192,6 +10266,20 @@ async function handleMeowAssistantAiOperation(route){
     }
     const plan={ok:true,type:op.kind==='add_overtime'?'add':'remove',dates};
     if(plan.type==='add')plan.hours=Number(op.hours)>0?Number(op.hours):Math.max(.5,num(state.settings.defaultOvertimeHours)||10);
+    const checked=meowAssistantPlanCheck(plan);
+    if(!checked.ok){renderMeowAssistantReply(checked.message,'error');return true}
+    executeMeowAssistantPlan(checked);
+    return true;
+  }
+  if(op.kind==='set_leave'||op.kind==='remove_leave'){
+    const dates=(Array.isArray(op.dates)?op.dates:[]).filter(meowAssistantValidIsoDate);
+    const leaveType=String(op.leaveType||'');
+    if(!dates.length||!['sick','menstrual','personal','annual'].includes(leaveType)){
+      renderMeowAssistantReply(route.clarifyingQuestion||'我知道你想修改假別，但日期或假別還不夠確定。請再說一次。','error');
+      return true;
+    }
+    const plan={ok:true,type:op.kind==='set_leave'?'leave':'removeLeave',leaveType,dates};
+    if(plan.type==='leave')plan.hours=Number(op.hours)>0?Number(op.hours):Math.max(.5,num(state.settings.dailyWorkHours)||8);
     const checked=meowAssistantPlanCheck(plan);
     if(!checked.ok){renderMeowAssistantReply(checked.message,'error');return true}
     executeMeowAssistantPlan(checked);
