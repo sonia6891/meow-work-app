@@ -268,11 +268,8 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
       await page.evaluate(() => window.__accountV119.settings());
       await page.waitForTimeout(100);
       check(`${width}px 帳號資料使用獨立帳號卡`, await page.evaluate(() => Boolean(document.querySelector('.settings-account-v129')?.contains(document.getElementById('profilePreview')))));
-      check(`${width}px Pro 方案使用獨立方案卡`, await page.locator('#accountUpgrade').isVisible() && (await page.locator('#accountUpgrade').innerText()).includes('查看方案'));
-      check(`${width}px Pro 方案緊接在登入喵星人下方`, await page.evaluate(() => {
-        const account=document.querySelector('.settings-account-v129'),plan=document.getElementById('accountPlanCard');
-        return account && plan && account.nextElementSibling===plan;
-      }));
+      check(`${width}px 目前方案整合在帳號與方案卡`, await page.locator('#refPlanAction').isVisible() && await page.locator('#accountPlanCard').isHidden());
+      check(`${width}px 目前方案列位於帳號與方案卡內`, await page.evaluate(() => document.querySelector('#refAccountCard')?.contains(document.getElementById('refPlanAction'))));
       check(`${width}px 帳號狀態留在帳號資料、登出收在個人資料展開區`, await page.evaluate(() => ['accountTitle','accountLoginMethod'].every(id => document.querySelector('.settings-account-v129').contains(document.getElementById(id))) && document.querySelector('#refAccountCard').contains(document.getElementById('accountLogout'))));
       check(`${width}px 帳號區不顯示 Email`, await page.evaluate(() => !document.getElementById('accountEmail') && !document.querySelector('.settings-account-v129').innerText.includes('member@example.test')));
       check(`${width}px 登入方式正確顯示 Google`, (await page.locator('#accountLoginMethod').innerText()).includes('Google'));
@@ -281,8 +278,8 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
       await page.locator('#accountUsername').fill('輪班喵'+width);
       await page.locator('#saveAccountUsername').click();
       check(`${width}px 使用者名稱可自訂修改`, await page.locator('#profileName').innerText() === '輪班喵'+width);
-      await page.locator('#accountUpgrade').scrollIntoViewIfNeeded();
-      await page.locator('#accountUpgrade').click();
+      await page.locator('#refPlanAction').scrollIntoViewIfNeeded();
+      await page.locator('#refPlanAction').click();
       check(`${width}px Pro 方案改用比較視窗`, await page.locator('#proPlanDialog').isVisible() && await page.locator('#proPlanSettings').isVisible());
       check(`${width}px 比較視窗顯示 Free／Pro 差異`, (await page.locator('#proPlanDialog').innerText()).includes('升級 Pro 助理') && (await page.locator('#proPlanSettings').innerText()).includes('薪資單三層交叉檢查'));
       check(`${width}px 比較視窗不再出現 AI 班表匯入`, !(await page.locator('#proPlanDialog').innerText()).includes('AI 班表'));
@@ -340,8 +337,8 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
       check(`${width}px 設定頁移除舊底部裝飾橫幅`, !settingsLayout.mobileRestInsideSettings && !(await page.locator('#settingsFooterBanner').isVisible()));
       if (width === 390) {
         await page.screenshot({ path: path.join(out, 'account-v119-390.png'), fullPage: true });
-        await page.locator('#accountUpgrade').scrollIntoViewIfNeeded();
-        await page.locator('#accountUpgrade').click();
+        await page.locator('#refPlanAction').scrollIntoViewIfNeeded();
+        await page.locator('#refPlanAction').click();
         check('升級入口會跳出 Free／Pro 比較視窗', await page.locator('#proPlanDialog').isVisible() && await page.locator('#proPlanSettings').isVisible());
         await page.screenshot({ path: path.join(out, 'account-v119-pro-390.png'), fullPage: true });
         await page.locator('#proPlanDialogClose').click();
@@ -445,7 +442,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     const billingUser = { id: 'acct-billing-off', email: 'member@example.test', app_metadata: { provider: 'google' } };
     const { context: billingOffContext, page: billingOffPage } = await openPage(browser, base, 390, billingUser, false);
     await billingOffPage.evaluate(() => window.__accountV119.settings());
-    await billingOffPage.locator('#accountUpgrade').click();
+    await billingOffPage.locator('#refPlanAction').click();
     check('網頁預覽仍顯示商店方案價格', await billingOffPage.locator('#liveBillingActions').isVisible());
     check('網頁預覽清楚標示不會進行付款', await billingOffPage.locator('#billingUnavailable').isVisible() && (await billingOffPage.locator('#billingUnavailable').innerText()).includes('App Store／Google Play'));
     await billingOffPage.screenshot({ path: path.join(out, 'account-v119-billing-off-390.png'), fullPage: true });
