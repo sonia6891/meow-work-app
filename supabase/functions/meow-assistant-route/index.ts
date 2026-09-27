@@ -150,11 +150,11 @@ const schema = {
     operation: {
       type: "object",
       additionalProperties: false,
-      required: ["kind","dates","fromDate","toDate","hours","year","month"],
+      required: ["kind","dates","fromDate","toDate","hours","year","month","leaveType"],
       properties: {
         kind: {
           type: "string",
-          enum: ["none","add_overtime","remove_overtime","move_overtime","view_schedule","undo_last"]
+          enum: ["none","add_overtime","remove_overtime","move_overtime","set_leave","remove_leave","view_schedule","undo_last"]
         },
         dates: {
           type: "array",
@@ -164,7 +164,8 @@ const schema = {
         toDate: nullableString,
         hours: { anyOf: [{ type: "number" }, { type: "null" }] },
         year: { anyOf: [{ type: "integer" }, { type: "null" }] },
-        month: { anyOf: [{ type: "integer", minimum: 1, maximum: 12 }, { type: "null" }] }
+        month: { anyOf: [{ type: "integer", minimum: 1, maximum: 12 }, { type: "null" }] },
+        leaveType: { anyOf: [{ type: "string", enum: ["sick","menstrual","personal","annual"] }, { type: "null" }] }
       }
     }
   }
@@ -262,11 +263,14 @@ Deno.serve(async (req: Request) => {
     "涉及薪資計算但需要實際班表／薪資資料時 risk=financial_calculation。",
     "涉及刪除、移動、覆蓋紀錄等資料變更時 risk=sensitive_mutation。",
     "如果只是情緒抱怨但同時包含可辨識需求，要理解需求，不要只把它當情緒。",
-    "如果使用者明確要求 App 新增／取消／移動加班，或查看某月班表，operation 要輸出結構化操作；不要直接執行，只負責解析。",
+    "如果使用者明確要求 App 新增／取消／移動加班、登記／更改／取消假別，或查看某月班表，operation 要輸出結構化操作；不要直接執行，只負責解析。",
+    "假別修改要區分『詢問規則』與『修改班表』：例如『病假可以請幾天』是 sickLeaveRights；『9/28 幫我改病假』是 set_leave。『特休還剩多少』是 annualLeave；『9/29 我要請特休』是 set_leave。",
+    "假別對照固定為 sick=病假／傷病假、menstrual=生理假／月經假、personal=事假、annual=特休／年假。明確修改時 operation.leaveType 必須填入；若假別不明確就追問，不可猜。",
+    "set_leave / remove_leave 的 dates 必須是可唯一確定的 YYYY-MM-DD；若使用者說今天、明天、後天、某月某日，要依 appContext.today 解析。使用者明確說『改成／請／登記／設成』時可 set_leave 覆蓋當天原有班表標記，實際覆蓋仍由 App 本機驗證與可復原機制控制。"
     "operation 的日期一律使用 YYYY-MM-DD。相對日期（今天、昨天、明天、禮拜五等）要以 appContext.today 與 recentContext 解析；不確定就 kind=none 並 shouldClarify=true。",
     "承接前文的操作，例如『那個拿掉』『不是22，是24』『移到禮拜五』，只有在 recentContext 能唯一解析對象時才輸出 operation，並 referencesPriorContext=true、contextResolution 說明解析結果。",
     "新增／取消／移動資料屬 sensitive_mutation。若日期或對象無法唯一確定，不可猜測。",
-    "查看班表使用 view_schedule，year/month 必須解析完成；修改加班則分別使用 add_overtime、remove_overtime、move_overtime。",
+    "查看班表使用 view_schedule，year/month 必須解析完成；修改加班使用 add_overtime、remove_overtime、move_overtime；修改假別使用 set_leave、remove_leave。",
     "如果使用者明確表示『撤回剛才』『復原上一個動作』『剛剛那個不要了』『取消剛才那一步』，且 recentContext 顯示上一個動作是 App 修改，operation.kind=undo_last；若無法確認上一個動作，不可猜測。",
     "意圖對照：\n" + intentGuide
   ].join("\n");
