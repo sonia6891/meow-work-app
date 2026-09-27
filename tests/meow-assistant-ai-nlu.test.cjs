@@ -35,6 +35,9 @@ assert(edge.includes('article841'),'84-1 intent missing');
 assert(edge.includes('overtimeWageBase'),'overtime wage-base intent missing');
 assert(edge.includes('pregnancyNightShift'),'pregnancy/night intent missing');
 assert(edge.includes('naturalDisaster'),'natural-disaster intent missing');
+assert(edge.includes('"set_leave"'),'leave set operation missing');
+assert(edge.includes('"remove_leave"'),'leave remove operation missing');
+assert(edge.includes('leaveType'),'leave type structured field missing');
 assert(!/sk-[A-Za-z0-9_-]{12,}/.test(edge),'OpenAI secret must never be committed');
 
 console.log('PASS Meow Assistant OpenAI NLU integration contract');
