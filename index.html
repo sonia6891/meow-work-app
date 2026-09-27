@@ -2456,6 +2456,283 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
   #page-settings #workSettingsBody:not(.hidden),#page-settings #dataSyncBody:not(.hidden){margin-top:6px}
 }
 </style>
+
+<style id="mobile-ui-rebuild-v226">
+/* v226 — rebuild the five mobile pages around one consistent visual system. */
+@media(max-width:760px){
+  :root{--nav-h:56px}
+
+  /* One shared branded Hero on every mobile tab. */
+  html[data-active-tab] .hero-wrap{
+    display:block!important;
+    margin-bottom:9px!important;
+  }
+  html[data-active-tab="attendance"] .main,
+  html[data-active-tab="salary"] .main,
+  html[data-active-tab="settings"] .main{
+    padding-top:8px!important;
+  }
+  #page-attendance .ref-itinerary-hero,
+  #page-settings .ref-settings-hero,
+  #page-salary .ref-salary-hero{
+    display:none!important;
+  }
+
+  /* Bottom tabs: compact, no oversized empty band. */
+  .bottom-nav{
+    height:calc(56px + env(safe-area-inset-bottom))!important;
+    min-height:0!important;
+    padding:4px 8px calc(4px + env(safe-area-inset-bottom))!important;
+    align-items:stretch!important;
+  }
+  .bottom-nav button{
+    min-height:0!important;
+    padding:2px 0!important;
+    border-radius:11px!important;
+    font-size:9px!important;
+    gap:1px!important;
+  }
+  .bottom-nav button .icon{font-size:19px!important}
+  .main{
+    padding-bottom:calc(56px + 14px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-active-tab="dashboard"] .main{
+    height:calc(100dvh - 56px - env(safe-area-inset-bottom))!important;
+    padding-bottom:0!important;
+  }
+
+  /* Schedule / work type uses the same card language as Overview. */
+  #page-calendar .ref-worktype-panel{
+    border:1px solid #eadfd3!important;
+    background:rgba(255,253,249,.97)!important;
+    box-shadow:0 7px 20px rgba(90,62,43,.055)!important;
+    border-radius:18px!important;
+    padding:13px 12px 12px!important;
+    margin:0 0 9px!important;
+  }
+  #page-calendar .ref-worktype-panel>.ref-block-title{
+    display:flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    margin:0 0 10px!important;
+    color:#4c2b1e!important;
+  }
+  #page-calendar .ref-worktype-panel>.ref-block-title .icon{
+    width:25px!important;height:25px!important;color:#9d7059!important;
+  }
+  #page-calendar .ref-worktype-panel>.ref-block-title b{
+    font-size:17px!important;font-weight:950!important;
+  }
+  #page-calendar .ref-worktype-row{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:6px!important;margin:0!important;
+  }
+  #page-calendar .ref-worktype-row button{
+    min-width:0!important;
+    border:1px solid transparent!important;
+    background:rgba(255,255,255,.67)!important;
+    color:#7d5b49!important;
+    border-radius:13px!important;
+    padding:8px 4px 7px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    font-weight:900!important;
+    box-shadow:0 3px 10px rgba(80,57,42,.035)!important;
+  }
+  #page-calendar .ref-worktype-row button.active{
+    background:#ffe7ae!important;border-color:#f5c76d!important;color:#7a4c29!important;
+  }
+  #page-calendar .ref-worktype-row .mda-worktype-icon{
+    width:18px;height:18px;display:inline-grid;place-items:center;flex:0 0 auto;
+  }
+  #page-calendar .ref-worktype-row .mda-worktype-icon svg{
+    width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  #page-calendar .ref-worktype-row .mda-worktype-icon.hospital{color:#dc865d}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.restaurant{color:#936550}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.security{color:#7f6858}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.factory{color:#8a6a58}
+  #page-calendar .ref-worktype-row .mda-worktype-icon.custom{color:#916954}
+  #page-calendar .ref-worktype-row b{
+    min-width:0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* Schedule template is the single collapsible schedule-control card. */
+  #page-calendar .ref-schedule-top-grid{
+    display:block!important;margin:0 0 9px!important;
+  }
+  #page-calendar #aiScheduleCard{display:none!important}
+  #page-calendar .ref-template-card{
+    min-height:0!important;
+    padding:0!important;margin:0!important;
+    border:1px solid #eadfd3!important;
+    border-radius:18px!important;
+    background:#fffdf9!important;
+    box-shadow:0 7px 20px rgba(90,62,43,.055)!important;
+    overflow:hidden!important;
+  }
+  #page-calendar .ref-template-card>.ref-block-title{
+    min-height:50px!important;
+    padding:10px 12px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    border:0!important;
+  }
+  #page-calendar .ref-template-card>.ref-block-title>.icon{
+    width:22px!important;height:22px!important;color:#9d6548!important;
+  }
+  #page-calendar .ref-template-card>.ref-block-title>b{
+    font-size:15px!important;font-weight:950!important;color:#4b2b20!important;
+  }
+  #page-calendar .schedule-template-fold{
+    margin-left:auto!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:5px!important;
+    border:0!important;
+    border-radius:11px!important;
+    padding:7px 9px!important;
+    background:#fff3e5!important;
+    color:#8c5537!important;
+    font-size:11px!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+  }
+  #page-calendar .schedule-template-fold svg{
+    width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  #page-calendar .schedule-template-fold #scheduleFoldChevron{
+    font-size:15px;line-height:1;
+  }
+  #page-calendar .ref-template-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px!important;
+    margin:0!important;
+    padding:0 10px 10px!important;
+  }
+  #page-calendar .ref-template-buttons button{
+    padding:8px 10px!important;
+    border-radius:11px!important;
+    font-size:10px!important;
+  }
+  #page-calendar .ref-template-card.is-collapsed .ref-template-buttons{
+    display:none!important;
+  }
+  #page-calendar .ref-template-card.is-collapsed .schedule-settings{
+    display:none!important;
+  }
+  #page-calendar .schedule-settings{
+    margin:0 10px 10px!important;
+    padding:10px!important;
+    border:1px solid #eee2d8!important;
+    border-radius:14px!important;
+    background:#fffaf5!important;
+  }
+  #page-calendar .schedule-settings .form-grid{
+    grid-template-columns:1fr!important;gap:8px!important;
+  }
+  #page-calendar .schedule-card-v136{
+    display:none!important;
+  }
+
+  /* Itinerary: keep Todo itself, remove duplicate "nothing here" cards. */
+  #page-attendance .todo-empty-v142,
+  #page-attendance .itinerary-empty-list{
+    display:none!important;
+  }
+  #page-attendance #v219TodoList:empty{
+    display:none!important;
+  }
+  #page-attendance .v219-itinerary-heading{
+    margin-top:0!important;
+  }
+
+  /* Salary: branded Hero is already the page title; do not repeat 薪資 again. */
+  #page-salary .salary-card>.page-head{
+    display:none!important;
+  }
+  #page-salary .salary-tabs{
+    margin-top:0!important;
+  }
+
+  /* Settings: match the supplied compact hierarchy, without a second plan card. */
+  #page-settings #accountPlanCard{
+    display:none!important;
+  }
+  #page-settings .ref-settings-icon{
+    overflow:hidden!important;
+    padding:0!important;
+    font-size:0!important;
+  }
+  #page-settings .ref-settings-icon svg{
+    width:21px;height:21px;display:block;
+  }
+  #page-settings .ref-settings-icon.google{
+    background:#fff!important;
+    border:1px solid #ece7e2!important;
+  }
+  #page-settings .ref-settings-icon.line{
+    background:#06c755!important;
+    color:#fff!important;
+  }
+  #page-settings .ref-settings-icon.crown{
+    background:#fff3cf!important;
+    color:#d49a21!important;
+  }
+  #page-settings #themeSystem{
+    display:none!important;
+  }
+  #page-settings #appearanceBody .settings-modern-row>div:first-child{
+    display:none!important;
+  }
+  #page-settings #appearanceBody .settings-segmented{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+  }
+  #page-settings #appearanceBody .settings-segmented button{
+    min-height:40px!important;
+  }
+
+  html.dark #page-calendar .ref-worktype-panel,
+  html.dark #page-calendar .ref-template-card{
+    background:#302923!important;border-color:#765f51!important;
+  }
+  html.dark #page-calendar .ref-worktype-panel>.ref-block-title,
+  html.dark #page-calendar .ref-template-card>.ref-block-title>b{
+    color:#fff4eb!important;
+  }
+  html.dark #page-calendar .ref-worktype-row button{
+    background:#241f1b!important;color:#e8d2c3!important;
+  }
+  html.dark #page-calendar .ref-worktype-row button.active{
+    background:#4c3a28!important;border-color:#a97d3f!important;color:#ffe0a7!important;
+  }
+  html.dark #page-calendar .schedule-template-fold{
+    background:#403323!important;color:#ffe0a7!important;
+  }
+  html.dark #page-calendar .schedule-settings{
+    background:#2b2521!important;border-color:#59493f!important;
+  }
+}
+
+@media(max-width:390px){
+  .bottom-nav{
+    height:calc(54px + env(safe-area-inset-bottom))!important;
+  }
+  .bottom-nav button .icon{font-size:18px!important}
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -6686,284 +6963,7 @@ function buildSalaryPrintHtml(){
     return '<!doctype html><html><head><meta charset="utf-8"><title>'+year+' 年薪資對帳</title><style>'+baseStyle+'</style></head><body><h1>喵的，又要上班了｜'+year+' 年薪資對帳</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>對帳月份</b><strong>'+rows.length+'</strong></div><div class="card"><b>全年公司實發</b><strong>'+money(actual)+'</strong></div><div class="card"><b>全年差額</b><strong>'+signedMoney(diff)+'</strong></div></div><table><thead><tr><th>月份</th><th>App 預估實領</th><th>公司實發</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">此報告依 App 中已儲存的排班、薪資與對帳資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
   }
   const r=exportMonthRecord(),tr=r.rows.map(x=>'<tr><td>'+escapeHtml(x.label)+'</td><td>'+money(x.expected)+'</td><td>'+(x.actual===null?'—':money(x.actual))+'</td><td>'+(x.actual===null?'—':signedMoney(x.actual-x.expected))+'</td></tr>').join('');
-  return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style>
-<style id="mobile-ui-rebuild-v226">
-/* v226 — rebuild the five mobile pages around one consistent visual system. */
-@media(max-width:760px){
-  :root{--nav-h:56px}
-
-  /* One shared branded Hero on every mobile tab. */
-  html[data-active-tab] .hero-wrap{
-    display:block!important;
-    margin-bottom:9px!important;
-  }
-  html[data-active-tab="attendance"] .main,
-  html[data-active-tab="salary"] .main,
-  html[data-active-tab="settings"] .main{
-    padding-top:8px!important;
-  }
-  #page-attendance .ref-itinerary-hero,
-  #page-settings .ref-settings-hero,
-  #page-salary .ref-salary-hero{
-    display:none!important;
-  }
-
-  /* Bottom tabs: compact, no oversized empty band. */
-  .bottom-nav{
-    height:calc(56px + env(safe-area-inset-bottom))!important;
-    min-height:0!important;
-    padding:4px 8px calc(4px + env(safe-area-inset-bottom))!important;
-    align-items:stretch!important;
-  }
-  .bottom-nav button{
-    min-height:0!important;
-    padding:2px 0!important;
-    border-radius:11px!important;
-    font-size:9px!important;
-    gap:1px!important;
-  }
-  .bottom-nav button .icon{font-size:19px!important}
-  .main{
-    padding-bottom:calc(56px + 14px + env(safe-area-inset-bottom))!important;
-  }
-  html[data-active-tab="dashboard"] .main{
-    height:calc(100dvh - 56px - env(safe-area-inset-bottom))!important;
-    padding-bottom:0!important;
-  }
-
-  /* Schedule / work type uses the same card language as Overview. */
-  #page-calendar .ref-worktype-panel{
-    border:1px solid #eadfd3!important;
-    background:rgba(255,253,249,.97)!important;
-    box-shadow:0 7px 20px rgba(90,62,43,.055)!important;
-    border-radius:18px!important;
-    padding:13px 12px 12px!important;
-    margin:0 0 9px!important;
-  }
-  #page-calendar .ref-worktype-panel>.ref-block-title{
-    display:flex!important;
-    align-items:center!important;
-    gap:9px!important;
-    margin:0 0 10px!important;
-    color:#4c2b1e!important;
-  }
-  #page-calendar .ref-worktype-panel>.ref-block-title .icon{
-    width:25px!important;height:25px!important;color:#9d7059!important;
-  }
-  #page-calendar .ref-worktype-panel>.ref-block-title b{
-    font-size:17px!important;font-weight:950!important;
-  }
-  #page-calendar .ref-worktype-row{
-    display:grid!important;
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
-    gap:6px!important;margin:0!important;
-  }
-  #page-calendar .ref-worktype-row button{
-    min-width:0!important;
-    border:1px solid transparent!important;
-    background:rgba(255,255,255,.67)!important;
-    color:#7d5b49!important;
-    border-radius:13px!important;
-    padding:8px 4px 7px!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:4px!important;
-    font-weight:900!important;
-    box-shadow:0 3px 10px rgba(80,57,42,.035)!important;
-  }
-  #page-calendar .ref-worktype-row button.active{
-    background:#ffe7ae!important;border-color:#f5c76d!important;color:#7a4c29!important;
-  }
-  #page-calendar .ref-worktype-row .mda-worktype-icon{
-    width:18px;height:18px;display:inline-grid;place-items:center;flex:0 0 auto;
-  }
-  #page-calendar .ref-worktype-row .mda-worktype-icon svg{
-    width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;
-    stroke-linecap:round;stroke-linejoin:round;
-  }
-  #page-calendar .ref-worktype-row .mda-worktype-icon.hospital{color:#dc865d}
-  #page-calendar .ref-worktype-row .mda-worktype-icon.restaurant{color:#936550}
-  #page-calendar .ref-worktype-row .mda-worktype-icon.security{color:#7f6858}
-  #page-calendar .ref-worktype-row .mda-worktype-icon.factory{color:#8a6a58}
-  #page-calendar .ref-worktype-row .mda-worktype-icon.custom{color:#916954}
-  #page-calendar .ref-worktype-row b{
-    min-width:0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-
-  /* Schedule template is the single collapsible schedule-control card. */
-  #page-calendar .ref-schedule-top-grid{
-    display:block!important;margin:0 0 9px!important;
-  }
-  #page-calendar #aiScheduleCard{display:none!important}
-  #page-calendar .ref-template-card{
-    min-height:0!important;
-    padding:0!important;margin:0!important;
-    border:1px solid #eadfd3!important;
-    border-radius:18px!important;
-    background:#fffdf9!important;
-    box-shadow:0 7px 20px rgba(90,62,43,.055)!important;
-    overflow:hidden!important;
-  }
-  #page-calendar .ref-template-card>.ref-block-title{
-    min-height:50px!important;
-    padding:10px 12px!important;
-    margin:0!important;
-    display:flex!important;
-    align-items:center!important;
-    gap:8px!important;
-    border:0!important;
-  }
-  #page-calendar .ref-template-card>.ref-block-title>.icon{
-    width:22px!important;height:22px!important;color:#9d6548!important;
-  }
-  #page-calendar .ref-template-card>.ref-block-title>b{
-    font-size:15px!important;font-weight:950!important;color:#4b2b20!important;
-  }
-  #page-calendar .schedule-template-fold{
-    margin-left:auto!important;
-    display:inline-flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:5px!important;
-    border:0!important;
-    border-radius:11px!important;
-    padding:7px 9px!important;
-    background:#fff3e5!important;
-    color:#8c5537!important;
-    font-size:11px!important;
-    font-weight:900!important;
-    white-space:nowrap!important;
-  }
-  #page-calendar .schedule-template-fold svg{
-    width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
-    stroke-linecap:round;stroke-linejoin:round;
-  }
-  #page-calendar .schedule-template-fold #scheduleFoldChevron{
-    font-size:15px;line-height:1;
-  }
-  #page-calendar .ref-template-buttons{
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px!important;
-    margin:0!important;
-    padding:0 10px 10px!important;
-  }
-  #page-calendar .ref-template-buttons button{
-    padding:8px 10px!important;
-    border-radius:11px!important;
-    font-size:10px!important;
-  }
-  #page-calendar .ref-template-card.is-collapsed .ref-template-buttons{
-    display:none!important;
-  }
-  #page-calendar .ref-template-card.is-collapsed .schedule-settings{
-    display:none!important;
-  }
-  #page-calendar .schedule-settings{
-    margin:0 10px 10px!important;
-    padding:10px!important;
-    border:1px solid #eee2d8!important;
-    border-radius:14px!important;
-    background:#fffaf5!important;
-  }
-  #page-calendar .schedule-settings .form-grid{
-    grid-template-columns:1fr!important;gap:8px!important;
-  }
-  #page-calendar .schedule-card-v136{
-    display:none!important;
-  }
-
-  /* Itinerary: keep Todo itself, remove duplicate "nothing here" cards. */
-  #page-attendance .todo-empty-v142,
-  #page-attendance .itinerary-empty-list{
-    display:none!important;
-  }
-  #page-attendance #v219TodoList:empty{
-    display:none!important;
-  }
-  #page-attendance .v219-itinerary-heading{
-    margin-top:0!important;
-  }
-
-  /* Salary: branded Hero is already the page title; do not repeat 薪資 again. */
-  #page-salary .salary-card>.page-head{
-    display:none!important;
-  }
-  #page-salary .salary-tabs{
-    margin-top:0!important;
-  }
-
-  /* Settings: match the supplied compact hierarchy, without a second plan card. */
-  #page-settings #accountPlanCard{
-    display:none!important;
-  }
-  #page-settings .ref-settings-icon{
-    overflow:hidden!important;
-    padding:0!important;
-    font-size:0!important;
-  }
-  #page-settings .ref-settings-icon svg{
-    width:21px;height:21px;display:block;
-  }
-  #page-settings .ref-settings-icon.google{
-    background:#fff!important;
-    border:1px solid #ece7e2!important;
-  }
-  #page-settings .ref-settings-icon.line{
-    background:#06c755!important;
-    color:#fff!important;
-  }
-  #page-settings .ref-settings-icon.crown{
-    background:#fff3cf!important;
-    color:#d49a21!important;
-  }
-  #page-settings #themeSystem{
-    display:none!important;
-  }
-  #page-settings #appearanceBody .settings-modern-row>div:first-child{
-    display:none!important;
-  }
-  #page-settings #appearanceBody .settings-segmented{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:7px!important;
-  }
-  #page-settings #appearanceBody .settings-segmented button{
-    min-height:40px!important;
-  }
-
-  html.dark #page-calendar .ref-worktype-panel,
-  html.dark #page-calendar .ref-template-card{
-    background:#302923!important;border-color:#765f51!important;
-  }
-  html.dark #page-calendar .ref-worktype-panel>.ref-block-title,
-  html.dark #page-calendar .ref-template-card>.ref-block-title>b{
-    color:#fff4eb!important;
-  }
-  html.dark #page-calendar .ref-worktype-row button{
-    background:#241f1b!important;color:#e8d2c3!important;
-  }
-  html.dark #page-calendar .ref-worktype-row button.active{
-    background:#4c3a28!important;border-color:#a97d3f!important;color:#ffe0a7!important;
-  }
-  html.dark #page-calendar .schedule-template-fold{
-    background:#403323!important;color:#ffe0a7!important;
-  }
-  html.dark #page-calendar .schedule-settings{
-    background:#2b2521!important;border-color:#59493f!important;
-  }
-}
-
-@media(max-width:390px){
-  .bottom-nav{
-    height:calc(54px + env(safe-area-inset-bottom))!important;
-  }
-  .bottom-nav button .icon{font-size:18px!important}
-}
-</style>
-
-</head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
+  return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style></head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
 }
 function exportSalaryPdf(){
   if(!canUse('salary_export'))return;
