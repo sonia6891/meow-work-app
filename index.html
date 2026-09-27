@@ -9412,7 +9412,7 @@ function meowAssistantParse(raw){
   if(wantsPayslipReconcile)return{ok:true,type:'smartPayslipReconcile',raw:text};
 
   const shiftTarget=meowAssistantShiftTarget(text),shiftDates=shiftTarget?meowAssistantMutationDates(text):[];
-  const shiftMutationVerb=/(幫我|我要|想要|改成|改為|更改|更動|調成|調班|換成|排成|設成|設定成)/.test(text);
+  const shiftMutationVerb=/(幫我|我要|想要|改成|改為|更改|更動|調成|調班|換成|排成|設成|設定成|改|調|換)/.test(text);
   if(shiftTarget&&shiftDates.length&&shiftMutationVerb){
     return{ok:true,type:'shiftChange',dates:shiftDates,kind:shiftTarget.kind,shiftName:shiftTarget.shiftName,raw:text};
   }
