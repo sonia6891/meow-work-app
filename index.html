@@ -3103,47 +3103,127 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
 
 
 
-<style id="meow-assistant-exact-hero-v232">
+<style id="meow-assistant-exact-hero-v235">
 @media(max-width:760px){
+  /* Rebuild the Pro sheet as one continuous component: no nested screenshot-card seams. */
+  #meowAssistantDialog{
+    height:auto!important;
+    max-height:88dvh!important;
+    overflow:hidden!important;
+    border-radius:34px 34px 0 0!important;
+    background:#fffdf9!important;
+  }
+  #meowAssistantDialog .meow-assistant-sheet{
+    height:auto!important;
+    max-height:88dvh!important;
+    padding:0 0 calc(14px + env(safe-area-inset-bottom))!important;
+    border-radius:34px 34px 0 0!important;
+    background:linear-gradient(180deg,#fffdf9 0%,#fffaf5 100%)!important;
+    overflow:auto!important;
+  }
+
+  /* The reference image already contains the cat, logo, crown, copy, handle and X.
+     Show it full-bleed, crop only the screenshot-only lower card edge. */
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image{
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    aspect-ratio:941 / 272!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border:0!important;
+    border-radius:34px 34px 0 0!important;
+    background:#fffdf9!important;
+  }
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image>img{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    margin:0!important;
+    object-fit:contain!important;
+    object-position:center top!important;
+    filter:none!important;
+    border:0!important;
+  }
+  /* Cover the two tiny gray screenshot wedges at the image edges.
+     The outer sheet supplies the real rounded corners. */
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image::before,
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image::after{
+    content:"";
+    position:absolute;
+    top:0;
+    width:20px;
+    height:62px;
+    background:#fffdf9;
+    z-index:3;
+    pointer-events:none;
+  }
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image::before{left:0;border-bottom-right-radius:24px}
+  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image::after{right:0;border-bottom-left-radius:24px}
+
+  /* Use the artwork's own close button visually; keep only an invisible hit target above it. */
   #meowAssistantDialog .meow-assistant-head{
     position:absolute!important;
     left:0!important;right:0!important;top:0!important;
     height:72px!important;min-height:72px!important;
-    padding:0!important;background:transparent!important;
-    z-index:40!important;pointer-events:none!important;
+    padding:0!important;
+    background:transparent!important;
+    z-index:40!important;
+    pointer-events:none!important;
   }
-  #meowAssistantDialog .meow-assistant-head::before{display:none!important}
+  #meowAssistantDialog .meow-assistant-head::before,
   #meowAssistantDialog .meow-assistant-title,
   #meowAssistantDialog .meow-assistant-minimize{display:none!important}
   #meowAssistantDialog .meow-assistant-head-actions{
-    position:absolute!important;right:11px!important;top:9px!important;
+    position:absolute!important;
+    right:9px!important;
+    top:7px!important;
     pointer-events:auto!important;
   }
   #meowAssistantDialog #meowAssistantClose{
-    width:58px!important;height:58px!important;padding:0!important;
-    opacity:0!important;border:0!important;background:transparent!important;
+    width:60px!important;
+    height:60px!important;
+    padding:0!important;
+    opacity:0!important;
+    border:0!important;
+    background:transparent!important;
   }
-  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image{
-    display:block!important;min-height:0!important;height:auto!important;
-    margin:0!important;padding:0!important;border:0!important;
-    overflow:visible!important;background:#fffdf9!important;
-  }
-  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image>img{
-    display:block!important;width:100%!important;max-width:100%!important;
-    height:auto!important;min-height:0!important;margin:0 auto!important;
-    object-fit:contain!important;object-position:center top!important;
-    filter:none!important;border:0!important;
-  }
+
+  /* Everything below the hero uses one consistent inset, so the whole sheet reads as one UI. */
   #meowAssistantDialog .ref-assistant-quick{
-    position:relative!important;z-index:3!important;margin-top:-12px!important;
+    position:relative!important;
+    z-index:5!important;
+    margin:-4px 18px 10px!important;
+    border-radius:22px!important;
+  }
+  #meowAssistantDialog .meow-assistant-chat{
+    margin:2px 18px 9px!important;
+  }
+  #meowAssistantDialog .meow-assistant-pro-strip{
+    margin:0 18px 9px!important;
+  }
+  #meowAssistantDialog .meow-assistant-compose{
+    margin:0 18px!important;
+  }
+  #meowAssistantDialog .meow-assistant-undo{
+    margin:7px 18px 0!important;
+  }
+  #meowAssistantDialog .v219-assistant-footnote{
+    margin:0 18px!important;
+    padding:10px 4px 0!important;
   }
 }
 @media(max-width:390px){
-  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image{
-    margin:0!important;
-  }
-  #meowAssistantDialog .ref-assistant-hero.ref-assistant-hero-image>img{
-    width:100%!important;max-width:100%!important;
+  #meowAssistantDialog .ref-assistant-quick{margin-left:14px!important;margin-right:14px!important}
+  #meowAssistantDialog .meow-assistant-chat,
+  #meowAssistantDialog .meow-assistant-pro-strip,
+  #meowAssistantDialog .meow-assistant-compose,
+  #meowAssistantDialog .meow-assistant-undo,
+  #meowAssistantDialog .v219-assistant-footnote{
+    margin-left:14px!important;
+    margin-right:14px!important;
   }
 }
 </style>
@@ -4105,7 +4185,7 @@ html.dark .welcome-sheet{background:#241d19;color:#fff4eb}html.dark .welcome-loc
       </div>
     </div>
     <div class="ref-assistant-hero ref-assistant-hero-image">
-      <img src="./assets/meow-assistant-pro-reference-v232.webp?v=234" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
+      <img src="./assets/meow-assistant-pro-reference-v232.webp?v=235" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
     </div>
     <div class="ref-assistant-quick">
       <b>你可以直接問我：</b>
