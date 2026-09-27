@@ -104,10 +104,11 @@ assert(
   'Cloud reads and realtime subscriptions must use the canonical cloud workspace owner.'
 );
 assert(
-  html.includes("正在載入雲端資料") &&
-  html.includes("switchWorkspace(user.id,true)") &&
+  html.includes("switchWorkspace(uid,true)") &&
+  html.includes("document.documentElement.classList.remove('auth-needs-login')") &&
+  html.includes("void (async()=>") &&
   html.includes("if(canCloudSync()&&!cloudReady)await loadAccountState()"),
-  'Login must hydrate cloud state before revealing the signed-in app.'
+  'Login must reveal the local workspace immediately while cloud hydration continues safely in the background.'
 );
 assert(
   html.includes("syncReason:'auto'") &&
