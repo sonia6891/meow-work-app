@@ -221,6 +221,35 @@ for(const [q,expected] of leaveMutationCases){
   if(expected.hours!==undefined)assert(Math.abs(Number(actual.hours)-expected.hours)<.001,'wrong leave hours: '+q);
 }
 
+// Voice-style leave commands may omit "請／改", and common ASR variants must still mutate.
+for(const [q,type,date] of [
+  ['9月28生理假','menstrual','2026-09-28'],
+  ['9月29特休','annual','2026-09-29'],
+  ['9月30事假','personal','2026-09-30'],
+  ['9月27生理價','menstrual','2026-09-27'],
+  ['9月26特修','annual','2026-09-26']
+]){
+  const actual=api.meowAssistantParse(q);
+  assert(actual&&actual.ok===true,'natural leave command should parse: '+q);
+  assert.strictEqual(actual.type,'leave','natural leave should mutate: '+q);
+  assert.strictEqual(actual.leaveType,type,'natural leave type: '+q);
+  assert.deepStrictEqual(actual.dates,[date],'natural leave date: '+q);
+}
+
+for(const [q,expected] of [
+  ['9月30號幫我改成晚班',{kind:'work',shiftName:'晚班',dates:['2026-09-30']}],
+  ['9月29改A班',{kind:'work',shiftName:'A班',dates:['2026-09-29']}],
+  ['9月28號調成大夜',{kind:'work',shiftName:'大夜班',dates:['2026-09-28']}],
+  ['9月27號改休',{kind:'off',shiftName:'休',dates:['2026-09-27']}]
+]){
+  const actual=api.meowAssistantParse(q);
+  assert(actual&&actual.ok===true,'shift change should parse: '+q);
+  assert.strictEqual(actual.type,'shiftChange','wrong shift mutation type: '+q);
+  assert.strictEqual(actual.kind,expected.kind,'wrong shift kind: '+q);
+  assert.strictEqual(actual.shiftName,expected.shiftName,'wrong shift name: '+q);
+  assert.deepStrictEqual(actual.dates,expected.dates,'wrong shift date: '+q);
+}
+
 assert(html.includes("type:'knowledgeMulti'"),'mixed-question parser support missing');
 assert(html.includes('handleMeowAssistantKnowledgeMulti'),'mixed-question response handler missing');
 const build=(html.match(/<meta name="meow-ui-build" content="v(\d+)[^"]*">/)||[])[1];
