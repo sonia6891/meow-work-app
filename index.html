@@ -8960,8 +8960,8 @@ function meowAssistantLeaveType(text){
 function meowAssistantLeaveLabel(type){
   return({sick:'病假',menstrual:'生理假',personal:'事假',annual:'特休'})[type]||'假別';
 }
-function meowAssistantLeaveHours(text){
-  const t=normalizeMeowAssistantText(text),daily=Math.max(.5,num(state.settings.dailyWorkHours)||8);
+function meowAssistantLeaveHours(text,leaveType=''){
+  const t=normalizeMeowAssistantText(text),daily=leaveType==='annual'?8:Math.max(.5,num(state.settings.dailyWorkHours)||8);
   if(/半天|半日/.test(t))return Math.max(.5,daily/2);
   const m=t.match(/(\d+(?:\.\d+)?)\s*(?:小時|鐘頭|HRS?|H)(?![A-Z])/i),v=m?Number(m[1]):NaN;
   return Number.isFinite(v)&&v>0&&v<=24?v:daily;
@@ -9236,7 +9236,7 @@ function meowAssistantParse(raw){
   const leaveMutationVerb=/(幫我|我要|我要請|想請|要請|請|改成|改為|改|更改|換成|設成|設定成|標記|登記|記成|排成|取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
   if(leaveType&&leaveDates.length&&leaveMutationVerb){
     const cancel=/(取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
-    return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text),raw:text};
+    return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text,leaveType),raw:text};
   }
   const knowledgeList=meowAssistantKnowledgeIntents(text);
   if(knowledgeList.length>1)return{ok:true,type:'knowledgeMulti',knowledgeList,raw:text};
@@ -9269,7 +9269,7 @@ function meowAssistantPlanCheck(plan){
   if(plan.type==='leave'){
     if(!['sick','menstrual','personal','annual'].includes(plan.leaveType))return{ok:false,message:'我有抓到請假需求，但沒有辨識出假別。'};
     if(!(plan.dates||[]).length)return{ok:false,message:'我有抓到請假需求，但沒有辨識出日期。'};
-    plan.hours=Number(plan.hours)>0?Number(plan.hours):Math.max(.5,num(state.settings.dailyWorkHours)||8);
+    plan.hours=Number(plan.hours)>0?Number(plan.hours):(plan.leaveType==='annual'?8:Math.max(.5,num(state.settings.dailyWorkHours)||8));
     return plan;
   }
   if(plan.type==='removeLeave'){
@@ -10279,7 +10279,7 @@ async function handleMeowAssistantAiOperation(route){
       return true;
     }
     const plan={ok:true,type:op.kind==='set_leave'?'leave':'removeLeave',leaveType,dates};
-    if(plan.type==='leave')plan.hours=Number(op.hours)>0?Number(op.hours):Math.max(.5,num(state.settings.dailyWorkHours)||8);
+    if(plan.type==='leave')plan.hours=Number(op.hours)>0?Number(op.hours):(leaveType==='annual'?8:Math.max(.5,num(state.settings.dailyWorkHours)||8));
     const checked=meowAssistantPlanCheck(plan);
     if(!checked.ok){renderMeowAssistantReply(checked.message,'error');return true}
     executeMeowAssistantPlan(checked);
