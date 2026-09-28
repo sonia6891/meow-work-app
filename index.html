@@ -10797,7 +10797,10 @@ async function handleMeowAssistantAiOperation(route){
       return true;
     }
     const plan={ok:true,type:op.kind==='set_leave'?'leave':'removeLeave',leaveType,dates};
-    if(plan.type==='leave')plan.hours=Number(op.hours)>0?Number(op.hours):Math.max(.5,num(state.settings.dailyWorkHours)||8);
+    if(plan.type==='leave'){
+      plan.hours=Number(op.hours)>0?Number(op.hours):Math.max(.5,num(state.settings.dailyWorkHours)||8);
+      plan.hoursSource=Number(op.hours)>0?'explicit-hours':'schedule-default';
+    }
     const checked=meowAssistantPlanCheck(plan);
     if(!checked.ok){renderMeowAssistantReply(checked.message,'error');return true}
     executeMeowAssistantPlan(checked);
