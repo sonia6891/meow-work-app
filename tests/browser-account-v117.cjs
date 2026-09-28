@@ -579,6 +579,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     check('主動登出後重新顯示登入頁', await page.evaluate(() => window.__accountV119.openWelcome()));
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__accountV119 !== undefined);
+    await page.waitForFunction(() => document.getElementById('welcomeDialog')?.open === true);
     check('登出後重開仍顯示登入頁', await page.evaluate(() => window.__accountV119.openWelcome()));
     await page.evaluate(() => localStorage.removeItem('__account_test_signed_out'));
     await page.reload({ waitUntil: 'domcontentloaded' });
