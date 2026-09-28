@@ -1,0 +1,255 @@
+{
+  "generated_at": "2026-09-28T18:55:01.960Z",
+  "build": "v263-meow-assistant-natural-actions",
+  "total": 400,
+  "semantic_discovery": {
+    "total": 300,
+    "no_route": 228,
+    "generic": 37,
+    "existing_specific": 35
+  },
+  "context_followup": {
+    "total": 60,
+    "context_gap": 60,
+    "standalone_route": 0
+  },
+  "multi_intent": {
+    "total": 40,
+    "no_route": 16,
+    "single_route": 24,
+    "multi_route": 0
+  },
+  "category_breakdown": {
+    "shift_rest_interval": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "consecutive_work_days": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "work_break": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "split_shift": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "on_call_standby": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "handover_work_time": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "cross_midnight_shift": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "schedule_change": {
+      "total": 12,
+      "no_route": 6,
+      "generic": 0,
+      "existing_specific": 6,
+      "observed_routes": [
+        "none",
+        "shiftChange"
+      ]
+    },
+    "shift_swap": {
+      "total": 12,
+      "no_route": 6,
+      "generic": 0,
+      "existing_specific": 6,
+      "observed_routes": [
+        "holidayPay",
+        "none"
+      ]
+    },
+    "overtime_limit": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "compensatory_leave": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "holiday_transfer": {
+      "total": 12,
+      "no_route": 6,
+      "generic": 0,
+      "existing_specific": 6,
+      "observed_routes": [
+        "none",
+        "holidayPay"
+      ]
+    },
+    "overtime_wage_base": {
+      "total": 12,
+      "no_route": 0,
+      "generic": 7,
+      "existing_specific": 5,
+      "observed_routes": [
+        "shiftAllowance",
+        "payrollGeneral"
+      ]
+    },
+    "annual_leave_termination": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "pregnancy_night_shift": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "flexible_working_hours": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "article_84_1": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "part_time_rights": {
+      "total": 12,
+      "no_route": 0,
+      "generic": 0,
+      "existing_specific": 12,
+      "observed_routes": [
+        "holidayPay"
+      ]
+    },
+    "natural_disaster": {
+      "total": 12,
+      "no_route": 6,
+      "generic": 6,
+      "existing_specific": 0,
+      "observed_routes": [
+        "scheduleGeneral",
+        "none"
+      ]
+    },
+    "mandatory_overtime": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "attendance_record": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "training_meeting_time": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "meal_break_on_duty": {
+      "total": 12,
+      "no_route": 12,
+      "generic": 0,
+      "existing_specific": 0,
+      "observed_routes": [
+        "none"
+      ]
+    },
+    "schedule_notice": {
+      "total": 12,
+      "no_route": 0,
+      "generic": 12,
+      "existing_specific": 0,
+      "observed_routes": [
+        "scheduleGeneral"
+      ]
+    },
+    "fixed_shift": {
+      "total": 12,
+      "no_route": 0,
+      "generic": 12,
+      "existing_specific": 0,
+      "observed_routes": [
+        "scheduleGeneral"
+      ]
+    }
+  }
+}
+PASS Meow Assistant automatic discovery corpus executed: 400 cases

@@ -1,0 +1,216 @@
+PASS parsed 4 inline scripts
+PASS 本機儲存使用 localStorage 與 IndexedDB 鏡像
+PASS 舊版雲端備份使用獨立唯讀資料表
+PASS 單一雲端還原會自動檢查舊版備份，不再要求使用者另外開檔
+PASS 參考圖 AI 班表匯入入口已恢復
+PASS 浮動喵助理使用定稿厭世喵素材
+PASS 喵助理語音會先寫入輸入框再自動送出
+PASS 喵助理文字位於貓咪下方且拖曳熱區加大
+PASS 喵助理正式 iPhone 版使用原生語音辨識
+PASS PWA 語音改用錄音後端轉文字，不再依賴 WebKit SpeechRecognition
+PASS 390px 沒有瀏覽器執行錯誤
+PASS 未登入一定顯示登入頁
+PASS 網頁登入頁保留 Google、LINE 兩個登入按鈕
+PASS Apple 登入在網頁版隱藏，只留給 iPhone 原生 App
+PASS 沒有訪客登入入口
+PASS 沒有公開 Email 或 OTP 入口
+PASS Google 按鈕使用 google provider
+PASS LINE 按鈕使用 custom:line
+PASS LINE 要求 openid profile
+PASS Apple 原生流程使用 signInWithIdToken
+PASS 手機新增日期班表不超出視窗
+PASS 手機新增班表日期改用緊湊文字觸發器
+PASS 手機新增班表日期使用年月日選擇器
+PASS 本機 Vision 班表解析器可把日期對到班別
+PASS 本機 Vision 解析保留休假狀態
+PASS 喵助理可理解單日加班
+PASS 喵助理可理解加班日期搬移
+PASS 喵助理可理解下個月多日加班
+PASS 喵助理可理解指定加班時數
+PASS 薪資 OCR 可辨識底薪與輪班津貼
+PASS 薪資 OCR 不把加班時數或倍率當加班費
+PASS 薪資 OCR 可辨識勞保健保福利金勞退
+PASS 薪資 OCR 可辨識公司實發金額
+PASS 薪資 OCR 可把考前誤字校正為考勤扣款 673
+PASS 薪資 OCR 不會把考勤 673 誤塞到勞保，勞保應維持 1,145
+PASS 薪資 OCR 可把建保誤字校正為健保並讀到金額
+PASS 啟動登入判斷完成後解除畫面鎖
+PASS 主畫面 App 的 LINE 登入不再建立第二視窗
+PASS 主畫面 App 的 LINE 登入使用單一畫面 OAuth
+PASS 320px 沒有瀏覽器執行錯誤
+PASS 320px 保持登入時不顯示登入頁
+PASS 320px 登入後預設 Free
+PASS 320px Free 沒有雲端同步
+PASS 320px Free 沒有 Pro 功能
+PASS 320px 帳號資料使用獨立帳號卡
+PASS 320px 目前方案整合在帳號與方案卡
+PASS 320px 目前方案列位於帳號與方案卡內
+PASS 320px 帳號狀態留在帳號資料、登出收在個人資料展開區
+PASS 320px 帳號區不顯示 Email
+PASS 320px 登入方式正確顯示 Google
+PASS 320px 帳號詳細資料可展開
+PASS 320px 使用者名稱可自訂修改
+PASS 320px Pro 方案改用比較視窗
+PASS 320px 比較視窗顯示 Free／Pro 差異
+PASS 320px 比較視窗不再出現 AI 班表匯入
+PASS 320px 方案視窗顯示目前 Free 與 3 天免費試用
+PASS 320px 顯示商店月繳與年繳價格
+PASS 320px 顯示與外觀可展開
+PASS 320px 排班偏好可展開
+PASS 320px 四個設定展開文字右側對齊
+PASS 320px 排班偏好不再提供 AI 班表匯入
+PASS 320px 工作資料與假別額度可就地展開
+PASS 320px 資料與同步可就地展開
+PASS 320px 資料管理只分 Free 本機與 Pro 雲端
+PASS 320px Free 的 Pro 雲端操作保持鎖定
+PASS 320px 展開內容留在資料同步卡內
+PASS 320px 設定頁無水平溢位
+PASS 320px 資料同步卡未超出畫面
+PASS 320px 資料同步按鈕未跑版
+PASS 320px 底部導覽固定在螢幕底部且不在設定內容中
+PASS 320px 設定內容順序符合定稿
+PASS 320px 設定頁不再出現版本方案測試卡
+PASS 320px 設定頁移除舊底部裝飾橫幅
+PASS 390px 沒有瀏覽器執行錯誤
+PASS 390px 保持登入時不顯示登入頁
+PASS 390px 登入後預設 Free
+PASS 390px Free 沒有雲端同步
+PASS 390px Free 沒有 Pro 功能
+PASS 390px 帳號資料使用獨立帳號卡
+PASS 390px 目前方案整合在帳號與方案卡
+PASS 390px 目前方案列位於帳號與方案卡內
+PASS 390px 帳號狀態留在帳號資料、登出收在個人資料展開區
+PASS 390px 帳號區不顯示 Email
+PASS 390px 登入方式正確顯示 Google
+PASS 390px 帳號詳細資料可展開
+PASS 390px 使用者名稱可自訂修改
+PASS 390px Pro 方案改用比較視窗
+PASS 390px 比較視窗顯示 Free／Pro 差異
+PASS 390px 比較視窗不再出現 AI 班表匯入
+PASS 390px 方案視窗顯示目前 Free 與 3 天免費試用
+PASS 390px 顯示商店月繳與年繳價格
+PASS 390px 顯示與外觀可展開
+PASS 390px 排班偏好可展開
+PASS 390px 四個設定展開文字右側對齊
+PASS 390px 排班偏好不再提供 AI 班表匯入
+PASS 390px 工作資料與假別額度可就地展開
+PASS 390px 資料與同步可就地展開
+PASS 390px 資料管理只分 Free 本機與 Pro 雲端
+PASS 390px Free 的 Pro 雲端操作保持鎖定
+PASS 390px 展開內容留在資料同步卡內
+PASS 390px 設定頁無水平溢位
+PASS 390px 資料同步卡未超出畫面
+PASS 390px 資料同步按鈕未跑版
+PASS 390px 底部導覽固定在螢幕底部且不在設定內容中
+PASS 390px 設定內容順序符合定稿
+PASS 390px 設定頁不再出現版本方案測試卡
+PASS 390px 設定頁移除舊底部裝飾橫幅
+PASS 升級入口會跳出 Free／Pro 比較視窗
+PASS 390px 總覽底部貓咪圖卡恢復顯示
+PASS 390px 總覽貓咪圖卡有實際寬高
+PASS 390px 今天的安排留在左側行程卡，不跨成整頁滿版
+PASS 今天的安排顯示日期與班別
+PASS 設定帳號卡保留 Google SVG
+PASS 設定帳號卡保留 LINE SVG
+PASS 設定帳號卡保留方案皇冠 SVG
+PASS 深色 Google icon 仍是白底品牌圖示
+PASS 深色 LINE icon 仍是 LINE 綠底
+PASS 深色方案 icon 保留金色區分
+PASS 深色 A班上班卡不再使用淺色背景
+PASS 深色 A班上班文字保持高亮
+PASS 深色 Hero 底色與頁面同為咖啡棕
+PASS 深色 Hero 圖片套用咖啡暖色融合
+PASS 390px 深色模式已實際套用到 html.dark
+PASS 390px 深色 calendar 關鍵區塊都存在
+PASS 390px 深色 calendar 不再出現白色／近白色主區塊
+PASS 390px 深色 attendance 關鍵區塊都存在
+PASS 390px 深色 attendance 不再出現白色／近白色主區塊
+PASS 390px 深色 salary 關鍵區塊都存在
+PASS 390px 深色 salary 不再出現白色／近白色主區塊
+PASS 390px 深色 settings 關鍵區塊都存在
+PASS 390px 深色 settings 不再出現白色／近白色主區塊
+PASS 320px 新增日期班表的日期欄位不超出彈窗
+PASS 320px 新增日期班表可正常關閉
+PASS 390px 新增日期班表的日期欄位不超出彈窗
+PASS 390px 新增日期班表可正常關閉
+PASS 430px 新增日期班表的日期欄位不超出彈窗
+PASS 430px 新增日期班表可正常關閉
+PASS 手機排班頁隱藏 AI 班表匯入入口
+PASS 浮動喵助理顯示定稿圖與名稱
+PASS 第三頁使用參考圖的行程與待辦架構
+PASS 行程與待辦事項兩張主卡同一畫面可見
+PASS 行程與待辦兩個新增按鈕同時可見
+PASS 行程在左、待辦在右且維持同一排
+PASS 今天的安排留在左側行程卡內，不跨到下一列
+PASS 今天的安排內容採橫向排列
+PASS 今天的安排標題固定單行不換行
+PASS 新增行程按鈕直接開啟行程視窗
+PASS 新行程預設前 1 小時提醒
+PASS 行程提醒提供前 3 天、前 1 天、前 1 小時
+PASS 新增行程未填資料也能用叉叉關閉
+PASS 新增行程未填資料也能用取消關閉
+PASS 待辦事項分頁可切換
+PASS 切到待辦事項後仍保持左右雙卡，不把行程推到下一列
+PASS 新增待辦按鈕直接開啟待辦視窗
+PASS 新待辦預設前一天上午 9 點提醒
+PASS 新增待辦未填資料也能用叉叉關閉
+PASS 可新增待辦事項
+PASS 手機版不再顯示舊版重複待辦列表
+PASS 新增待辦直接出現在待辦清單卡內
+PASS 未完成待辦數量會更新
+PASS 待辦清單顯示自由選擇時間
+PASS 編輯待辦會帶回原本時間
+PASS 新增待辦會呼叫原生通知排程
+PASS 前一天提醒沿用使用者選的時間
+PASS 待辦清單顯示自訂提醒時間
+PASS 完成待辦會取消原生提醒
+PASS 待辦勾選完成後仍留在列表
+PASS 完成待辦預設顯示且提供隱藏按鈕
+PASS 可主動隱藏已完成待辦
+PASS 可重新顯示已完成待辦
+PASS 完成待辦可以取消完成
+PASS 取消完成會重新排程提醒
+PASS 430px 沒有瀏覽器執行錯誤
+PASS 430px 保持登入時不顯示登入頁
+PASS 430px 登入後預設 Free
+PASS 430px Free 沒有雲端同步
+PASS 430px Free 沒有 Pro 功能
+PASS 430px 帳號資料使用獨立帳號卡
+PASS 430px 目前方案整合在帳號與方案卡
+PASS 430px 目前方案列位於帳號與方案卡內
+PASS 430px 帳號狀態留在帳號資料、登出收在個人資料展開區
+PASS 430px 帳號區不顯示 Email
+PASS 430px 登入方式正確顯示 Google
+PASS 430px 帳號詳細資料可展開
+PASS 430px 使用者名稱可自訂修改
+PASS 430px Pro 方案改用比較視窗
+PASS 430px 比較視窗顯示 Free／Pro 差異
+PASS 430px 比較視窗不再出現 AI 班表匯入
+PASS 430px 方案視窗顯示目前 Free 與 3 天免費試用
+PASS 430px 顯示商店月繳與年繳價格
+PASS 430px 顯示與外觀可展開
+PASS 430px 排班偏好可展開
+PASS 430px 四個設定展開文字右側對齊
+PASS 430px 排班偏好不再提供 AI 班表匯入
+PASS 430px 工作資料與假別額度可就地展開
+PASS 430px 資料與同步可就地展開
+PASS 430px 資料管理只分 Free 本機與 Pro 雲端
+PASS 430px Free 的 Pro 雲端操作保持鎖定
+PASS 430px 展開內容留在資料同步卡內
+PASS 430px 設定頁無水平溢位
+PASS 430px 資料同步卡未超出畫面
+PASS 430px 資料同步按鈕未跑版
+PASS 430px 底部導覽固定在螢幕底部且不在設定內容中
+PASS 430px 設定內容順序符合定稿
+PASS 430px 設定頁不再出現版本方案測試卡
+PASS 430px 設定頁移除舊底部裝飾橫幅
+PASS 390px 沒有瀏覽器執行錯誤
+PASS 網頁預覽仍顯示商店方案價格
+PASS 網頁預覽清楚標示不會進行付款
+PASS 390px 沒有瀏覽器執行錯誤
+PASS 登出前工作區資料已保存
+PASS 主動登出後重新顯示登入頁
+PASS 登出後重開仍顯示登入頁
+PASS 同一帳號重新登入後回到原本工作區
+PASS 登出不會刪除同一帳號的本機工作資料
+214/214 account v119 checks passed

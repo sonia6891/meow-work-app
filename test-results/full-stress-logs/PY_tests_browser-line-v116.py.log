@@ -1,0 +1,16 @@
+PAGE_ERRORS []
+PASS 未登入時一定顯示登入框
+PASS 公開登入頁沒有訪客入口
+PASS 公開登入頁沒有 Email 入口
+PASS Google 登入按鈕存在
+PASS LINE 登入按鈕存在
+PASS Google 使用 google provider
+PASS LINE 使用 custom:line provider
+PASS LINE 要求 openid profile scopes
+PAGE_ERRORS []
+PASS 已有有效登入狀態重開不跳登入框
+PASS 免費帳號方案仍是 Free
+PASS 免費帳號沒有雲端同步資格
+PASS 主動登出後再次顯示登入框
+PASS 登出後重開仍要求登入
+13/13 LINE login checks passed

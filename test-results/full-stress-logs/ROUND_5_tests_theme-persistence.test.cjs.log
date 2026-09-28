@@ -1,0 +1,17 @@
+PASS all inline JavaScript remains syntactically valid
+PASS theme is initialized before stylesheet / first paint
+PASS fresh install defaults to light even on a dark OS
+PASS legacy wrapped local preference migrates without touching work data
+PASS legacy unwrapped local preference migrates
+PASS explicit light wins over old dark snapshots at startup
+PASS switch to light survives immediate close/reopen
+PASS switch to dark survives immediate close/reopen
+PASS login and real-time cloud data cannot overwrite device preference
+PASS the authoritative snapshot normalizer protects the device preference
+PASS late IndexedDB restore cannot overwrite a just-selected mode
+PASS stale direct state assignment is corrected before rendering
+PASS system theme is explicit, persists, and resolves against the OS
+PASS invalid theme values do not change state or trigger saves
+PASS blocked storage does not crash or override in-session selection
+PASS lightweight theme persists when bulk snapshot storage fails
+Theme regression tests: 16/16 passed.

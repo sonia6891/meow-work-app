@@ -1,0 +1,10 @@
+PASS 首次安裝顯示框架頁
+PASS 框架四邊皆有留白，非滿版
+FAIL 圓角為 28px
+Traceback (most recent call last):
+  File "/home/runner/work/meow-work-app/meow-work-app/tests/browser-frame-v113.py", line 57, in <module>
+    check('圓角為 28px',r['radius']=='28px')
+  File "/home/runner/work/meow-work-app/meow-work-app/tests/browser-frame-v113.py", line 28, in check
+    assert passed,name
+           ^^^^^^
+AssertionError: 圓角為 28px

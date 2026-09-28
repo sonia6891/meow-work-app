@@ -1,0 +1,17 @@
+PASS v173 native iOS speech plus PWA recorded-audio transcription
+PASS v138 schedule actions structure
+PASS v219 restored reference AI schedule import UI
+PASS v215 itinerary/todo reference navigation
+PASS v143 dialog close structure
+PASS v145 schedule date fit structure
+PASS v161 schedule add date uses compact mobile picker
+PASS v146 attendance add chooser structure
+PASS v147 completed todos remain visible
+PASS v148 itinerary/todo reminders structure
+PASS v149 todo free time structure
+PASS v151 App Store readiness structure
+PASS v159 Free/Pro salary reconciliation tabs structure
+PASS v161 draggable floating Meow Assistant structure
+PASS v160 movable concise cloud-month Meow Assistant structure
+PASS v160 floating Meow assistant and cloud month viewer structure
+PASS v160 Pro placement and simplified data-management structure

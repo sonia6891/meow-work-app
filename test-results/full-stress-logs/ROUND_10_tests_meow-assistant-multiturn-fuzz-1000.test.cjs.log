@@ -1,0 +1,2 @@
+{"pass":true,"conversations":100,"turns":1000,"blocked_conflicts":100,"blocked_low_confidence":100,"undo_operations":200}
+PASS Meow Assistant multi-turn fuzz: 100 conversations / 1000 stateful turns

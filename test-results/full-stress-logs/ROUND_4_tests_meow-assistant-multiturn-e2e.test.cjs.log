@@ -1,0 +1,1 @@
+PASS Meow Assistant multi-turn E2E state flow: add → revise → move → undo → conflict block → remove → undo
