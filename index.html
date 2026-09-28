@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v260-itinerary-todo-single-card-coffee-hero">
+<meta name="meow-ui-build" content="v261-itinerary-left-todo-right-horizontal-today">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -5504,6 +5504,110 @@ html.dark .holiday-tag{
 }
 </style>
 
+
+<style id="attendance-two-column-v261">
+@media(max-width:760px){
+  /* 兩張主卡固定同一排：左行程、右待辦。 */
+  #page-attendance .v219-itinerary-board{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)!important;
+    gap:9px!important;
+    align-items:start!important;
+  }
+  #page-attendance .v219-today-card{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  #page-attendance .v219-board-right{
+    grid-column:2!important;
+    grid-row:1!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:9px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  #page-attendance .v219-todo-card,
+  #page-attendance .v219-conflict-card{
+    grid-column:1!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+
+  /* 左邊「今天的安排」內部橫向，不再掉到下一列。 */
+  #page-attendance .v219-today-card .v219-timeline-row{
+    display:grid!important;
+    grid-template-columns:42px 8px minmax(0,1fr)!important;
+    gap:5px!important;
+    align-items:center!important;
+    min-width:0!important;
+  }
+  #page-attendance .v219-today-card .v219-timeline-content{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:5px!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+  #page-attendance .v219-today-card .v219-timeline-content>b{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    font-size:12px!important;
+  }
+  #page-attendance .v219-today-card .v219-timeline-content>small{
+    margin:0!important;
+    white-space:nowrap!important;
+    font-size:9px!important;
+  }
+  #page-attendance .v219-today-card .v219-timeline-row time{
+    font-size:10px!important;
+    white-space:nowrap!important;
+  }
+
+  /* 右邊待辦卡保持緊湊，待辦直接留在這張卡裡。 */
+  #page-attendance .v219-todo-row{
+    grid-template-columns:28px minmax(0,1fr)!important;
+    gap:7px!important;
+    padding:7px 0!important;
+  }
+  #page-attendance .v219-todo-check{
+    width:27px!important;
+    height:27px!important;
+  }
+  #page-attendance .v219-todo-main b{
+    font-size:12px!important;
+  }
+  #page-attendance .v219-todo-main small{
+    font-size:9px!important;
+  }
+
+  /* 舊版重複清單不再另外佔一列。 */
+  #page-attendance #itineraryUpcomingList{
+    display:none!important;
+  }
+}
+@media(max-width:360px){
+  #page-attendance .v219-itinerary-board{
+    grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr)!important;
+    gap:7px!important;
+  }
+  #page-attendance .v219-today-card .v219-timeline-row{
+    grid-template-columns:38px 7px minmax(0,1fr)!important;
+  }
+  #page-attendance .v219-today-card .v219-timeline-content>small{
+    font-size:8px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -8235,16 +8339,15 @@ function renderAttendance(){
   $('attendanceTabEvents').setAttribute('aria-selected',String(eventsActive));
   $('attendanceTabTodos').setAttribute('aria-selected',String(!eventsActive));
 
-  // v257: 行程與待辦事項是兩個獨立內容區。
-  // 行程：只顯示橫向「今天的安排」＋行程衝突提醒。
-  // 待辦：只顯示橫向「待辦清單」。
+  // v261: 行程與待辦事項保持同一排同時顯示。
+  // 左邊是行程／今天的安排，右邊是待辦清單；切換按鈕只影響操作語意，不隱藏另一張卡。
   const todayCard=document.querySelector('#page-attendance .v219-today-card');
   const todoCard=document.querySelector('#page-attendance .v219-todo-card');
   const conflictCard=document.querySelector('#page-attendance .v219-conflict-card');
   const boardRight=document.querySelector('#page-attendance .v219-board-right');
-  if(todayCard)todayCard.classList.toggle('hidden',!eventsActive);
-  if(todoCard)todoCard.classList.toggle('hidden',eventsActive);
-  if(conflictCard)conflictCard.classList.toggle('hidden',!eventsActive);
+  if(todayCard)todayCard.classList.remove('hidden');
+  if(todoCard)todoCard.classList.remove('hidden');
+  if(conflictCard)conflictCard.classList.remove('hidden');
   if(boardRight)boardRight.dataset.attendanceMode=eventsActive?'events':'todos';
   renderV219ItineraryBoard();
   const openTodos=todoItems().filter(t=>!t.completed).length;
