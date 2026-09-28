@@ -6672,7 +6672,7 @@ html.dark .holiday-tag{
   </div>
 </dialog>
 
-<dialog class="dialog" id="dayDialog"><form method="dialog" id="dayForm"><div class="dialog-head"><div><b id="dialogDate">編輯出勤</b><div class="hint" id="dialogBase"></div></div><button class="dialog-close" value="cancel">×</button></div><div class="dialog-body"><div class="field"><label>狀態</label><select id="dialogStatus"><option value="none">正常班表</option><option value="overtime">加班</option><option value="sick">病假</option><option value="menstrual">生理假</option><option value="personal">事假</option><option value="annual">特休</option><option value="custom">自訂假別</option></select></div><div class="field hidden" id="customLabelWrap"><label>自訂假別名稱</label><input id="dialogCustomLabel" placeholder="例如：公假、補休"></div><div class="field hidden" id="overtimeKindWrap"><label>加班日別</label><select id="dialogOvertimeKind"><option value="regular">平日延長工時</option><option value="rest">休息日出勤</option><option value="holiday">國定假日／特別休假出勤</option></select><div class="hint">輪班制依公司實際排定日別選擇，不以星期六、日判定。</div></div><div class="field" id="hoursWrap"><label>時數</label><input id="dialogHours" type="number" min="0" step="0.5" placeholder="例如 8"></div><div class="field"><label>備註</label><textarea id="dialogNote" placeholder="可留空"></textarea></div></div><div class="dialog-foot"><button class="btn" value="cancel">取消</button><button type="button" class="btn danger" id="clearDay">清除標記</button><button type="button" class="btn primary" id="saveDay">儲存</button></div></form></dialog>
+<dialog class="dialog" id="dayDialog"><form method="dialog" id="dayForm"><div class="dialog-head"><div><b id="dialogDate">編輯出勤</b><div class="hint" id="dialogBase"></div></div><button class="dialog-close" value="cancel">×</button></div><div class="dialog-body"><div class="field"><label>狀態</label><select id="dialogStatus"><option value="none">正常班表</option><option value="overtime">加班</option><option value="sick">病假</option><option value="menstrual">生理假</option><option value="personal">事假</option><option value="annual">特休</option><option value="marriage">婚假</option><option value="bereavement">喪假</option><option value="occupationalInjury">公傷病假</option><option value="official">公假</option><option value="maternity">產假</option><option value="miscarriage">流產假</option><option value="pregnancyRest">安胎休養假</option><option value="prenatal">產檢假</option><option value="paternity">陪產檢及陪產假</option><option value="familyCare">家庭照顧假</option><option value="parentalLeave">育嬰留職停薪</option><option value="compensatory">補休</option><option value="custom">自訂假別</option></select></div><div class="field hidden" id="customLabelWrap"><label>自訂假別名稱</label><input id="dialogCustomLabel" placeholder="例如：公假、補休"></div><div class="field hidden" id="overtimeKindWrap"><label>加班日別</label><select id="dialogOvertimeKind"><option value="regular">平日延長工時</option><option value="rest">休息日出勤</option><option value="holiday">國定假日／特別休假出勤</option></select><div class="hint">輪班制依公司實際排定日別選擇，不以星期六、日判定。</div></div><div class="field" id="hoursWrap"><label>時數</label><input id="dialogHours" type="number" min="0" step="0.5" placeholder="例如 8"></div><div class="field"><label>備註</label><textarea id="dialogNote" placeholder="可留空"></textarea></div></div><div class="dialog-foot"><button class="btn" value="cancel">取消</button><button type="button" class="btn danger" id="clearDay">清除標記</button><button type="button" class="btn primary" id="saveDay">儲存</button></div></form></dialog>
 
 <dialog class="dialog itinerary-add-choice" id="attendanceAddDialog">
   <div class="attendance-add-choice-card">
@@ -7842,8 +7842,37 @@ function attendanceDeductionEstimate(y,m,normalMonthlyWage){
     pregnancyRestDeduction:deductionByType.pregnancyRest
   };
 }
-function calcMonth(){const y=current.getFullYear(),m=current.getMonth(),mm=state.months[monthKey(y,m)]||{},days=new Date(y,m+1,0).getDate();let expected=0,attendance=0,leaveDays=0,leaveHours=0,overtimeDays=0,dailyOt=0;const leaves={};const weekdayOt=[0,0,0,0,0,0,0];for(let d=1;d<=days;d++){const dt=new Date(y,m,d),date=iso(dt),base=scheduleForDate(dt),st=state.dayStatus[date];if(base==='work')expected++;if(base==='work'&&(!st||st.type==='none'||st.type==='overtime'))attendance++;if(st&&st.type&&st.type!=='none'){if(st.type==='overtime'){overtimeDays++;dailyOt+=effectiveDayStatusHours(st);weekdayOt[dt.getDay()]+=effectiveDayStatusHours(st)}else{leaveDays++;leaveHours+=effectiveDayStatusHours(st);const meta=typeMeta(st),key=st.type==='custom'?'custom:'+meta.label:st.type;if(!leaves[key])leaves[key]={label:meta.label,type:st.type,hours:0,days:0};leaves[key].hours+=effectiveDayStatusHours(st);leaves[key].days++}}}
- const manualOvertimeHours=('overtimeHours' in mm)?num(mm.overtimeHours):0;const overtimeHours=overtimeDays>0?dailyOt:manualOvertimeHours;const base=num(state.settings.baseSalary),shiftPerDay=num(state.settings.shiftAllowancePerDay),shiftAllowance=shiftPerDay*attendance,meal=num(state.settings.mealAllowance),performance=num(state.settings.performanceAllowance),transport=num(state.settings.transportAllowance),otherIncome=num(state.settings.otherIncome),normalWageBase=base+shiftAllowance+meal+performance,hourly=normalWageBase/240,otPay=monthlyOvertimePay(y,m,hourly,overtimeHours),gross=base+shiftAllowance+meal+performance+transport+otherIncome+otPay;const autoAttendance=attendanceDeductionEstimate(y,m,normalWageBase),attendanceDeductionManual=Object.prototype.hasOwnProperty.call(mm,'dedAttendance'),attendanceDeduction=attendanceDeductionManual?num(mm.dedAttendance):autoAttendance.amount;const deductions={labor:num(mm.dedLabor),health:num(mm.dedHealth),welfare:num(mm.dedWelfare),pension:num(mm.dedPension),attendance:attendanceDeduction,tax:num(mm.dedTax),healthExtra:num(mm.dedHealthExtra),other:num(mm.dedOther)};const dedTotal=Object.values(deductions).reduce((a,b)=>a+b,0),net=Math.max(0,gross-dedTotal);return{y,m,mm,days,expected,attendance,leaveDays,leaveHours,overtimeDays,overtimeHours,dailyOt,weekdayOt,leaves,base,shiftPerDay,shiftAllowance,meal,performance,transport,otherIncome,normalWageBase,hourly,otPay,gross,autoAttendance,attendanceDeductionManual,deductions,dedTotal,net}}
+function calcMonth(){
+  const y=current.getFullYear(),m=current.getMonth(),mm=state.months[monthKey(y,m)]||{},days=new Date(y,m+1,0).getDate();
+  let expected=0,attendance=0,leaveDays=0,leaveHours=0,overtimeDays=0,dailyOt=0;
+  const leaves={},weekdayOt=[0,0,0,0,0,0,0];
+  for(let d=1;d<=days;d++){
+    const dt=new Date(y,m,d),date=iso(dt),base=scheduleForDate(dt),st=state.dayStatus[date];
+    if(base==='work')expected++;
+    if(base==='work'&&(!st||st.type==='none'||st.type==='overtime'))attendance++;
+    if(st&&st.type&&st.type!=='none'){
+      if(st.type==='overtime'){
+        overtimeDays++;
+        dailyOt+=effectiveDayStatusHours(st);
+        weekdayOt[dt.getDay()]+=effectiveDayStatusHours(st);
+      }else if(base==='work'){
+        leaveDays++;
+        leaveHours+=effectiveDayStatusHours(st);
+        const meta=typeMeta(st),key=st.type==='custom'?'custom:'+meta.label:st.type;
+        if(!leaves[key])leaves[key]={label:meta.label,type:st.type,hours:0,days:0};
+        leaves[key].hours+=effectiveDayStatusHours(st);
+        leaves[key].days++;
+      }
+    }
+  }
+  const manualOvertimeHours=('overtimeHours' in mm)?num(mm.overtimeHours):0;
+  const overtimeHours=overtimeDays>0?dailyOt:manualOvertimeHours;
+  const base=num(state.settings.baseSalary),shiftPerDay=num(state.settings.shiftAllowancePerDay),shiftAllowance=shiftPerDay*attendance,meal=num(state.settings.mealAllowance),performance=num(state.settings.performanceAllowance),transport=num(state.settings.transportAllowance),otherIncome=num(state.settings.otherIncome),normalWageBase=base+shiftAllowance+meal+performance,hourly=normalWageBase/240,otPay=monthlyOvertimePay(y,m,hourly,overtimeHours),gross=base+shiftAllowance+meal+performance+transport+otherIncome+otPay;
+  const autoAttendance=attendanceDeductionEstimate(y,m,normalWageBase),attendanceDeductionManual=Object.prototype.hasOwnProperty.call(mm,'dedAttendance'),attendanceDeduction=attendanceDeductionManual?num(mm.dedAttendance):autoAttendance.amount;
+  const deductions={labor:num(mm.dedLabor),health:num(mm.dedHealth),welfare:num(mm.dedWelfare),pension:num(mm.dedPension),attendance:attendanceDeduction,tax:num(mm.dedTax),healthExtra:num(mm.dedHealthExtra),other:num(mm.dedOther)};
+  const dedTotal=Object.values(deductions).reduce((a,b)=>a+b,0),net=Math.max(0,gross-dedTotal);
+  return{y,m,mm,days,expected,attendance,leaveDays,leaveHours,overtimeDays,overtimeHours,dailyOt,weekdayOt,leaves,base,shiftPerDay,shiftAllowance,meal,performance,transport,otherIncome,normalWageBase,hourly,otPay,gross,autoAttendance,attendanceDeductionManual,deductions,dedTotal,net};
+}
 function icon(id){return`<svg class="icon"><use href="#${id}"/></svg>`}
 function overtimeRates(){const mode=['unselected','legal','fixed','custom'].includes(state.settings.overtimeRateMode)?state.settings.overtimeRateMode:'unselected';if(mode==='unselected')return{mode,regularFirst:0,regularLater:0,restFirst:0,restLater:0,restOver8:0,holiday:0};if(mode==='fixed'){const r=Math.max(1,num(state.settings.overtimeFixedRate)||2);return{mode,regularFirst:r,regularLater:r,restFirst:r,restLater:r,restOver8:r,holiday:r}}if(mode==='custom')return{mode,regularFirst:Math.max(1,num(state.settings.overtimeRegularFirst)||4/3),regularLater:Math.max(1,num(state.settings.overtimeRegularLater)||5/3),restFirst:Math.max(1,num(state.settings.overtimeRestFirst)||4/3),restLater:Math.max(1,num(state.settings.overtimeRestLater)||5/3),restOver8:Math.max(1,num(state.settings.overtimeRestOver8)||8/3),holiday:1};return{mode:'legal',regularFirst:4/3,regularLater:5/3,restFirst:4/3,restLater:5/3,restOver8:8/3,holiday:1}}
 function overtimePayForHours(hourly,hours,kind,r=overtimeRates()){const h=Math.max(0,num(hours));if(!h)return 0;if(kind==='holiday')return hourly*h*r.holiday;if(kind==='rest')return hourly*(Math.min(h,2)*r.restFirst+Math.min(Math.max(h-2,0),6)*r.restLater+Math.max(h-8,0)*r.restOver8);return hourly*(Math.min(h,2)*r.regularFirst+Math.max(h-2,0)*r.regularLater)}
@@ -7961,6 +7990,7 @@ function annualLeaveBalanceInfo(asOf=new Date()){
       if(!st||st.type!=='annual')continue;
       const d=annualDate(date);
       if(!d||d<period.start||d>=period.end||d<period.hire)continue;
+      if(scheduleForDate(d)!=='work')continue;
       if(d<=period.today)recordedHours+=effectiveDayStatusHours(st);
       else plannedHours+=effectiveDayStatusHours(st);
     }
@@ -8010,7 +8040,12 @@ function renderAnnualLeaveSettings(){
 
 function yearlyLeaveUsage(type){
   const year=new Date().getFullYear(),prefix=year+'-';
-  return Object.entries(state.dayStatus).reduce((sum,[date,st])=>sum+(date.startsWith(prefix)&&st&&st.type===type?effectiveDayStatusHours(st):0),0);
+  return Object.entries(state.dayStatus||{}).reduce((sum,[date,st])=>{
+    if(!date.startsWith(prefix)||!st||st.type!==type)return sum;
+    const dt=new Date(date+'T00:00:00');
+    if(Number.isNaN(dt.getTime())||scheduleForDate(dt)!=='work')return sum;
+    return sum+effectiveDayStatusHours(st);
+  },0);
 }
 function fmtHours(v){return Number(v||0).toLocaleString('zh-TW',{maximumFractionDigits:1})}
 function leaveBalanceInfo(type,quotaDays){
@@ -8078,7 +8113,11 @@ function renderMobileDashboardApproved(){
   const annual=annualLeaveBalanceInfo();
   const daily=Math.max(.5,num(state.settings.dailyWorkHours)||8);
   const monthPrefix=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-';
-  const menstrualUsed=Object.entries(state.dayStatus||{}).reduce((sum,[date,st])=>sum+(date.startsWith(monthPrefix)&&st&&st.type==='menstrual'?effectiveDayStatusHours(st):0),0);
+  const menstrualUsed=Object.entries(state.dayStatus||{}).reduce((sum,[date,st])=>{
+    if(!date.startsWith(monthPrefix)||!st||st.type!=='menstrual')return sum;
+    const dt=new Date(date+'T00:00:00');
+    return !Number.isNaN(dt.getTime())&&scheduleForDate(dt)==='work'?sum+effectiveDayStatusHours(st):sum;
+  },0);
   const menstrualRemain=Math.max(0,daily-menstrualUsed);
   if($('mDashSickRemain'))$('mDashSickRemain').textContent='剩 '+fmtHours(sick.remainHours)+' h';
   if($('mDashSickUsed'))$('mDashSickUsed').textContent='已用 '+fmtHours(sick.usedHours)+' / '+fmtHours(sick.totalHours)+' h';
@@ -12276,7 +12315,8 @@ function meowAssistantMaxConsecutiveWorkDays(year,month){
   const start=new Date(year,month,1),from=new Date(year,month,1-14),to=new Date(year,month+1,14);
   let run=0,max=0,maxStart=null,maxEnd=null,runStart=null;
   for(let dt=new Date(from);dt<=to;dt.setDate(dt.getDate()+1)){
-    const text=meowAssistantShiftText(dt),working=!/休假|病假|事假|特休|請假/.test(text);
+    const date=iso(dt),st=state.dayStatus&&state.dayStatus[date];
+    const working=!!(st&&st.type==='overtime')||(scheduleForDate(dt)==='work'&&(!st||!st.type||st.type==='none'));
     if(working){
       if(!run)runStart=new Date(dt);
       run++;if(run>max){max=run;maxStart=new Date(runStart);maxEnd=new Date(dt)}
