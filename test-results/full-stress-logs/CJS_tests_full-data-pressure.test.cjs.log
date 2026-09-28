@@ -1,17 +1,16 @@
-PASS 大量資料筆數完整注入 :: {"replaceMs":0,"renderMs":3348.9000000000087,"dayStatus":1866,"events":5000,"overrides":730,"months":120,"fingerprintBytes":917233}
-PASS 大量資料完整 render 不崩潰 :: {"renderMs":3348.9000000000087}
+PASS 大量資料筆數完整注入 :: {"replaceMs":0.10000000000582077,"renderMs":62.19999999998254,"dayStatus":1866,"events":5000,"overrides":730,"months":120,"fingerprintBytes":917233}
+PASS 大量資料完整 render 不崩潰 :: {"renderMs":62.19999999998254}
 PASS 大量狀態可建立穩定 fingerprint :: {"bytes":917233}
-PASS 大量資料可完整本機儲存 :: {"ok":true,"elapsed":24.59999999999127,"bytes":917402,"dayStatus":1866,"events":5000}
-PASS 大量本機儲存未超過合理 CI 時間 :: {"elapsed":24.59999999999127,"bytes":917402}
-PASS 120 次連續資料變更後狀態正確 :: {"mutationMs":2918.899999999994,"tabMs":407949.70000000007,"base":50119,"net":80372.51805555556,"gross":85663.51805555556,"otPay":23844.518055555556}
-FAIL 120 次快速頁籤切換未卡死 :: {"tabMs":407949.70000000007}
-AssertionError [ERR_ASSERTION]: 120 次快速頁籤切換未卡死
-    at check (/home/runner/work/meow-work-app/meow-work-app/tests/full-data-pressure.test.cjs:73:10)
-    at /home/runner/work/meow-work-app/meow-work-app/tests/full-data-pressure.test.cjs:194:3 {
-  generatedMessage: false,
-  code: 'ERR_ASSERTION',
-  actual: false,
-  expected: true,
-  operator: '==',
-  diff: 'simple'
-}
+PASS 大量資料可完整本機儲存 :: {"ok":true,"elapsed":27.20000000001164,"bytes":917402,"dayStatus":1866,"events":5000}
+PASS 大量本機儲存未超過合理 CI 時間 :: {"elapsed":27.20000000001164,"bytes":917402}
+PASS 120 次連續資料變更後狀態正確 :: {"mutationMs":3383.100000000006,"tabMs":9991.399999999994,"base":50119,"net":80372.51805555556,"gross":85663.51805555556,"otPay":23844.518055555556}
+PASS 120 次快速頁籤切換未卡死 :: {"tabMs":9991.399999999994}
+PASS 大量資料薪資計算仍為有限非負數 :: {"mutationMs":3383.100000000006,"tabMs":9991.399999999994,"base":50119,"net":80372.51805555556,"gross":85663.51805555556,"otPay":23844.518055555556}
+PASS 瀏覽器內 10,000 次自然語言解析不中斷 :: {"parsed":10000,"elapsed":190.70000000001164}
+PASS 大量資料與快速操作沒有瀏覽器執行錯誤 :: []
+PASS 損壞 JSON 備份會安全退回可用預設狀態 :: {"dayStatus":0,"events":0,"name":"喵星人"}
+PASS 損壞備份啟動沒有 uncaught error :: []
+PASS 儲存空間不足時 persist 明確失敗 :: {"ok":false,"saveError":true,"salary":77777}
+PASS 儲存失敗不會清掉記憶體中的工作資料 :: {"ok":false,"saveError":true,"salary":77777}
+PASS 儲存空間不足模擬沒有 uncaught error :: []
+PASS full data pressure suite
