@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v246-simple-pro-tab-no-duplicate-actual">
+<meta name="meow-ui-build" content="v247-free-reconcile-two-cards-diff-bar">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4341,6 +4341,195 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
 }
 </style>
 
+
+<style id="salary-free-reconcile-v247">
+@media(max-width:760px){
+  #page-salary .salary-free-reconcile-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:9px!important;
+    margin-top:8px!important;
+    align-items:stretch!important;
+  }
+
+  #page-salary .salary-free-card{
+    min-width:0!important;
+    min-height:132px!important;
+    padding:12px!important;
+    border:1px solid #eee1d6!important;
+    border-radius:16px!important;
+    background:#fff!important;
+    box-shadow:none!important;
+    box-sizing:border-box!important;
+  }
+
+  #page-salary .salary-free-card-head{
+    display:flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    min-width:0!important;
+  }
+  #page-salary .salary-free-card-head .summary-icon{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    border-radius:11px!important;
+    display:grid!important;
+    place-items:center!important;
+  }
+  #page-salary .salary-free-card-head .summary-icon .icon{
+    font-size:18px!important;
+  }
+  #page-salary .salary-free-card-head b{
+    display:block!important;
+    font-size:12px!important;
+    line-height:1.2!important;
+    font-weight:950!important;
+    color:#5c3425!important;
+  }
+  #page-salary .salary-free-card-head small{
+    display:block!important;
+    margin-top:3px!important;
+    font-size:9px!important;
+    line-height:1.3!important;
+    color:#927565!important;
+  }
+
+  #page-salary .salary-free-actual-input{
+    width:100%!important;
+    height:44px!important;
+    margin-top:12px!important;
+    border:1px solid #e3d5ca!important;
+    border-radius:11px!important;
+    background:#fffdfb!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    font-size:17px!important;
+    font-weight:900!important;
+    color:#39251b!important;
+    outline:none!important;
+  }
+  #page-salary .salary-free-actual-input:focus{
+    border-color:#efb168!important;
+    box-shadow:0 0 0 3px rgba(239,177,104,.14)!important;
+  }
+
+  #page-salary .salary-free-estimated-card{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+  }
+  #page-salary .salary-free-estimated-card > strong{
+    display:block!important;
+    margin-top:12px!important;
+    font-size:22px!important;
+    line-height:1.05!important;
+    font-weight:950!important;
+    color:#4d2a1d!important;
+    white-space:nowrap!important;
+  }
+
+  /* Full-width horizontal difference bar. */
+  #page-salary .salary-free-diff-bar{
+    grid-column:1 / -1!important;
+    min-width:0!important;
+    min-height:72px!important;
+    padding:12px 14px!important;
+    border:1px solid #eadfd5!important;
+    border-radius:16px!important;
+    background:linear-gradient(135deg,#fffaf5,#fffdfb)!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:14px!important;
+    box-sizing:border-box!important;
+  }
+  #page-salary .salary-free-diff-copy{
+    min-width:0!important;
+    flex:1 1 auto!important;
+  }
+  #page-salary .salary-free-diff-copy b{
+    display:block!important;
+    font-size:13px!important;
+    font-weight:950!important;
+    color:#5c3425!important;
+  }
+  #page-salary .salary-free-diff-copy small{
+    display:block!important;
+    margin-top:4px!important;
+    font-size:10px!important;
+    line-height:1.3!important;
+    color:#927565!important;
+  }
+  #page-salary .salary-free-diff-bar > strong{
+    flex:0 0 auto!important;
+    font-size:23px!important;
+    line-height:1!important;
+    font-weight:950!important;
+    white-space:nowrap!important;
+    color:#4d2a1d!important;
+  }
+
+  #page-salary .salary-free-diff-bar.negative{
+    background:linear-gradient(135deg,#fff5f6,#fffafa)!important;
+    border-color:#f0c9ce!important;
+  }
+  #page-salary .salary-free-diff-bar.negative > strong{color:#c83f52!important}
+
+  #page-salary .salary-free-diff-bar.positive{
+    background:linear-gradient(135deg,#f4fbf5,#fbfffb)!important;
+    border-color:#cce6d1!important;
+  }
+  #page-salary .salary-free-diff-bar.positive > strong{color:#248a49!important}
+
+  #page-salary .salary-free-diff-bar.equal{
+    background:linear-gradient(135deg,#f7f8f7,#fcfdfc)!important;
+    border-color:#daddda!important;
+  }
+
+  html.dark #page-salary .salary-free-card{
+    background:#25211f!important;
+    border-color:#59493f!important;
+  }
+  html.dark #page-salary .salary-free-card-head b,
+  html.dark #page-salary .salary-free-estimated-card > strong,
+  html.dark #page-salary .salary-free-diff-copy b,
+  html.dark #page-salary .salary-free-diff-bar > strong{
+    color:#fff2e8!important;
+  }
+  html.dark #page-salary .salary-free-card-head small,
+  html.dark #page-salary .salary-free-diff-copy small{
+    color:#d0b9aa!important;
+  }
+  html.dark #page-salary .salary-free-actual-input{
+    background:#1f1b19!important;
+    border-color:#59493f!important;
+    color:#fff!important;
+  }
+  html.dark #page-salary .salary-free-diff-bar{
+    background:#2b2521!important;
+    border-color:#59493f!important;
+  }
+}
+
+@media(max-width:390px){
+  #page-salary .salary-free-card{
+    padding:10px!important;
+    min-height:126px!important;
+  }
+  #page-salary .salary-free-card-head{
+    gap:6px!important;
+  }
+  #page-salary .salary-free-card-head .summary-icon{
+    width:31px!important;height:31px!important;min-width:31px!important;
+  }
+  #page-salary .salary-free-card-head b{font-size:11px!important}
+  #page-salary .salary-free-card-head small{font-size:8.5px!important}
+  #page-salary .salary-free-estimated-card > strong{font-size:19px!important}
+  #page-salary .salary-free-diff-bar > strong{font-size:20px!important}
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -4821,12 +5010,37 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
       <div class="salary-pane hidden" id="salaryReconcilePane">
       <div class="salary-section">
         <div class="salary-section-title"><span class="paw">🐾</span>薪資對帳 <span style="font-size:11px;color:var(--mobile-gold-ink, #3c8a50);background:var(--mobile-gold-icon, #e8f7eb);border-radius:999px;padding:4px 8px">免費</span></div>
-        <div class="salary-grid">
-          <div class="salary-field"><div class="field-icon" style="background:var(--mobile-gold-icon, #e8f7eb);color:var(--mobile-gold-ink, #2d8a48)"><svg class="icon"><use href="#i-money"/></svg></div><label>公司實際入帳（元）</label><input id="actualNetPay" type="number" min="0" step="1" placeholder="輸入薪資單實發金額"></div>
-        </div>
-        <div class="salary-compare-grid" style="margin-top:10px">
-          <div class="card compare-card"><b>App 預估實領</b><strong id="compareEstimated">NT$0</strong><small>依目前班表與薪資資料</small></div>
-<div class="card compare-card compare-diff" id="compareDiffCard"><b>本月差額</b><strong id="compareDiff">—</strong><small id="compareDiffHint">輸入公司實發後自動比較</small></div>
+
+        <div class="salary-free-reconcile-grid">
+          <div class="card salary-free-card salary-free-actual-card">
+            <div class="salary-free-card-head">
+              <div class="summary-icon" style="background:var(--mobile-green-surface,#e8f7eb);color:var(--mobile-green-ink,#2d8a48)"><svg class="icon"><use href="#i-money"/></svg></div>
+              <div>
+                <b>公司實際入帳</b>
+                <small>以薪資單／銀行入帳為準</small>
+              </div>
+            </div>
+            <input id="actualNetPay" class="salary-free-actual-input" type="number" min="0" step="1" placeholder="輸入實發金額">
+          </div>
+
+          <div class="card salary-free-card salary-free-estimated-card">
+            <div class="salary-free-card-head">
+              <div class="summary-icon" style="background:var(--mobile-gold-icon,#fff0cf);color:var(--mobile-gold-ink,#b8650a)"><svg class="icon"><use href="#i-bag"/></svg></div>
+              <div>
+                <b>App 預估實領</b>
+                <small>依目前班表與薪資資料</small>
+              </div>
+            </div>
+            <strong id="compareEstimated">NT$0</strong>
+          </div>
+
+          <div class="card compare-diff salary-free-diff-bar" id="compareDiffCard">
+            <div class="salary-free-diff-copy">
+              <b>本月差額</b>
+              <small id="compareDiffHint">輸入公司實發後自動比較</small>
+            </div>
+            <strong id="compareDiff">—</strong>
+          </div>
         </div>
       </div>
       </div>
@@ -8571,7 +8785,7 @@ function renderSalaryCompare(mc,mm){
   const hasActual=raw!==undefined&&raw!==null&&String(raw)!=='';
   const actual=hasActual?num(raw):0;
   $('compareEstimated').textContent=money(mc.net);
-  if($('compareActual'))$('compareActual').textContent=hasActual?money(actual):'尚未輸入';
+  
   const card=$('compareDiffCard');
   card.classList.remove('negative','positive','equal');
   if(!hasActual){
@@ -12196,7 +12410,7 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v246';
+    const reloadKey='meow-sw-reloaded-v247';
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
         if(sessionStorage.getItem(reloadKey))return;
@@ -12205,7 +12419,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=246',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=247',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
@@ -12218,7 +12432,7 @@ restoreIndexedMirrorIfNewer();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 // meow-build-freshness-v241: when an installed PWA resumes, compare the published build and reload once if newer.
 (function(){
-  const CURRENT_BUILD='v246-simple-pro-tab-no-duplicate-actual';
+  const CURRENT_BUILD='v247-free-reconcile-two-cards-diff-bar';
   let checking=false;
   async function checkFreshBuild(){
     if(checking||!navigator.onLine)return;
