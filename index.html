@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v236-layout-consistency-pro-art">
+<meta name="meow-ui-build" content="v237-natural-scroll-pro-banner">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4111,6 +4111,169 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
   }
 }
 </style>
+
+<style id="layout-correction-v237">
+@media(max-width:760px){
+  /* Dashboard: natural document scrolling. Never lock the overview to the viewport. */
+  html[data-active-tab="dashboard"]{
+    height:auto!important;
+    min-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  html[data-active-tab="dashboard"] body{
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  html[data-active-tab="dashboard"] .main{
+    display:block!important;
+    height:auto!important;
+    min-height:calc(100dvh - var(--nav-h) - env(safe-area-inset-bottom))!important;
+    overflow:visible!important;
+    padding:8px 10px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px)!important;
+    box-sizing:border-box!important;
+  }
+  html[data-active-tab="dashboard"] .hero-wrap{
+    display:block!important;
+    position:relative!important;
+    flex:none!important;
+    margin-bottom:8px!important;
+  }
+  html[data-active-tab="dashboard"] #page-dashboard.active{
+    display:block!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    padding:0 12px!important;
+    box-sizing:border-box!important;
+  }
+  html[data-active-tab="dashboard"] .mobile-dashboard-approved{
+    display:grid!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    grid-template-rows:auto auto auto auto auto!important;
+    gap:10px!important;
+    align-content:start!important;
+    overflow:visible!important;
+    padding:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Keep the enlarged look, but let every card use natural height instead of stretching/covering another card. */
+  html[data-active-tab="dashboard"] .mda-kpis,
+  html[data-active-tab="dashboard"] .mda-kpi,
+  html[data-active-tab="dashboard"] .mda-next-shift,
+  html[data-active-tab="dashboard"] .mda-leave-shell,
+  html[data-active-tab="dashboard"] .mda-leave-grid,
+  html[data-active-tab="dashboard"] .mda-leave-card,
+  html[data-active-tab="dashboard"] .mda-reminder{
+    height:auto!important;
+  }
+  html[data-active-tab="dashboard"] .mda-kpis{align-items:stretch!important}
+  html[data-active-tab="dashboard"] .mda-kpi{min-height:88px!important}
+  html[data-active-tab="dashboard"] .mda-next-shift{min-height:58px!important}
+  html[data-active-tab="dashboard"] .mda-leave-shell{min-height:148px!important}
+  html[data-active-tab="dashboard"] .mda-leave-card{min-height:98px!important}
+  html[data-active-tab="dashboard"] .mda-reminder{
+    position:relative!important;
+    z-index:auto!important;
+    min-height:66px!important;
+    margin:0!important;
+    padding:12px 13px!important;
+    align-self:auto!important;
+  }
+
+  /* Important reminder grows with its text; no ellipsis, no clipping. Extra text simply makes the page scroll. */
+  html[data-active-tab="dashboard"] .mda-reminder-copy small{
+    display:block!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    line-height:1.45!important;
+    max-height:none!important;
+  }
+
+  /* Itinerary consistency: lower cards use the exact same 1:1 split as the upper 行程 / 待辦 columns. */
+  #page-attendance .v219-itinerary-board{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:9px!important;
+    align-items:start!important;
+  }
+  #page-attendance .v219-today-card,
+  #page-attendance .v219-board-right,
+  #page-attendance .v219-board-right > .v219-board-card{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  #page-attendance .v219-board-right{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:9px!important;
+  }
+
+  /* Salary Pro: use the same approved Meow Assistant Pro artwork, not a generic Pro pill. */
+  #page-salary .salary-tab-pro-art{
+    min-width:0!important;
+    padding:5px 5px 6px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:center!important;
+    gap:4px!important;
+    overflow:hidden!important;
+  }
+  #page-salary .salary-pro-tab-label{
+    display:block!important;
+    font-size:10px!important;
+    font-weight:950!important;
+    line-height:1!important;
+    color:inherit!important;
+    text-align:center!important;
+  }
+  #page-salary .salary-pro-tab-thumb{
+    display:block!important;
+    width:100%!important;
+    aspect-ratio:941 / 272!important;
+    border-radius:8px!important;
+    overflow:hidden!important;
+    background:#fffdf9!important;
+    box-shadow:inset 0 0 0 1px rgba(120,74,44,.08)!important;
+  }
+  #page-salary .salary-pro-tab-thumb img{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    object-position:center top!important;
+  }
+  #page-salary .salary-pro-meow-art{
+    display:block!important;
+    width:100%!important;
+    aspect-ratio:941 / 272!important;
+    margin:0 0 12px!important;
+    border-radius:18px!important;
+    overflow:hidden!important;
+    background:#fffdf9!important;
+    box-shadow:0 7px 20px rgba(90,62,43,.08)!important;
+  }
+  #page-salary .salary-pro-meow-art > img{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    object-position:center top!important;
+    border:0!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -4565,7 +4728,7 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
       <div class="salary-tabs" role="tablist" aria-label="薪資功能">
         <button type="button" class="salary-tab active" id="salaryTabCalc" role="tab" aria-selected="true">薪資試算</button>
         <button type="button" class="salary-tab" id="salaryTabReconcile" role="tab" aria-selected="false">薪資對帳 <span class="salary-tab-tier free">Free</span></button>
-        <button type="button" class="salary-tab salary-tab-pro" id="salaryTabPro" role="tab" aria-selected="false">薪資對帳 <span class="salary-tab-tier pro">Pro</span></button>
+        <button type="button" class="salary-tab salary-tab-pro salary-tab-pro-art" id="salaryTabPro" role="tab" aria-selected="false" aria-label="薪資對帳 Pro"><span class="salary-pro-tab-label">薪資對帳</span><span class="salary-pro-tab-thumb" aria-hidden="true"><img src="./assets/meow-assistant-pro-reference-v232.webp?v=237" alt=""></span></button>
       </div>
       <div class="salary-pane" id="salaryCalcPane">
       <div class="salary-section"><div class="salary-section-title"><span class="paw">🐾</span>薪資收入項目</div><div class="salary-grid">
@@ -4607,7 +4770,7 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
         <div class="hint" style="margin-bottom:10px">免費版先看總額有沒有差；Pro 再幫你找出差在哪一項。</div>
         <div class="pro-grid smart-payroll-shell">
           <div class="pro-card pro-smart-hero" data-pro-feature="payslip_scan">
-            <div class="salary-pro-meow-art" aria-hidden="true"><img src="./assets/meow-assistant-pro-reference-v232.webp?v=236" alt=""></div>
+            <div class="salary-pro-meow-art" aria-hidden="true"><img src="./assets/meow-assistant-pro-reference-v232.webp?v=237" alt=""></div>
             <div class="pro-smart-title"><div><span class="pro-smart-kicker">🐾 智慧薪資對帳</span><span class="salary-tab-tier pro">Pro</span></div><span class="pro-badge">🔒 Pro</span></div>
             <p class="pro-smart-lead">讀每一份辛苦，不只看總額。上傳薪資單後，系統會逐項核對並把需要你確認的地方集中列出。</p>
             <div class="pro-smart-points">
@@ -5069,7 +5232,7 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
       </div>
     </div>
     <div class="ref-assistant-hero ref-assistant-hero-image">
-      <img src="./assets/meow-assistant-pro-reference-v232.webp?v=236" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
+      <img src="./assets/meow-assistant-pro-reference-v232.webp?v=237" alt="喵助理 Pro｜你的職場大小事，我來幫你！更懂社畜，更懂你！">
     </div>
     <div class="ref-assistant-quick">
       <b>直接用語音告訴喵助理要做什麼：</b>
@@ -8432,88 +8595,6 @@ function buildSalaryPrintHtml(){
   }
   const r=exportMonthRecord(),tr=r.rows.map(x=>'<tr><td>'+escapeHtml(x.label)+'</td><td>'+money(x.expected)+'</td><td>'+(x.actual===null?'—':money(x.actual))+'</td><td>'+(x.actual===null?'—':signedMoney(x.actual-x.expected))+'</td></tr>').join('');
   return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style>
-<style id="layout-consistency-v236">
-/* User-approved correction: enlarge without overlap, align itinerary columns, reuse Meow Assistant Pro artwork. */
-@media(max-width:760px){
-  /* Overview: keep 重要提醒 in normal flow with a clean gap above the fixed bottom layer/nav. */
-  html[data-active-tab="dashboard"] #page-dashboard.active{
-    overflow:auto!important;
-    padding:0 12px 14px!important;
-    scroll-padding-bottom:14px!important;
-    box-sizing:border-box!important;
-  }
-  html[data-active-tab="dashboard"] .mobile-dashboard-approved{
-    width:100%!important;
-    min-height:calc(100% - 14px)!important;
-    height:auto!important;
-    grid-template-rows:
-      auto
-      minmax(92px,1fr)
-      minmax(62px,.62fr)
-      minmax(154px,1.5fr)
-      auto!important;
-    align-content:stretch!important;
-    gap:10px!important;
-    padding-bottom:0!important;
-    overflow:visible!important;
-    box-sizing:border-box!important;
-  }
-  html[data-active-tab="dashboard"] .mda-reminder{
-    position:relative!important;
-    z-index:2!important;
-    min-height:66px!important;
-    height:auto!important;
-    margin:0!important;
-    flex:none!important;
-  }
-
-  /* 行程 / 待辦上方是 1:1；下方也必須使用相同的 1:1 欄寬。 */
-  #page-attendance .v219-itinerary-board{
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-    gap:9px!important;
-    align-items:start!important;
-  }
-  #page-attendance .v219-today-card,
-  #page-attendance .v219-board-right,
-  #page-attendance .v219-board-right > .v219-board-card{
-    width:100%!important;
-    max-width:none!important;
-    min-width:0!important;
-    box-sizing:border-box!important;
-  }
-  #page-attendance .v219-board-right{
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr)!important;
-    gap:9px!important;
-  }
-
-  /* Salary Pro uses the exact same approved artwork shown when Meow Assistant Pro opens. */
-  #page-salary .salary-pro-meow-art{
-    width:100%!important;
-    aspect-ratio:941 / 272!important;
-    margin:0 0 12px!important;
-    border-radius:16px!important;
-    overflow:hidden!important;
-    background:#fffdf9!important;
-  }
-  #page-salary .salary-pro-meow-art > img{
-    display:block!important;
-    width:100%!important;
-    height:100%!important;
-    object-fit:cover!important;
-    object-position:center top!important;
-    border:0!important;
-  }
-}
-@media(max-width:760px) and (max-height:740px){
-  html[data-active-tab="dashboard"] .mobile-dashboard-approved{
-    min-height:auto!important;
-    grid-template-rows:auto 92px 62px 154px auto!important;
-  }
-}
-</style>
-
 </head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
 }
 function exportSalaryPdf(){
