@@ -98,7 +98,7 @@ struct MeowDateWidgetView: View {
 
     private var countdownTitle: String {
         guard let info = payday else { return "尚未設定發薪日" }
-        return info.days == 0 ? "今天發薪" : "發薪倒數 \(info.days) 天"
+        return info.days == 0 ? "今天發薪 🎉" : "距離發薪日 \(info.days) 天"
     }
 
     private var paydayDateText: String {
