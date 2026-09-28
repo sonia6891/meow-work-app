@@ -1,0 +1,118 @@
+name: Native iOS Stress Build
+
+on:
+  push:
+    branches:
+      - stress/full-app-20260929-a
+    paths:
+      - '.github/workflows/native-ios-stress.yml'
+      - 'index.html'
+      - 'tests/**'
+      - 'native/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios-stress:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout stress branch
+        uses: actions/checkout@v6
+        with:
+          ref: stress/full-app-20260929-a
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install native dependencies
+        working-directory: native
+        run: npm install
+
+      - name: Sync current web app into Capacitor iOS
+        working-directory: native
+        run: |
+          set -euo pipefail
+          npm run sync:web
+          npx cap sync ios
+
+      - name: Verify current stress-tested web bundle reached iOS
+        working-directory: native
+        run: |
+          set -euo pipefail
+          test -f ios/App/App/public/index.html
+          grep -q 'function renderActiveTab' ios/App/App/public/index.html
+          grep -q 'groupItineraryEventsByDate' ios/App/App/public/index.html
+          grep -q 'meowAssistantParse' ios/App/App/public/index.html
+          grep -q 'annualBalance' ios/App/App/public/index.html
+          grep -q 'personalEvents' ios/App/App/public/index.html
+          test -f ios/App/App/public/privacy.html
+          test -f ios/App/App/public/terms.html
+          test -f ios/App/App/public/support.html
+
+      - name: Verify native bridges and App Store structure
+        working-directory: native
+        run: |
+          set -euo pipefail
+          grep -q 'MeowStoreBillingPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'MeowReminderPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'MeowAppleAuthPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'MeowScheduleVisionPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'MeowSpeechPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'MeowWidgetPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'Transaction.currentEntitlements' ios/App/App/SceneDelegate.swift
+          grep -q 'Transaction.updates' ios/App/App/SceneDelegate.swift
+          grep -q 'VNRecognizeTextRequest' ios/App/App/SceneDelegate.swift
+          grep -q 'SFSpeechRecognizer' ios/App/App/SceneDelegate.swift
+          grep -q 'UNUserNotificationCenter' ios/App/App/SceneDelegate.swift
+          test -f ios/App/App/PrivacyInfo.xcprivacy
+          test -f ios/App/App/App.entitlements
+          test -f ios/App/MeowDateWidget/MeowDateWidget.swift
+          test -f ios/App/MeowDateWidget/Info.plist
+          test -f ios/App/MeowWork.storekit
+          grep -q 'meowwork.pro.monthly' ios/App/MeowWork.storekit
+          grep -q 'meowwork.pro.yearly' ios/App/MeowWork.storekit
+          /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" ios/App/App/Info.plist | grep -q false
+          /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" ios/App/App/Info.plist | grep -q '班表'
+          /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" ios/App/App/Info.plist | grep -q '薪資單'
+          /usr/libexec/PlistBuddy -c "Print :NSMicrophoneUsageDescription" ios/App/App/Info.plist | grep -q '喵助理'
+          /usr/libexec/PlistBuddy -c "Print :NSSpeechRecognitionUsageDescription" ios/App/App/Info.plist | grep -q '文字指令'
+
+      - name: Build iPhone simulator Debug
+        working-directory: native
+        run: |
+          set -euo pipefail
+          if [ -d ios/App/App.xcworkspace ]; then
+            xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build
+          else
+            xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build
+          fi
+
+      - name: Build unsigned iPhone Release
+        working-directory: native
+        run: |
+          set -euo pipefail
+          if [ -d ios/App/App.xcworkspace ]; then
+            xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphoneos -configuration Release CODE_SIGNING_ALLOWED=NO build
+          else
+            xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphoneos -configuration Release CODE_SIGNING_ALLOWED=NO build
+          fi
+
+      - name: Verify built app bundle
+        working-directory: native
+        run: |
+          set -euo pipefail
+          APP_DIR="$(find "$HOME/Library/Developer/Xcode/DerivedData" -type d -path '*/Build/Products/Debug-iphonesimulator/App.app' -print -quit)"
+          test -n "$APP_DIR"
+          test -f "$APP_DIR/public/index.html"
+          grep -q 'function renderActiveTab' "$APP_DIR/public/index.html"
+          grep -q 'groupItineraryEventsByDate' "$APP_DIR/public/index.html"
+          test -f "$APP_DIR/public/privacy.html"
+          test -d "$APP_DIR/PlugIns/MeowDateWidget.appex"
+          test -f "$APP_DIR/PrivacyInfo.xcprivacy"
+          /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$APP_DIR/Info.plist" | grep -q false
+          echo "Native iOS stress build and bundle verification passed."
