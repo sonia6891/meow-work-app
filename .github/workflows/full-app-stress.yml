@@ -106,12 +106,13 @@ jobs:
 
           {
             echo ""
-            echo "## B. 舊版 Python Playwright 回歸"
+            echo "## B. 現行登入／瀏覽器相容性"
+            echo ""
+            echo "- ℹ️ browser-v112.py、browser-frame-v113.py、browser-logout-v114.py 為歷史測試，仍要求已移除的訪客／Email／OTP 舊流程，不再作為現行品質閘門。"
+            echo "- ℹ️ 現行登入規格由 browser-account-v117.cjs 與 browser-line-v116.py 驗證：Google＋LINE、無公開 Email／OTP、登出與帳號狀態。"
           } >> "$REPORT"
 
-          for f in tests/browser-v112.py tests/browser-frame-v113.py tests/browser-line-v116.py tests/browser-logout-v114.py; do
-            run_case "PY ${f}" .stress-venv/bin/python "$f"
-          done
+          run_case "PY tests/browser-line-v116.py" .stress-venv/bin/python tests/browser-line-v116.py
 
           {
             echo ""
