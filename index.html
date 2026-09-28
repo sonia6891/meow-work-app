@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v247-free-reconcile-two-cards-diff-bar">
+<meta name="meow-ui-build" content="v248-align-pay-values-yellow-nav">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4527,6 +4527,62 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
   #page-salary .salary-free-card-head small{font-size:8.5px!important}
   #page-salary .salary-free-estimated-card > strong{font-size:19px!important}
   #page-salary .salary-free-diff-bar > strong{font-size:20px!important}
+}
+</style>
+
+
+<style id="salary-align-nav-yellow-v248">
+@media(max-width:760px){
+  /* Free reconciliation: both value areas use identical geometry. */
+  #page-salary .salary-free-actual-input,
+  #page-salary .salary-free-estimated-card > strong{
+    width:100%!important;
+    height:44px!important;
+    min-height:44px!important;
+    margin-top:12px!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    border:1px solid #e3d5ca!important;
+    border-radius:11px!important;
+    background:#fffdfb!important;
+    color:#39251b!important;
+    font-size:17px!important;
+    line-height:1!important;
+    font-weight:900!important;
+  }
+  #page-salary .salary-free-estimated-card > strong{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+  }
+
+  /* Bottom navigation selected state = same yellow palette as 我的工作類型 selected state. */
+  .bottom-nav button.active{
+    background:#ffe7ae!important;
+    border:1px solid #f5c76d!important;
+    color:#7a4c29!important;
+    box-shadow:none!important;
+    border-radius:14px!important;
+  }
+  .bottom-nav button.active .icon{
+    color:#7a4c29!important;
+  }
+
+  html.dark #page-salary .salary-free-actual-input,
+  html.dark #page-salary .salary-free-estimated-card > strong{
+    background:#1f1b19!important;
+    border-color:#59493f!important;
+    color:#fff2e8!important;
+  }
+  html.dark .bottom-nav button.active{
+    background:linear-gradient(180deg,#f2c879 0%,#d8a657 100%)!important;
+    border-color:rgba(255,224,164,.72)!important;
+    color:#2e2114!important;
+    box-shadow:0 6px 18px rgba(215,163,80,.18)!important;
+  }
+  html.dark .bottom-nav button.active .icon{
+    color:#2e2114!important;
+  }
 }
 </style>
 
@@ -12410,7 +12466,7 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v247';
+    const reloadKey='meow-sw-reloaded-v248';
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
         if(sessionStorage.getItem(reloadKey))return;
@@ -12419,7 +12475,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=247',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=248',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
@@ -12432,7 +12488,7 @@ restoreIndexedMirrorIfNewer();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 // meow-build-freshness-v241: when an installed PWA resumes, compare the published build and reload once if newer.
 (function(){
-  const CURRENT_BUILD='v247-free-reconcile-two-cards-diff-bar';
+  const CURRENT_BUILD='v248-align-pay-values-yellow-nav';
   let checking=false;
   async function checkFreshBuild(){
     if(checking||!navigator.onLine)return;
