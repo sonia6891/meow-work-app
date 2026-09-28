@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v263-meow-assistant-natural-actions">
+<meta name="meow-ui-build" content="v265-auth-stability">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -6927,7 +6927,7 @@ function normalizeState(v){
   s.personalEvents=x.personalEvents||{};
   return s;
 }
-let authClient=null,authUser=null,authChannel=null,authTimer=null,authBusy=false;
+let authClient=null,authUser=null,authChannel=null,authTimer=null,authBusy=false,authSignOutProbe=0,explicitSignOutPending=false;
 let accountStatusText='尚未登入';
 let deviceId='';
 try{
@@ -7328,7 +7328,24 @@ function showSignedOutSplash(){
   splash.classList.remove('is-leaving');
   document.documentElement.classList.add('auth-needs-login');
 }
-async function handleSignedOut(){
+async function preserveLocalWorkspaceAfterAuthLoss(message='登入已失效・本機資料仍可使用'){
+  const epoch=++accessEpoch;
+  entitlementRequest++;authUser=null;resetEntitlement();billingHistory=[];clearTimeout(expiryTimer);clearTimeout(authTimer);authTimer=null;
+  await stopAccountRealtime();
+  if(epoch!==accessEpoch||authUser)return;
+  cloudReady=false;pendingCloud=null;
+  document.documentElement.classList.remove('auth-needs-login');
+  if($('welcomeDialog').open&&!welcomeManual)finishWelcome();
+  setAccountStatus(message);
+  setCloudStatus('登入連線中斷・雲端同步暫停，本機資料保留');
+  applyTheme();render();
+}
+async function handleSignedOut(explicit=false){
+  const remembered=readLocalString(LAST_AUTH_USER_KEY);
+  if(!explicit&&remembered&&localOwner===remembered){
+    await preserveLocalWorkspaceAfterAuthLoss();
+    return;
+  }
   const epoch=++accessEpoch;
   entitlementRequest++;authUser=null;resetEntitlement();billingHistory=[];clearTimeout(expiryTimer);
   try{localStorage.removeItem(LAST_AUTH_USER_KEY)}catch(e){}
@@ -7338,6 +7355,22 @@ async function handleSignedOut(){
   showSignedOutSplash();
   setAccountStatus('請使用 Google、LINE 或 Apple 登入');setCloudStatus('未啟用・Pro 專屬');render();
   openWelcome(false);
+}
+async function recheckSignedOutEvent(){
+  const probe=++authSignOutProbe;
+  await new Promise(resolve=>setTimeout(resolve,450));
+  if(probe!==authSignOutProbe||explicitSignOutPending)return;
+  try{
+    const client=await getAuthClient();
+    const {data,error}=await client.auth.getSession();
+    if(probe!==authSignOutProbe||explicitSignOutPending)return;
+    if(!error&&data&&data.session&&data.session.user){
+      await handleSignedIn(data.session.user,data.session);
+      return;
+    }
+  }catch(e){}
+  if(probe!==authSignOutProbe||explicitSignOutPending)return;
+  await handleSignedOut(false);
 }
 async function initAuth(){
   const callbackIssue=readOAuthCallbackError();
@@ -7353,10 +7386,11 @@ async function initAuth(){
     }
     if(error)throw error;
     if(data&&data.session&&data.session.user){
+      authSignOutProbe++;
       clearOAuthCallbackError();
       await handleSignedIn(data.session.user,data.session);
     }else{
-      await handleSignedOut();
+      await handleSignedOut(false);
       if(callbackIssue){
         const message=authCallbackMessage(callbackIssue);
         setAccountStatus((callbackIssue.provider==='line'?'LINE':callbackIssue.provider==='google'?'Google':callbackIssue.provider==='apple'?'Apple':'帳號')+' 登入未完成');
@@ -7368,8 +7402,14 @@ async function initAuth(){
     client.auth.onAuthStateChange((event,session)=>{
       if(!['SIGNED_IN','SIGNED_OUT','TOKEN_REFRESHED','USER_UPDATED'].includes(event))return;
       clearTimeout(authEventTimer);
-      if(event==='SIGNED_OUT'){accessEpoch++;accessCheckedUser='';clearTimeout(authTimer)}
+      if(event==='SIGNED_OUT'){
+        if(explicitSignOutPending)return;
+        authEventTimer=setTimeout(()=>{authEventTimer=null;void recheckSignedOutEvent()},180);
+        return;
+      }
+      authSignOutProbe++;
       authEventTimer=setTimeout(()=>{
+        authEventTimer=null;
         if((event==='TOKEN_REFRESHED'||event==='USER_UPDATED')&&session&&session.user){
           authUser=session.user;
           document.documentElement.classList.remove('auth-needs-login');
@@ -7378,14 +7418,12 @@ async function initAuth(){
           return;
         }
         if(session&&session.user)void handleSignedIn(session.user,session);
-        else if(event==='SIGNED_OUT')void handleSignedOut();
       },0);
     });
   }catch(e){
     const remembered=readLocalString(LAST_AUTH_USER_KEY);
-    if(remembered&&localOwner!=='guest'){
-      document.documentElement.classList.remove('auth-needs-login');
-      applyTheme();render();setAccountStatus('本機資料可使用・登入服務重新連線中');
+    if(remembered&&localOwner===remembered){
+      await preserveLocalWorkspaceAfterAuthLoss('本機資料可使用・登入服務重新連線中');
     }else{
       setAccountStatus('登入服務暫時無法連線');
       openWelcome(false);
@@ -7571,18 +7609,22 @@ async function signInWithApple(){
 }
 async function signOutAccount(){
   const button=$('accountLogout');if(button.disabled)return;button.disabled=true;
+  explicitSignOutPending=true;authSignOutProbe++;
   try{
     const client=await getAuthClient();
     // Sign out this device only; other devices and saved workspaces are untouched.
     const {error}=await client.auth.signOut({scope:'local'});
     if(error)throw error;
     clearTimeout(authEventTimer);authEventTimer=null;
-    // Also handle clients which do not emit a local SIGNED_OUT callback.
-    await handleSignedOut();
+    // Explicit user intent is the only path that immediately returns to the login screen.
+    await handleSignedOut(true);
   }catch(e){
     setAccountStatus('登出未完成，請稍後重試。本機資料未清除。');
     alert('登出未完成，請稍後重試。本機資料未清除。');
-  }finally{button.disabled=false}
+  }finally{
+    explicitSignOutPending=false;
+    button.disabled=false;
+  }
 }
 async function deleteAccountPermanently(){
   if(!authUser)return;
@@ -7606,11 +7648,14 @@ async function deleteAccountPermanently(){
     }catch(e){}
     await clearIndexedBackup();
     state=defaultState();lastSavedAt=null;localDirty=false;localEditVersion++;
+    explicitSignOutPending=true;authSignOutProbe++;
     try{
-      const client=await getAuthClient();
-      await client.auth.signOut({scope:'local'});
-    }catch(e){}
-    await handleSignedOut();
+      try{
+        const client=await getAuthClient();
+        await client.auth.signOut({scope:'local'});
+      }catch(e){}
+      await handleSignedOut(true);
+    }finally{explicitSignOutPending=false}
     alert('帳號與雲端資料已永久刪除。');
   }catch(e){
     setAccountStatus('帳號刪除失敗，資料沒有被刪除。');
@@ -13934,17 +13979,10 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v251';
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      try{
-        if(sessionStorage.getItem(reloadKey))return;
-        sessionStorage.setItem(reloadKey,'1');
-      }catch(e){}
-      location.reload();
-    });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=251',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=265',{updateViaCache:'none'});
       await reg.update();
+      // Activate the new worker without reloading the page the user is actively using.
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
   });
@@ -13954,32 +13992,8 @@ applyTheme();render();
 setTimeout(()=>{void syncAllNativeReminders()},1200);
 restoreIndexedMirrorIfNewer();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
-// meow-build-freshness-v241: when an installed PWA resumes, compare the published build and reload once if newer.
-(function(){
-  const CURRENT_BUILD='v251-dark-unified-payday-widget';
-  let checking=false;
-  async function checkFreshBuild(){
-    if(checking||!navigator.onLine)return;
-    checking=true;
-    try{
-      const res=await fetch('./index.html?fresh='+Date.now(),{cache:'no-store'});
-      const html=await res.text();
-      const m=html.match(/<meta name="meow-ui-build" content="([^"]+)"/);
-      const latest=m&&m[1];
-      if(latest&&latest!==CURRENT_BUILD){
-        const key='meow-build-reload:'+latest;
-        let seen='';
-        try{seen=sessionStorage.getItem(key)||''}catch(e){}
-        if(!seen){
-          try{sessionStorage.setItem(key,'1')}catch(e){}
-          location.replace('./?build='+encodeURIComponent(latest)+'&t='+Date.now());
-        }
-      }
-    }catch(e){}finally{checking=false}
-  }
-  window.addEventListener('pageshow',()=>{void checkFreshBuild()});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void checkFreshBuild()});
-})();
+// Published navigation is network-first in sw.js. Do not reload an active screen on
+// pageshow/visibilitychange; updates take effect on the next normal navigation/launch.
 
 })();
 </script>
