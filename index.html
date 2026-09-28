@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v221-schedule-legend-placement">
+<meta name="meow-ui-build" content="v222-annual-leave-dual-units">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -6178,7 +6178,11 @@ function annualSupplementHours(period){
   return values&&typeof values==='object'?Math.max(0,num(values[period.key])):0;
 }
 function annualLeaveBalanceInfo(asOf=new Date()){
-  const period=annualLeavePeriod(asOf),daily=Math.max(.5,num(state.settings.dailyWorkHours)||8),totalDays=annualPeriodQuota(period,asOf),totalHours=totalDays*daily;
+  const period=annualLeavePeriod(asOf);
+  const legalDaily=8;
+  const scheduledDaily=Math.max(.5,num(state.settings.dailyWorkHours)||8);
+  const totalDays=annualPeriodQuota(period,asOf);
+  const totalHours=totalDays*legalDaily; // 法規顯示用：一天固定以 8 小時換算，不等於實際班別工時。
   let recordedHours=0,plannedHours=0;
   if(!period.missing){
     for(const [date,st] of Object.entries(state.dayStatus||{})){
@@ -6189,9 +6193,27 @@ function annualLeaveBalanceInfo(asOf=new Date()){
       else plannedHours+=effectiveDayStatusHours(st);
     }
   }
-  const carryHours=annualSupplementHours(period),usedHours=carryHours+recordedHours;
-  const remainHours=Math.max(0,totalHours-usedHours-plannedHours),overHours=Math.max(0,usedHours+plannedHours-totalHours);
-  return{period,daily,totalDays,totalHours,recordedHours,plannedHours,carryHours,usedHours,remainHours,overHours,usedDays:usedHours/daily,remainDays:remainHours/daily,pct:totalHours>0?Math.min(100,(usedHours+plannedHours)/totalHours*100):0};
+  // 補登與班表紀錄都是「實際請假時數」；先依目前每日工時換成使用天數，
+  // 再由法定天數計算剩餘，避免把 10 小時輪班直接拿去扣 8 小時法規換算額度。
+  const carryHours=annualSupplementHours(period);
+  const usedHours=carryHours+recordedHours;
+  const usedDays=usedHours/scheduledDaily;
+  const plannedDays=plannedHours/scheduledDaily;
+  const consumedDays=usedDays+plannedDays;
+  const remainDays=Math.max(0,totalDays-consumedDays);
+  const overDays=Math.max(0,consumedDays-totalDays);
+  const remainHours=remainDays*scheduledDaily; // 依目前班別，實際還能排多少請假時數。
+  const overHours=overDays*scheduledDaily;
+  const legalUsedHours=usedDays*legalDaily;
+  const legalPlannedHours=plannedDays*legalDaily;
+  const legalRemainHours=remainDays*legalDaily;
+  return{
+    period,legalDaily,scheduledDaily,totalDays,totalHours,
+    recordedHours,plannedHours,carryHours,usedHours,remainHours,overHours,
+    usedDays,plannedDays,remainDays,overDays,
+    legalUsedHours,legalPlannedHours,legalRemainHours,
+    pct:totalDays>0?Math.min(100,consumedDays/totalDays*100):0
+  };
 }
 function annualSettlementInfo(){
   const period=annualLeavePeriod();
@@ -6200,17 +6222,22 @@ function annualSettlementInfo(){
 function annualBalanceText(info){
   const p=info.period;
   if(p.missing)return p.reason;
-  return(p.mode==='anniversary'?'本期法定 ':'本期比例試算 ')+fmtHours(info.totalDays)+' 天 / '+fmtHours(info.totalHours)+' 小時・已使用 '+fmtHours(info.usedHours)+' 小時'+(info.plannedHours?'・已排未休 '+fmtHours(info.plannedHours)+' 小時':'')+(info.overHours?'・超出額度 '+fmtHours(info.overHours)+' 小時':'');
+  const prefix=p.mode==='anniversary'?'本期法定 ':'本期比例試算 ';
+  return prefix+fmtHours(info.totalDays)+' 天（8 小時基準換算 '+fmtHours(info.totalHours)+' 小時）'
+    +'・實際已使用 '+fmtHours(info.usedHours)+' 小時（'+fmtHours(info.usedDays)+' 天）'
+    +(info.plannedHours?'・已排未休 '+fmtHours(info.plannedHours)+' 小時（'+fmtHours(info.plannedDays)+' 天）':'')
+    +'・剩 '+fmtHours(info.remainDays)+' 天（依目前 '+fmtHours(info.scheduledDaily)+' 小時班可排 '+fmtHours(info.remainHours)+' 小時）'
+    +(info.overHours?'・超出 '+fmtHours(info.overDays)+' 天 / '+fmtHours(info.overHours)+' 小時':'');
 }
 function renderAnnualLeaveSettings(){
   const info=annualLeaveBalanceInfo(),p=info.period,ten=tenureInfo();
   const quota=$('settingAnnualQuota'),usage=$('settingAnnualUsedHours');
-  quota.value=p.missing?'尚未取得額度':fmtHours(info.totalDays)+' 天 / '+fmtHours(info.totalHours)+' 小時';
+  quota.value=p.missing?'尚未取得額度':fmtHours(info.totalDays)+' 天 / 法規換算 '+fmtHours(info.totalHours)+' 小時';
   $('settingAnnualQuotaHint').textContent=p.missing?p.reason:(ten.years+' 年 '+ten.months+' 個月・'+p.label+'・本期 '+iso(p.start)+'～'+iso(p.date)+'。'+(p.mode==='anniversary'?'依到職年資自動計算，滿半年／週年自動更新。':'按日數比例試算，假設本期持續在職；公司換算及進位方式可能不同。'));
   usage.disabled=p.missing||statutoryAnnualLeaveDays()===0;
   if(document.activeElement!==usage)usage.value=info.carryHours;
-  $('annualUsedHoursHint').textContent='只填本期尚未記錄在 App 的已休時數；已在排班表登記的特休會自動加總，請勿重複填入。';
-  $('annualSettingsBalance').textContent=annualBalanceText(info)+(p.missing?'':'・剩餘可排 '+fmtHours(info.remainHours)+' 小時');
+  $('annualUsedHoursHint').textContent='這裡填的是實際已休工時；例如每日排班 10 小時，休整天就記 10 小時。法規額度仍以 8 小時／日換算顯示，系統會先換算成使用天數再扣除。';
+  $('annualSettingsBalance').textContent=annualBalanceText(info);
 }
 
 function yearlyLeaveUsage(type){
@@ -6290,7 +6317,7 @@ function renderMobileDashboardApproved(){
   if($('mDashPersonalRemain'))$('mDashPersonalRemain').textContent='剩 '+fmtHours(personal.remainHours)+' h';
   if($('mDashPersonalUsed'))$('mDashPersonalUsed').textContent='已用 '+fmtHours(personal.usedHours)+' / '+fmtHours(personal.totalHours)+' h';
   if($('mDashAnnualRemain'))$('mDashAnnualRemain').textContent=annual.period.missing?'待設定':'剩 '+fmtHours(annual.remainHours)+' h';
-  if($('mDashAnnualUsed'))$('mDashAnnualUsed').textContent=annual.period.missing?'請設定到職日':'已用 '+fmtHours(annual.usedHours)+' / '+fmtHours(annual.totalHours)+' h';
+  if($('mDashAnnualUsed'))$('mDashAnnualUsed').textContent=annual.period.missing?'請設定到職日':'已用 '+fmtHours(annual.usedHours)+' h（'+fmtHours(annual.usedDays)+' 天）';
   if($('mDashMenstrualRemain'))$('mDashMenstrualRemain').textContent='剩 '+fmtHours(menstrualRemain)+' h';
   if($('mDashMenstrualUsed'))$('mDashMenstrualUsed').textContent='本月已用 '+fmtHours(menstrualUsed)+' / '+fmtHours(daily)+' h';
   if($('mDashLeaveCycle')){
@@ -6343,7 +6370,7 @@ function paintBalance(prefix,info){
   const main=$(prefix+'BalanceMain'),detail=$(prefix+'BalanceDetail'),bar=$(prefix+'BalanceBar');
   if(info.totalHours<=0){main.textContent='額度未設定';detail.textContent='今年已用 '+fmtHours(info.usedHours)+' 小時';bar.style.width='0%';return}
   main.textContent='剩 '+fmtHours(info.remainDays)+' 天 / '+fmtHours(info.remainHours)+' 小時';
-  detail.textContent='可用 '+fmtHours(info.totalDays)+' 天・已用 '+fmtHours(info.usedDays)+' 天 / '+fmtHours(info.usedHours)+' 小時';
+  detail.textContent='法定 '+fmtHours(info.totalDays)+' 天（8h換算 '+fmtHours(info.totalHours)+'h）・實際已用 '+fmtHours(info.usedHours)+'h（'+fmtHours(info.usedDays)+' 天）';
   bar.style.width=info.pct+'%';
 }
 const annualInfo=annualLeaveBalanceInfo();
