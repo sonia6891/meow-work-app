@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v252-dark-overview-parity-payday-widget">
+<meta name="meow-ui-build" content="v253-dark-overview-parity-payday-widget">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4842,6 +4842,193 @@ html.dark .holiday-tag{
 }
 </style>
 
+<style id="dark-overview-parity-v252">
+/* v252 — dark mode parity. Secondary pages use the same coffee-brown hierarchy as Overview. */
+@media(max-width:760px){
+  html.dark #page-calendar,
+  html.dark #page-attendance,
+  html.dark #page-salary,
+  html.dark #page-settings{
+    --dark-page:#18120f;
+    --dark-card:#2a211d;
+    --dark-inner:#211916;
+    --dark-soft:#322720;
+    --dark-line:#513d31;
+    --dark-text:#f7eee8;
+    --dark-muted:#c9b5a7;
+    --dark-selected:#4a3427;
+    --dark-selected-line:#8e6741;
+    --dark-selected-text:#ffd18e;
+    background:var(--dark-page)!important;
+    color:var(--dark-text)!important;
+  }
+
+  /* Page heroes: no light/white islands in dark mode. */
+  html.dark #page-attendance .ref-itinerary-hero,
+  html.dark #page-settings .ref-settings-hero,
+  html.dark #page-salary .ref-salary-hero{
+    background:
+      radial-gradient(circle at 82% 10%,rgba(226,173,108,.09),transparent 30%),
+      linear-gradient(180deg,#2a211d,#211916)!important;
+    border-color:var(--dark-line)!important;
+    box-shadow:0 10px 28px rgba(0,0,0,.22)!important;
+  }
+  html.dark #page-attendance .ref-page-hero-copy>b,
+  html.dark #page-settings .ref-page-hero-copy>b,
+  html.dark #page-salary .ref-page-hero-copy>b,
+  html.dark #page-salary .page-title{color:var(--dark-text)!important}
+  html.dark #page-attendance .ref-page-hero-copy p,
+  html.dark #page-settings .ref-page-hero-copy p,
+  html.dark #page-salary .ref-page-hero-copy p{color:#e1cbbd!important}
+  html.dark #page-attendance .ref-page-hero-copy small,
+  html.dark #page-settings .ref-page-hero-copy small,
+  html.dark #page-salary .ref-page-hero-copy small{color:#e2ad6c!important}
+
+  /* Main cards: exactly the same primary surface family as Overview. */
+  html.dark #page-calendar .ref-worktype-panel,
+  html.dark #page-calendar .ref-template-card,
+  html.dark #page-calendar .ref-ai-card,
+  html.dark #page-calendar .schedule-v138-heading,
+  html.dark #page-calendar .schedule-settings,
+  html.dark #page-calendar .schedule-card-v136,
+  html.dark #page-calendar .v219-schedule-settings-strip,
+  html.dark #page-calendar .calendar-card,
+  html.dark #page-calendar .v219-calendar-color-panel,
+  html.dark #page-calendar .schedule-legend-card,
+  html.dark #page-attendance .v219-board-card,
+  html.dark #page-attendance .v219-reminder-card,
+  html.dark #page-attendance .itinerary-list-card,
+  html.dark #page-attendance .todo-card-v142,
+  html.dark #page-attendance .itinerary-empty-list,
+  html.dark #page-attendance .todo-empty-v142,
+  html.dark #page-attendance .ref-itinerary-footer-note,
+  html.dark #page-salary .salary-card,
+  html.dark #page-salary .salary-section,
+  html.dark #page-salary .salary-field,
+  html.dark #page-salary .result-card,
+  html.dark #page-salary .compare-card,
+  html.dark #page-salary .pro-card,
+  html.dark #page-salary .pro-recent-card,
+  html.dark #page-salary .salary-free-card,
+  html.dark #page-salary .salary-free-diff-bar,
+  html.dark #page-salary .formula,
+  html.dark #page-salary .scan-status,
+  html.dark #page-salary .scan-result,
+  html.dark #page-salary .itemized-panel,
+  html.dark #page-salary .salary-history-panel,
+  html.dark #page-settings .v219-settings-profile-card,
+  html.dark #page-settings .settings-ui-v129>.card,
+  html.dark #page-settings .settings-modern-card,
+  html.dark #page-settings .settings-modern-fold,
+  html.dark #page-settings .ref-settings-card,
+  html.dark #page-settings .settings-card,
+  html.dark #page-settings .account-overview-card,
+  html.dark #page-settings .account-name-editor{
+    background:var(--dark-card)!important;
+    border-color:var(--dark-line)!important;
+    color:var(--dark-text)!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
+  }
+
+  /* Inner rows, fields and calendar cells use Overview's deeper nested surface. */
+  html.dark #page-calendar .ref-worktype-row button,
+  html.dark #page-calendar .ref-template-buttons,
+  html.dark #page-calendar .ref-template-buttons button,
+  html.dark #page-calendar .schedule-template-fold,
+  html.dark #page-calendar .schedule-v129-summary,
+  html.dark #page-calendar .schedule-v129-summary>div,
+  html.dark #page-calendar .v219-schedule-settings-strip>div,
+  html.dark #page-calendar .v219-schedule-settings-strip>button,
+  html.dark #page-calendar .weekdays,
+  html.dark #page-calendar .weekdays div,
+  html.dark #page-calendar .day,
+  html.dark #page-calendar .calendar-card .legend,
+  html.dark #page-calendar .v219-full-month,
+  html.dark #page-calendar .v219-calendar-color-options button,
+  html.dark #page-attendance .attendance-v142-tabs,
+  html.dark #page-attendance .attendance-v142-tabs button,
+  html.dark #page-attendance .ref-attendance-list-head button,
+  html.dark #page-attendance .v219-reminder-options button,
+  html.dark #page-attendance .v219-board-link,
+  html.dark #page-attendance .v219-mini-day,
+  html.dark #page-attendance .v219-conflict-item,
+  html.dark #page-salary .salary-tabs,
+  html.dark #page-salary .salary-tab,
+  html.dark #page-salary .salary-field input,
+  html.dark #page-salary .salary-field select,
+  html.dark #page-salary .salary-free-actual-input,
+  html.dark #page-settings .ref-settings-rows,
+  html.dark #page-settings .ref-settings-row,
+  html.dark #page-settings .settings-item,
+  html.dark #page-settings .settings-segmented,
+  html.dark #page-settings .settings-segmented button,
+  html.dark #page-settings .v219-settings-profile-card button{
+    background:var(--dark-inner)!important;
+    border-color:var(--dark-line)!important;
+    color:var(--dark-text)!important;
+    box-shadow:none!important;
+  }
+
+  /* Selected controls follow Overview's warm gold selected state. */
+  html.dark #page-calendar .ref-worktype-row button.active,
+  html.dark #page-calendar .ref-template-buttons button.active,
+  html.dark #page-attendance .attendance-v142-tabs button.active,
+  html.dark #page-attendance .attendance-v142-tabs button[aria-selected="true"],
+  html.dark #page-attendance .v219-reminder-options button.active,
+  html.dark #page-salary .salary-tab.active,
+  html.dark #page-settings .settings-segmented button.active{
+    background:var(--dark-selected)!important;
+    border-color:var(--dark-selected-line)!important;
+    color:var(--dark-selected-text)!important;
+    box-shadow:inset 0 0 0 1px rgba(236,178,104,.14)!important;
+  }
+
+  /* Text hierarchy also matches Overview; remove leftover light-mode browns. */
+  html.dark #page-calendar :is(.ref-block-title,.schedule-v138-heading b,.month-title,.schedule-v129-summary strong),
+  html.dark #page-attendance :is(.ref-attendance-list-head b,.v219-board-title,b,strong),
+  html.dark #page-salary :is(.salary-section-title,.result-card strong,.salary-free-card-head b,.salary-free-estimated-card>strong),
+  html.dark #page-settings :is(.ref-settings-card-title,.ref-settings-row b,.v219-settings-profile-card b,.settings-modern-head b){
+    color:var(--dark-text)!important;
+  }
+  html.dark #page-calendar :is(.hint,small,.schedule-v129-summary span),
+  html.dark #page-attendance :is(.hint,small,.v219-mini-week),
+  html.dark #page-salary :is(.hint,.mini-note,small,.salary-field label),
+  html.dark #page-settings :is(.hint,small,.ref-settings-row small){
+    color:var(--dark-muted)!important;
+  }
+
+  /* Keep form controls dark even when older page-specific rules use white !important. */
+  html.dark #page-calendar input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.dark #page-calendar select,
+  html.dark #page-calendar textarea,
+  html.dark #page-attendance input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.dark #page-attendance select,
+  html.dark #page-attendance textarea,
+  html.dark #page-salary input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.dark #page-salary select,
+  html.dark #page-salary textarea,
+  html.dark #page-settings input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  html.dark #page-settings select,
+  html.dark #page-settings textarea{
+    background:var(--dark-inner)!important;
+    border-color:#5a4336!important;
+    color:#fff5ee!important;
+  }
+
+  /* Navigation is part of the same dark family. */
+  html.dark .bottom-nav{
+    background:rgba(24,18,15,.98)!important;
+    border-color:#49362c!important;
+    box-shadow:0 -8px 26px rgba(0,0,0,.30)!important;
+  }
+  html.dark .bottom-nav button{background:transparent!important;color:#cbb7a9!important}
+  html.dark .bottom-nav button.active{
+    background:var(--dark-selected)!important;
+    color:var(--dark-selected-text)!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -9229,192 +9416,6 @@ function buildSalaryPrintHtml(){
   }
   const r=exportMonthRecord(),tr=r.rows.map(x=>'<tr><td>'+escapeHtml(x.label)+'</td><td>'+money(x.expected)+'</td><td>'+(x.actual===null?'—':money(x.actual))+'</td><td>'+(x.actual===null?'—':signedMoney(x.actual-x.expected))+'</td></tr>').join('');
   return '<!doctype html><html><head><meta charset="utf-8"><title>'+r.title+'</title><style>'+baseStyle+'</style>
-<style id="dark-overview-parity-v252">
-/* v252 — dark mode parity. Secondary pages use the same coffee-brown hierarchy as Overview. */
-@media(max-width:760px){
-  html.dark #page-calendar,
-  html.dark #page-attendance,
-  html.dark #page-salary,
-  html.dark #page-settings{
-    --dark-page:#18120f;
-    --dark-card:#2a211d;
-    --dark-inner:#211916;
-    --dark-soft:#322720;
-    --dark-line:#513d31;
-    --dark-text:#f7eee8;
-    --dark-muted:#c9b5a7;
-    --dark-selected:#4a3427;
-    --dark-selected-line:#8e6741;
-    --dark-selected-text:#ffd18e;
-    background:var(--dark-page)!important;
-    color:var(--dark-text)!important;
-  }
-
-  /* Page heroes: no light/white islands in dark mode. */
-  html.dark #page-attendance .ref-itinerary-hero,
-  html.dark #page-settings .ref-settings-hero,
-  html.dark #page-salary .ref-salary-hero{
-    background:
-      radial-gradient(circle at 82% 10%,rgba(226,173,108,.09),transparent 30%),
-      linear-gradient(180deg,#2a211d,#211916)!important;
-    border-color:var(--dark-line)!important;
-    box-shadow:0 10px 28px rgba(0,0,0,.22)!important;
-  }
-  html.dark #page-attendance .ref-page-hero-copy>b,
-  html.dark #page-settings .ref-page-hero-copy>b,
-  html.dark #page-salary .ref-page-hero-copy>b,
-  html.dark #page-salary .page-title{color:var(--dark-text)!important}
-  html.dark #page-attendance .ref-page-hero-copy p,
-  html.dark #page-settings .ref-page-hero-copy p,
-  html.dark #page-salary .ref-page-hero-copy p{color:#e1cbbd!important}
-  html.dark #page-attendance .ref-page-hero-copy small,
-  html.dark #page-settings .ref-page-hero-copy small,
-  html.dark #page-salary .ref-page-hero-copy small{color:#e2ad6c!important}
-
-  /* Main cards: exactly the same primary surface family as Overview. */
-  html.dark #page-calendar .ref-worktype-panel,
-  html.dark #page-calendar .ref-template-card,
-  html.dark #page-calendar .ref-ai-card,
-  html.dark #page-calendar .schedule-v138-heading,
-  html.dark #page-calendar .schedule-settings,
-  html.dark #page-calendar .schedule-card-v136,
-  html.dark #page-calendar .v219-schedule-settings-strip,
-  html.dark #page-calendar .calendar-card,
-  html.dark #page-calendar .v219-calendar-color-panel,
-  html.dark #page-calendar .schedule-legend-card,
-  html.dark #page-attendance .v219-board-card,
-  html.dark #page-attendance .v219-reminder-card,
-  html.dark #page-attendance .itinerary-list-card,
-  html.dark #page-attendance .todo-card-v142,
-  html.dark #page-attendance .itinerary-empty-list,
-  html.dark #page-attendance .todo-empty-v142,
-  html.dark #page-attendance .ref-itinerary-footer-note,
-  html.dark #page-salary .salary-card,
-  html.dark #page-salary .salary-section,
-  html.dark #page-salary .salary-field,
-  html.dark #page-salary .result-card,
-  html.dark #page-salary .compare-card,
-  html.dark #page-salary .pro-card,
-  html.dark #page-salary .pro-recent-card,
-  html.dark #page-salary .salary-free-card,
-  html.dark #page-salary .salary-free-diff-bar,
-  html.dark #page-salary .formula,
-  html.dark #page-salary .scan-status,
-  html.dark #page-salary .scan-result,
-  html.dark #page-salary .itemized-panel,
-  html.dark #page-salary .salary-history-panel,
-  html.dark #page-settings .v219-settings-profile-card,
-  html.dark #page-settings .settings-ui-v129>.card,
-  html.dark #page-settings .settings-modern-card,
-  html.dark #page-settings .settings-modern-fold,
-  html.dark #page-settings .ref-settings-card,
-  html.dark #page-settings .settings-card,
-  html.dark #page-settings .account-overview-card,
-  html.dark #page-settings .account-name-editor{
-    background:var(--dark-card)!important;
-    border-color:var(--dark-line)!important;
-    color:var(--dark-text)!important;
-    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
-  }
-
-  /* Inner rows, fields and calendar cells use Overview's deeper nested surface. */
-  html.dark #page-calendar .ref-worktype-row button,
-  html.dark #page-calendar .ref-template-buttons,
-  html.dark #page-calendar .ref-template-buttons button,
-  html.dark #page-calendar .schedule-template-fold,
-  html.dark #page-calendar .schedule-v129-summary,
-  html.dark #page-calendar .schedule-v129-summary>div,
-  html.dark #page-calendar .v219-schedule-settings-strip>div,
-  html.dark #page-calendar .v219-schedule-settings-strip>button,
-  html.dark #page-calendar .weekdays,
-  html.dark #page-calendar .weekdays div,
-  html.dark #page-calendar .day,
-  html.dark #page-calendar .calendar-card .legend,
-  html.dark #page-calendar .v219-full-month,
-  html.dark #page-calendar .v219-calendar-color-options button,
-  html.dark #page-attendance .attendance-v142-tabs,
-  html.dark #page-attendance .attendance-v142-tabs button,
-  html.dark #page-attendance .ref-attendance-list-head button,
-  html.dark #page-attendance .v219-reminder-options button,
-  html.dark #page-attendance .v219-board-link,
-  html.dark #page-attendance .v219-mini-day,
-  html.dark #page-attendance .v219-conflict-item,
-  html.dark #page-salary .salary-tabs,
-  html.dark #page-salary .salary-tab,
-  html.dark #page-salary .salary-field input,
-  html.dark #page-salary .salary-field select,
-  html.dark #page-salary .salary-free-actual-input,
-  html.dark #page-settings .ref-settings-rows,
-  html.dark #page-settings .ref-settings-row,
-  html.dark #page-settings .settings-item,
-  html.dark #page-settings .settings-segmented,
-  html.dark #page-settings .settings-segmented button,
-  html.dark #page-settings .v219-settings-profile-card button{
-    background:var(--dark-inner)!important;
-    border-color:var(--dark-line)!important;
-    color:var(--dark-text)!important;
-    box-shadow:none!important;
-  }
-
-  /* Selected controls follow Overview's warm gold selected state. */
-  html.dark #page-calendar .ref-worktype-row button.active,
-  html.dark #page-calendar .ref-template-buttons button.active,
-  html.dark #page-attendance .attendance-v142-tabs button.active,
-  html.dark #page-attendance .attendance-v142-tabs button[aria-selected="true"],
-  html.dark #page-attendance .v219-reminder-options button.active,
-  html.dark #page-salary .salary-tab.active,
-  html.dark #page-settings .settings-segmented button.active{
-    background:var(--dark-selected)!important;
-    border-color:var(--dark-selected-line)!important;
-    color:var(--dark-selected-text)!important;
-    box-shadow:inset 0 0 0 1px rgba(236,178,104,.14)!important;
-  }
-
-  /* Text hierarchy also matches Overview; remove leftover light-mode browns. */
-  html.dark #page-calendar :is(.ref-block-title,.schedule-v138-heading b,.month-title,.schedule-v129-summary strong),
-  html.dark #page-attendance :is(.ref-attendance-list-head b,.v219-board-title,b,strong),
-  html.dark #page-salary :is(.salary-section-title,.result-card strong,.salary-free-card-head b,.salary-free-estimated-card>strong),
-  html.dark #page-settings :is(.ref-settings-card-title,.ref-settings-row b,.v219-settings-profile-card b,.settings-modern-head b){
-    color:var(--dark-text)!important;
-  }
-  html.dark #page-calendar :is(.hint,small,.schedule-v129-summary span),
-  html.dark #page-attendance :is(.hint,small,.v219-mini-week),
-  html.dark #page-salary :is(.hint,.mini-note,small,.salary-field label),
-  html.dark #page-settings :is(.hint,small,.ref-settings-row small){
-    color:var(--dark-muted)!important;
-  }
-
-  /* Keep form controls dark even when older page-specific rules use white !important. */
-  html.dark #page-calendar input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  html.dark #page-calendar select,
-  html.dark #page-calendar textarea,
-  html.dark #page-attendance input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  html.dark #page-attendance select,
-  html.dark #page-attendance textarea,
-  html.dark #page-salary input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  html.dark #page-salary select,
-  html.dark #page-salary textarea,
-  html.dark #page-settings input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-  html.dark #page-settings select,
-  html.dark #page-settings textarea{
-    background:var(--dark-inner)!important;
-    border-color:#5a4336!important;
-    color:#fff5ee!important;
-  }
-
-  /* Navigation is part of the same dark family. */
-  html.dark .bottom-nav{
-    background:rgba(24,18,15,.98)!important;
-    border-color:#49362c!important;
-    box-shadow:0 -8px 26px rgba(0,0,0,.30)!important;
-  }
-  html.dark .bottom-nav button{background:transparent!important;color:#cbb7a9!important}
-  html.dark .bottom-nav button.active{
-    background:var(--dark-selected)!important;
-    color:var(--dark-selected-text)!important;
-  }
-}
-</style>
 
 </head><body><h1>喵的，又要上班了｜'+r.title+'</h1><div class="sub">產生日期：'+new Date().toLocaleDateString('zh-TW')+'</div><div class="cards"><div class="card"><b>App 預估實領</b><strong>'+money(r.expectedNet)+'</strong></div><div class="card"><b>公司實發</b><strong>'+(r.actualNet===null?'—':money(r.actualNet))+'</strong></div><div class="card"><b>差額</b><strong>'+(r.diff===null?'—':signedMoney(r.diff))+'</strong></div></div><table><thead><tr><th>項目</th><th>App 預估</th><th>公司實際</th><th>差額</th></tr></thead><tbody>'+tr+'</tbody></table><div class="foot">本月實際出勤 '+r.attendance+' 天・加班 '+r.overtimeHours+' 小時・請假 '+r.leaveDays+' 天。此報告依 App 中已儲存資料產生，實際薪資仍以公司薪資單為準。</div></body></html>';
 }
