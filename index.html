@@ -7215,9 +7215,7 @@ async function saveAccountState(showAlert=false,resolveConflict=false){
   if(authBusy&&authBusyEpoch===epoch)return false;
   authBusy=true;authBusyEpoch=epoch;
   const edit=localEditVersion,snapshot=JSON.parse(JSON.stringify(state));delete snapshot.theme;
-  let history=cloudHistoryEntries(cloudPayload);
-  if(cloudPayload&&meaningfulSnapshot(cloudPayload))history=[{savedAt:cloudPayload.savedAt,state:cloudPayload.state},...history];
-  const payload={version:5,savedAt:lastSavedAt||new Date().toISOString(),deviceId,state:snapshot,history:history.slice(0,5),syncReason:'auto'};
+  const payload={version:6,savedAt:lastSavedAt||new Date().toISOString(),deviceId,state:snapshot,syncReason:'auto'};
   setCloudStatus('正在同步…');
   try{
     const client=await getAuthClient();if(!sameAccess(uid,epoch)||!canCloudSync())return false;
@@ -11923,22 +11921,41 @@ function meowAssistantMonthSnapshotScore(snapshot,year,month){
 }
 async function meowAssistantCloudSnapshot(year,month){
   if(!authUser||!hasCloudEntitlement())throw new Error('cloud_required');
-  const uid=authUser.id,epoch=accessEpoch,client=await getAuthClient();
-  const {data,error}=await client.from('user_sync_state').select('payload,updated_at').eq('user_id',cloudOwnerId||uid).maybeSingle();
+  const uid=authUser.id,epoch=accessEpoch,client=await getAuthClient(),owner=cloudOwnerId||uid;
+  const [liveResult,backupResult]=await Promise.all([
+    client.from('user_sync_state').select('payload,updated_at').eq('user_id',owner).maybeSingle(),
+    client.from('user_sync_backups').select('payload,created_at,revision').eq('user_id',owner).order('created_at',{ascending:false}).limit(30)
+  ]);
   if(!sameAccess(uid,epoch))throw new Error('account_changed');
-  if(error)throw error;
-  const payload=data&&data.payload||null;
-  if(!payload)throw new Error('cloud_empty');
-  const candidates=[payload,...cloudHistoryEntries(payload)].filter(x=>x&&x.state);
+  if(liveResult.error)throw liveResult.error;
+  const payload=liveResult.data&&liveResult.data.payload||null;
+  const backups=backupResult.error?[]:(Array.isArray(backupResult.data)?backupResult.data:[]);
+  const candidates=[];
+  if(payload&&payload.state)candidates.push({
+    snapshot:payload,
+    updatedAt:payload.savedAt||liveResult.data&&liveResult.data.updated_at||'',
+    historical:false
+  });
+  cloudHistoryEntries(payload).forEach(snapshot=>{
+    candidates.push({snapshot,updatedAt:snapshot.savedAt||'',historical:true});
+  });
+  backups.forEach(row=>{
+    if(row&&row.payload&&row.payload.state)candidates.push({
+      snapshot:row.payload,
+      updatedAt:row.payload.savedAt||row.created_at||row.revision||'',
+      historical:true
+    });
+  });
   if(!candidates.length)throw new Error('cloud_empty');
-  const ranked=candidates.map((snapshot,index)=>({snapshot,index,score:meowAssistantMonthSnapshotScore(snapshot,year,month)}))
-    .sort((a,b)=>b.score-a.score||a.index-b.index);
-  const picked=ranked[0];
+  const ranked=candidates.map((entry,index)=>({
+    entry,index,score:meowAssistantMonthSnapshotScore(entry.snapshot,year,month)
+  })).sort((a,b)=>b.score-a.score||a.index-b.index);
+  const picked=ranked[0].entry;
   return{
     state:normalizeState(picked.snapshot.state),
-    updatedAt:picked.snapshot.savedAt||data.updated_at||'',
-    historical:picked.index>0,
-    monthEvidence:picked.score>0
+    updatedAt:picked.updatedAt,
+    historical:picked.historical,
+    monthEvidence:ranked[0].score>0
   };
 }
 function renderMeowAssistantMonth(snapshot,year,month,meta=''){
@@ -13434,9 +13451,7 @@ async function backupCloudNow(showAlert=true){
       }
     }
     const snapshot=JSON.parse(JSON.stringify(state));delete snapshot.theme;
-    let history=cloudHistoryEntries(remotePayload);
-    if(remotePayload&&meaningfulSnapshot(remotePayload))history=[{savedAt:remotePayload.savedAt,state:remotePayload.state},...history];
-    const payload={version:5,savedAt:lastSavedAt||new Date().toISOString(),deviceId,state:snapshot,history:history.slice(0,5),syncReason:'manual_backup'};
+    const payload={version:6,savedAt:lastSavedAt||new Date().toISOString(),deviceId,state:snapshot,syncReason:'manual_backup'};
     const {data,error}=await client.rpc('meow_save_snapshot',{p_payload:payload,p_expected_updated_at:remote&&remote.updated_at||null});
     if(!sameAccess(uid,epoch)||!hasCloudEntitlement())return false;
     if(error)throw error;
