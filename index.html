@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v262-itinerary-left-todo-right-title-single-line">
+<meta name="meow-ui-build" content="v263-meow-assistant-natural-actions">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -11245,7 +11245,7 @@ function meowAssistantLeaveInfo(text){
     if(type==='custom')continue;
     if(meta.aliases.some(alias=>t.includes(alias)))return{type,label:meta.label};
   }
-  const mutation=/(?:請|休|改成|改為|設成|設定成|登記|標記|記成|排成|取消|刪除|刪掉|拿掉|撤銷|移除).{0,8}([\u4e00-\u9fff]{1,8}假)|([\u4e00-\u9fff]{1,8}假).{0,8}(?:取消|不要|刪除|刪掉|拿掉|撤銷|移除|標錯|記錯)/.exec(t);
+  const mutation=/(?:請|休|改成|改為|設成|設定成|登記|標記|記成|排成|取消|刪除|刪掉|拿掉|撤銷|移除)\s*(?:一個|一天|半天)?\s*([\u4e00-\u9fff]{1,8}假)|([\u4e00-\u9fff]{1,8}假)\s*(?:取消|不要|刪除|刪掉|拿掉|撤銷|移除|標錯|記錯)/.exec(t);
   const label=String(mutation&&(mutation[1]||mutation[2])||'').trim();
   if(label&&!['請假','休假','放假','假日','什麼假','任何假'].includes(label))return{type:'custom',label};
   return{type:'',label:''};
