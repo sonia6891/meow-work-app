@@ -9,6 +9,7 @@ import Security
 import Vision
 import Speech
 import AVFoundation
+import WidgetKit
 
 @objc(MeowStoreBillingPlugin)
 public class MeowStoreBillingPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -858,6 +859,31 @@ public class MeowSpeechPlugin: CAPPlugin, CAPBridgedPlugin {
 }
 
 
+
+@objc(MeowWidgetPlugin)
+public class MeowWidgetPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "MeowWidgetPlugin"
+    public let jsName = "MeowWidget"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "updatePayday", returnType: CAPPluginReturnPromise)
+    ]
+    private let appGroup = "group.com.lumilab.meowwork.shared"
+    private let paydayKey = "paydayDay"
+
+    @objc func updatePayday(_ call: CAPPluginCall) {
+        let raw = call.getInt("payday") ?? 0
+        let payday = (1...31).contains(raw) ? raw : 0
+        guard let defaults = UserDefaults(suiteName: appGroup) else {
+            call.reject("Unable to access widget App Group")
+            return
+        }
+        defaults.set(payday, forKey: paydayKey)
+        defaults.synchronize()
+        WidgetCenter.shared.reloadAllTimelines()
+        call.resolve(["updated": true, "payday": payday])
+    }
+}
+
 final class ViewController: CAPBridgeViewController {
     override public func capacitorDidLoad() {
         bridge?.registerPluginInstance(MeowStoreBillingPlugin())
@@ -865,5 +891,6 @@ final class ViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(MeowAppleAuthPlugin())
         bridge?.registerPluginInstance(MeowScheduleVisionPlugin())
         bridge?.registerPluginInstance(MeowSpeechPlugin())
+        bridge?.registerPluginInstance(MeowWidgetPlugin())
     }
 }

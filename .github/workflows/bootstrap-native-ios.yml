@@ -204,10 +204,17 @@ jobs:
           grep -q 'TARGETED_DEVICE_FAMILY = 1;' ios/App/App.xcodeproj/project.pbxproj
           test -f ios/App/MeowDateWidget/MeowDateWidget.swift
           test -f ios/App/MeowDateWidget/Info.plist
+          test -f ios/App/MeowDateWidget/MeowDateWidget.entitlements
           test -f ios/App/MeowDateWidget/WidgetAssets.xcassets/WidgetCat.imageset/widget-cat.png
           grep -q 'import WidgetKit' ios/App/MeowDateWidget/MeowDateWidget.swift
           grep -q 'supportedFamilies' ios/App/MeowDateWidget/MeowDateWidget.swift
           grep -q 'com.apple.widgetkit-extension' ios/App/MeowDateWidget/Info.plist
+          grep -q 'group.com.lumilab.meowwork.shared' ios/App/MeowDateWidget/MeowDateWidget.entitlements
+          grep -q 'group.com.lumilab.meowwork.shared' ios/App/App/App.entitlements
+          grep -q 'MeowWidgetPlugin' ios/App/App/SceneDelegate.swift
+          grep -q 'registerPluginInstance(MeowWidgetPlugin())' ios/App/App/SceneDelegate.swift
+          grep -q 'systemLarge' ios/App/MeowDateWidget/MeowDateWidget.swift
+          grep -q 'paydayDay' ios/App/MeowDateWidget/MeowDateWidget.swift
           grep -q 'MeowDateWidget.appex' ios/App/App.xcodeproj/project.pbxproj
           grep -q 'com.lumilab.meowwork.widget' ios/App/App.xcodeproj/project.pbxproj
           if grep -q 'TARGETED_DEVICE_FAMILY = "1,2";' ios/App/App.xcodeproj/project.pbxproj; then

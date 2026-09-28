@@ -15,6 +15,7 @@ FileUtils.rm_rf(widget_dir)
 FileUtils.mkdir_p(widget_dir)
 FileUtils.cp(File.join(source_dir, 'MeowDateWidget.swift'), File.join(widget_dir, 'MeowDateWidget.swift'))
 FileUtils.cp(File.join(source_dir, 'MeowDateWidget-Info.plist'), File.join(widget_dir, 'Info.plist'))
+FileUtils.cp(File.join(source_dir, 'MeowDateWidget.entitlements'), File.join(widget_dir, 'MeowDateWidget.entitlements'))
 
 asset_catalog = File.join(widget_dir, 'WidgetAssets.xcassets')
 image_set = File.join(asset_catalog, 'WidgetCat.imageset')
@@ -52,6 +53,7 @@ widget_target.resources_build_phase.add_file_reference(assets_ref, true)
 widget_target.build_configurations.each do |config|
   settings = config.build_settings
   settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
+  settings['CODE_SIGN_ENTITLEMENTS'] = "#{widget_name}/MeowDateWidget.entitlements"
   settings['CODE_SIGN_STYLE'] = 'Automatic'
   settings['CURRENT_PROJECT_VERSION'] = '1'
   settings['GENERATE_INFOPLIST_FILE'] = 'NO'
@@ -74,4 +76,4 @@ unless embed_phase.files_references.include?(widget_target.product_reference)
 end
 
 project.save
-puts "Added #{widget_name} WidgetKit extension with small and medium date widgets."
+puts "Added #{widget_name} WidgetKit extension with small, medium and large date/payday widgets."
