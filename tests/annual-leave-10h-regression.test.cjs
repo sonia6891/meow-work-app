@@ -57,7 +57,8 @@ const balanceApi=new Function(`
   const state={
     settings:{dailyWorkHours:10},
     dayStatus:{
-      '2026-09-27':{type:'annual',hours:10}
+      '2026-09-27':{type:'annual',hours:10},
+      '2026-09-28':{type:'annual',hours:10}
     }
   };
   const num=v=>Number(v)||0;
@@ -71,6 +72,7 @@ const balanceApi=new Function(`
   const annualPeriodQuota=()=>7;
   const annualSupplementHours=()=>22;
   const annualDate=value=>new Date(String(value)+'T00:00:00');
+  const scheduleForDate=dt=>dt.getDate()===28?'off':'work';
   const effectiveDayStatusHours=st=>Math.max(0,Number(st&&st.hours)||0);
   ${balanceSource}
   return annualLeaveBalanceInfo(new Date(2026,8,28));
