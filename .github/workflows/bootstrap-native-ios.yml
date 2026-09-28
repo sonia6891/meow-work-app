@@ -110,6 +110,8 @@ jobs:
           rm -rf ios
           npx cap add ios
           node scripts/patch-ios-bridge.mjs
+          gem install xcodeproj --no-document
+          ruby scripts/add-date-widget.rb
           cp ../native-icon-v178-1024.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           cp ../native-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png
           cp ../native-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png
@@ -200,6 +202,14 @@ jobs:
           grep -q 'com.apple.developer.applesignin' ios/App/App/App.entitlements
           grep -q 'CODE_SIGN_ENTITLEMENTS = App/App.entitlements;' ios/App/App.xcodeproj/project.pbxproj
           grep -q 'TARGETED_DEVICE_FAMILY = 1;' ios/App/App.xcodeproj/project.pbxproj
+          test -f ios/App/MeowDateWidget/MeowDateWidget.swift
+          test -f ios/App/MeowDateWidget/Info.plist
+          test -f ios/App/MeowDateWidget/WidgetAssets.xcassets/WidgetCat.imageset/widget-cat.png
+          grep -q 'import WidgetKit' ios/App/MeowDateWidget/MeowDateWidget.swift
+          grep -q 'supportedFamilies' ios/App/MeowDateWidget/MeowDateWidget.swift
+          grep -q 'com.apple.widgetkit-extension' ios/App/MeowDateWidget/Info.plist
+          grep -q 'MeowDateWidget.appex' ios/App/App.xcodeproj/project.pbxproj
+          grep -q 'com.lumilab.meowwork.widget' ios/App/App.xcodeproj/project.pbxproj
           if grep -q 'TARGETED_DEVICE_FAMILY = "1,2";' ios/App/App.xcodeproj/project.pbxproj; then
             echo "Unexpected iPad support in iPhone-only v1 target"
             exit 1
@@ -287,6 +297,8 @@ jobs:
           test -f "$APP_DIR/public/privacy.html"
           test -f "$APP_DIR/public/terms.html"
           test -f "$APP_DIR/public/support.html"
+          test -d "$APP_DIR/PlugIns/MeowDateWidget.appex"
+          /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$APP_DIR/PlugIns/MeowDateWidget.appex/Info.plist" | grep -q 'com.apple.widgetkit-extension'
           /usr/libexec/PlistBuddy -c "Print :ITSAppUsesNonExemptEncryption" "$APP_DIR/Info.plist" | grep -q false
           /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" "$APP_DIR/Info.plist" | grep -q '班表'
           /usr/libexec/PlistBuddy -c "Print :NSPhotoLibraryUsageDescription" "$APP_DIR/Info.plist" | grep -q '薪資單'
