@@ -398,7 +398,14 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         });
         check('深色 A班上班卡不再使用淺色背景', !/rgb\(255, 248, 242\)/.test(darkToday.bg));
         check('深色 A班上班文字保持高亮', /rgb\(255, 247, 241\)/.test(darkToday.text));
-        await page.screenshot({ path:path.join(out,'v256-dark-attendance-390.png'), fullPage:true });
+        const darkHero=await page.evaluate(()=>{
+          const wrap=document.querySelector('.hero-wrap'),image=document.querySelector('.hero-mobile-dark');
+          const ws=getComputedStyle(wrap),is=getComputedStyle(image);
+          return{background:ws.backgroundColor,filter:is.filter,opacity:is.opacity};
+        });
+        check('深色 Hero 底色與頁面同為咖啡棕', /rgb\(24, 18, 15\)/.test(darkHero.background));
+        check('深色 Hero 圖片套用咖啡暖色融合', darkHero.filter!=='none' && Number(darkHero.opacity)<1);
+        await page.screenshot({ path:path.join(out,'v257-dark-attendance-390.png'), fullPage:true });
 
         await page.evaluate(() => window.__accountV119.theme('light'));
         await page.waitForTimeout(80);
@@ -479,7 +486,14 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.evaluate(() => window.__accountV119.attendance());
         await page.waitForTimeout(120);
         check('第三頁使用參考圖的行程與待辦架構', (await page.locator('.v219-itinerary-heading').innerText()).includes('行程與待辦事項') && await page.locator('.v219-itinerary-board').isVisible());
-        check('行程與待辦卡片的加號按鈕可見', await page.locator('#v219QuickEvent').isVisible() && await page.locator('#v219QuickTodoCard').isVisible());
+        check('行程分頁只顯示行程內容', await page.locator('.v219-today-card').isVisible() && !(await page.locator('.v219-todo-card').isVisible()) && await page.locator('.v219-conflict-card').isVisible());
+        check('行程分頁只顯示新增行程按鈕', await page.locator('#v219QuickEvent').isVisible() && !(await page.locator('#v219QuickTodoCard').isVisible()));
+        const todayWidth=await page.evaluate(()=>{
+          const card=document.querySelector('.v219-today-card'),board=document.querySelector('.v219-itinerary-board');
+          const cr=card.getBoundingClientRect(),br=board.getBoundingClientRect();
+          return{card:cr.width,board:br.width};
+        });
+        check('今天的安排是橫向滿版長卡', todayWidth.card >= todayWidth.board-2);
         await page.locator('#v219QuickEvent').click();
         check('新增行程按鈕直接開啟行程視窗', await page.locator('#eventDialog').evaluate(x=>x.open));
         check('新行程預設前 1 小時提醒', await page.locator('#eventReminder').inputValue() === '1h');
@@ -492,6 +506,13 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
 
         await page.locator('#attendanceTabTodos').click();
         check('待辦事項分頁可切換', await page.locator('#attendanceTabTodos').getAttribute('aria-selected') === 'true');
+        check('待辦事項分頁只顯示待辦清單', await page.locator('.v219-todo-card').isVisible() && !(await page.locator('.v219-today-card').isVisible()) && !(await page.locator('.v219-conflict-card').isVisible()));
+        const todoWidth=await page.evaluate(()=>{
+          const card=document.querySelector('.v219-todo-card'),board=document.querySelector('.v219-itinerary-board');
+          const cr=card.getBoundingClientRect(),br=board.getBoundingClientRect();
+          return{card:cr.width,board:br.width};
+        });
+        check('待辦清單在待辦事項下面橫向滿版', todoWidth.card >= todoWidth.board-2);
         await page.locator('#v219QuickTodoCard').click();
         check('新增待辦按鈕直接開啟待辦視窗', await page.locator('#todoDialog').evaluate(x=>x.open));
         check('新待辦預設前一天上午 9 點提醒', await page.locator('#todoReminder').inputValue() === '1d');
