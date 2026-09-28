@@ -140,5 +140,11 @@ assert(
   html.includes('Free 版本只保存在本機。'),
   'Cloud messaging must match automatic Pro sync and local-only Free behavior.'
 );
+assert(
+  html.includes('const versionCreated=!!data.backup_created') &&
+  html.includes('已同步到雲端・目前尚無新的歷史版本') &&
+  html.includes('已同步・已建立歷史雲端版本'),
+  'Manual cloud save must distinguish the live cloud snapshot from an actual history checkpoint.'
+);
 
 console.log('Cloud sync v190 regression checks passed.');
