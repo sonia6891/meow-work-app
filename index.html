@@ -6113,7 +6113,7 @@ function annualSupplementHours(period){
   return values&&typeof values==='object'?Math.max(0,num(values[period.key])):0;
 }
 function annualLeaveBalanceInfo(asOf=new Date()){
-  const period=annualLeavePeriod(asOf),daily=8,totalDays=annualPeriodQuota(period,asOf),totalHours=totalDays*daily;
+  const period=annualLeavePeriod(asOf),daily=Math.max(.5,num(state.settings.dailyWorkHours)||8),totalDays=annualPeriodQuota(period,asOf),totalHours=totalDays*daily;
   let recordedHours=0,plannedHours=0;
   if(!period.missing){
     for(const [date,st] of Object.entries(state.dayStatus||{})){
