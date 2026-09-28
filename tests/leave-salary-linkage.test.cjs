@@ -7,33 +7,10 @@ function extractFunction(name){
   const marker='function '+name+'(';
   const start=html.indexOf(marker);
   assert(start>=0,'missing function '+name);
-  const brace=html.indexOf('{',start);
-  let depth=0,inStr='',esc=false,inRegex=false,inClass=false;
-  for(let i=brace;i<html.length;i++){
-    const ch=html[i],prev=html[i-1]||'';
-    if(inStr){
-      if(esc){esc=false;continue}
-      if(ch==='\\'){esc=true;continue}
-      if(ch===inStr)inStr='';
-      continue;
-    }
-    if(inRegex){
-      if(esc){esc=false;continue}
-      if(ch==='\\'){esc=true;continue}
-      if(ch==='[')inClass=true;
-      else if(ch===']')inClass=false;
-      else if(ch==='/'&&!inClass)inRegex=false;
-      continue;
-    }
-    if(ch==="'"||ch==='"'||ch==='\`'){inStr=ch;continue}
-    if(ch==='/'&&prev!=='/'&&html[i+1]!=='/'&&html[i+1]!=='*'){inRegex=true;continue}
-    if(ch==='{')depth++;
-    if(ch==='}'){
-      depth--;
-      if(depth===0)return html.slice(start,i+1);
-    }
-  }
-  throw new Error('unterminated '+name);
+  const next='\nfunction calcMonth()';
+  const end=html.indexOf(next,start);
+  assert(end>start,'missing end marker for '+name);
+  return html.slice(start,end);
 }
 
 const source=extractFunction('attendanceDeductionEstimate');
