@@ -11246,7 +11246,7 @@ function meowAssistantLeaveInfo(text){
     if(meta.aliases.some(alias=>t.includes(alias)))return{type,label:meta.label};
   }
   const mutation=/(?:請|休|改成|改為|設成|設定成|登記|標記|記成|排成|取消|刪除|刪掉|拿掉|撤銷|移除)\s*(?:一個|一天|半天)?\s*([\u4e00-\u9fff]{1,8}假)|([\u4e00-\u9fff]{1,8}假)\s*(?:取消|不要|刪除|刪掉|拿掉|撤銷|移除|標錯|記錯)/.exec(t);
-  const label=String(mutation&&(mutation[1]||mutation[2])||'').trim();
+  const label=String(mutation&&(mutation[1]||mutation[2])||'').trim().replace(/^(?:號|日)+/,'');
   if(label&&!['請假','休假','放假','假日','什麼假','任何假'].includes(label))return{type:'custom',label};
   return{type:'',label:''};
 }
