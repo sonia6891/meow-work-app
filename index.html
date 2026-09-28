@@ -7786,49 +7786,60 @@ function effectiveDayStatusHours(st){
   return Math.max(.5,num(state.settings.dailyWorkHours)||8);
 }
 function attendanceDeductionEstimate(y,m,normalMonthlyWage){
-  // Taiwan MOL monthly-paid leave estimate:
+  // Taiwan monthly-paid leave estimate:
   // 1 day wage = normal monthly wage / 30; hourly equivalent = / 240.
-  // Personal leave = no pay; ordinary sick / menstrual leave = half pay.
-  // A single scheduled work date is capped at 8 statutory hours for wage-deduction
-  // purposes, so a full 10-hour four-shift sick day is still treated as one leave day.
+  // Full-unpaid group: personal leave, family-care leave, parental leave without pay.
+  // Half-pay group: ordinary sick leave, menstrual leave, pregnancy-rest leave.
+  // Paid/conditional statutory leave is not auto-deducted here.
   const wageBase=Math.max(0,num(normalMonthlyWage));
   const dailyWage=wageBase/30;
   const hourlyWage=wageBase/240;
-  let personalHours=0,sickHours=0,menstrualHours=0;
-  let personalLegalHours=0,sickLegalHours=0,menstrualLegalHours=0;
-  let personalDeduction=0,sickDeduction=0,menstrualDeduction=0;
+  const fullUnpaidTypes=new Set(['personal','familyCare','parentalLeave']);
+  const halfPayTypes=new Set(['sick','menstrual','pregnancyRest']);
+  const tracked={personal:0,familyCare:0,parentalLeave:0,sick:0,menstrual:0,pregnancyRest:0};
+  const legalTracked={personal:0,familyCare:0,parentalLeave:0,sick:0,menstrual:0,pregnancyRest:0};
+  const deductionByType={personal:0,familyCare:0,parentalLeave:0,sick:0,menstrual:0,pregnancyRest:0};
   const prefix=monthKey(y,m)+'-';
   for(const [date,st] of Object.entries(state.dayStatus||{})){
     if(!date.startsWith(prefix)||!st||!st.type||st.type==='none'||st.type==='overtime')continue;
     const dt=new Date(date+'T00:00:00');
     if(Number.isNaN(dt.getTime())||scheduleForDate(dt)!=='work')continue;
+    const type=st.type;
+    if(!fullUnpaidTypes.has(type)&&!halfPayTypes.has(type))continue;
     const hours=effectiveDayStatusHours(st);
+    // The salary engine estimates loss of normal monthly wages, not scheduled overtime.
+    // Cap each scheduled date at one statutory normal workday (8 hours).
     const legalHours=Math.min(8,Math.max(0,hours));
     const leaveWage=Math.min(dailyWage,hourlyWage*legalHours);
-    if(st.type==='personal'){
-      personalHours+=hours;
-      personalLegalHours+=legalHours;
-      personalDeduction+=leaveWage;
-    }else if(st.type==='sick'){
-      sickHours+=hours;
-      sickLegalHours+=legalHours;
-      sickDeduction+=leaveWage*.5;
-    }else if(st.type==='menstrual'){
-      menstrualHours+=hours;
-      menstrualLegalHours+=legalHours;
-      menstrualDeduction+=leaveWage*.5;
-    }
+    tracked[type]+=hours;
+    legalTracked[type]+=legalHours;
+    deductionByType[type]+=fullUnpaidTypes.has(type)?leaveWage:leaveWage*.5;
   }
-  const amount=Math.max(0,Math.round(personalDeduction+sickDeduction+menstrualDeduction));
+  const amount=Math.max(0,Math.round(Object.values(deductionByType).reduce((sum,value)=>sum+value,0)));
   return{
     amount,
     hourly:hourlyWage,
     hourlyWage,
     dailyWage,
     wageBase,
-    personalHours,sickHours,menstrualHours,
-    personalLegalHours,sickLegalHours,menstrualLegalHours,
-    personalDeduction,sickDeduction,menstrualDeduction
+    personalHours:tracked.personal,
+    familyCareHours:tracked.familyCare,
+    parentalLeaveHours:tracked.parentalLeave,
+    sickHours:tracked.sick,
+    menstrualHours:tracked.menstrual,
+    pregnancyRestHours:tracked.pregnancyRest,
+    personalLegalHours:legalTracked.personal,
+    familyCareLegalHours:legalTracked.familyCare,
+    parentalLeaveLegalHours:legalTracked.parentalLeave,
+    sickLegalHours:legalTracked.sick,
+    menstrualLegalHours:legalTracked.menstrual,
+    pregnancyRestLegalHours:legalTracked.pregnancyRest,
+    personalDeduction:deductionByType.personal,
+    familyCareDeduction:deductionByType.familyCare,
+    parentalLeaveDeduction:deductionByType.parentalLeave,
+    sickDeduction:deductionByType.sick,
+    menstrualDeduction:deductionByType.menstrual,
+    pregnancyRestDeduction:deductionByType.pregnancyRest
   };
 }
 function calcMonth(){const y=current.getFullYear(),m=current.getMonth(),mm=state.months[monthKey(y,m)]||{},days=new Date(y,m+1,0).getDate();let expected=0,attendance=0,leaveDays=0,leaveHours=0,overtimeDays=0,dailyOt=0;const leaves={};const weekdayOt=[0,0,0,0,0,0,0];for(let d=1;d<=days;d++){const dt=new Date(y,m,d),date=iso(dt),base=scheduleForDate(dt),st=state.dayStatus[date];if(base==='work')expected++;if(base==='work'&&(!st||st.type==='none'||st.type==='overtime'))attendance++;if(st&&st.type&&st.type!=='none'){if(st.type==='overtime'){overtimeDays++;dailyOt+=effectiveDayStatusHours(st);weekdayOt[dt.getDay()]+=effectiveDayStatusHours(st)}else{leaveDays++;leaveHours+=effectiveDayStatusHours(st);const meta=typeMeta(st),key=st.type==='custom'?'custom:'+meta.label:st.type;if(!leaves[key])leaves[key]={label:meta.label,type:st.type,hours:0,days:0};leaves[key].hours+=effectiveDayStatusHours(st);leaves[key].days++}}}
@@ -10154,7 +10165,7 @@ function renderSalary(){
   set('dedWelfare',mm.dedWelfare);
   set('dedPension',mm.dedPension);
   set('dedAttendance',mc.attendanceDeductionManual?mm.dedAttendance:mc.deductions.attendance);
-  if($('dedAttendanceHint'))$('dedAttendanceHint').textContent=mc.attendanceDeductionManual?'目前使用你手動輸入的考勤扣款；清空欄位即可恢復班表自動估算。':'班表自動估算：依你的薪資設定與本月請假紀錄自動計算；事假 100%、普通病假／生理假 50%、特休 0%。目前事假 '+fmtHours(mc.autoAttendance.personalHours)+' 小時、病假 '+fmtHours(mc.autoAttendance.sickHours)+' 小時、生理假 '+fmtHours(mc.autoAttendance.menstrualHours)+' 小時。';
+  if($('dedAttendanceHint'))$('dedAttendanceHint').textContent=mc.attendanceDeductionManual?'目前使用你手動輸入的考勤扣款；清空欄位即可恢復班表自動估算。':'班表自動估算：事假／家庭照顧假／育嬰留職停薪按未給薪估算；普通病假／生理假／安胎休養按半薪估算；特休、產檢假、陪產檢及陪產假等不自動扣基本工資。產假／流產假會依年資與法定條件不同，請以薪資單人工確認。目前事假 '+fmtHours(mc.autoAttendance.personalHours)+' 小時、家庭照顧假 '+fmtHours(mc.autoAttendance.familyCareHours)+' 小時、育嬰留停 '+fmtHours(mc.autoAttendance.parentalLeaveHours)+' 小時、病假 '+fmtHours(mc.autoAttendance.sickHours)+' 小時、生理假 '+fmtHours(mc.autoAttendance.menstrualHours)+' 小時、安胎休養 '+fmtHours(mc.autoAttendance.pregnancyRestHours)+' 小時。';
   set('dedTax',mm.dedTax);
   set('dedHealthExtra',mm.dedHealthExtra);
   set('dedOther',mm.dedOther);
@@ -10166,7 +10177,7 @@ function renderSalary(){
   $('resultOtPay').textContent=money(mc.otPay);
   $('resultGross').textContent=money(mc.gross);
   $('resultNet').textContent=money(mc.net);
-  $('formulaText').innerHTML=`<b>ⓘ 計算說明</b><br>● 輪班津貼依「每班津貼 × 實際出勤」自動計算<br>● 請假考勤扣款 ＝ ${mc.attendanceDeductionManual?'手動輸入 '+money(mc.deductions.attendance):'班表自動估算 '+money(mc.deductions.attendance)+'（依你的薪資設定與實際請假時數計算；事假 100%、病假／生理假 50%、特休 0%）'}<br>● 基礎時薪 ＝（底薪＋輪班津貼＋伙食津貼＋表現津貼）÷ 240 ＝ ${money(mc.hourly)}<br>● 加班費率 ＝ ${overtimeRateSummary()}<br>● ${overtimeHourlyDisplay(mc.hourly).label} ＝ ${overtimeHourlyDisplay(mc.hourly).main===null?overtimeHourlyDisplay(mc.hourly).sub:money(overtimeHourlyDisplay(mc.hourly).main)}<br>● 本月加班費<br>　${overtimeFormulaDetail(mc)}`;
+  $('formulaText').innerHTML=`<b>ⓘ 計算說明</b><br>● 輪班津貼依「每班津貼 × 實際出勤」自動計算<br>● 請假考勤扣款 ＝ ${mc.attendanceDeductionManual?'手動輸入 '+money(mc.deductions.attendance):'班表自動估算 '+money(mc.deductions.attendance)+'（事假／家庭照顧假／育嬰留停按未給薪估算；病假／生理假／安胎休養按半薪估算；產假／流產假依個別法定條件請人工確認）'}<br>● 基礎時薪 ＝（底薪＋輪班津貼＋伙食津貼＋表現津貼）÷ 240 ＝ ${money(mc.hourly)}<br>● 加班費率 ＝ ${overtimeRateSummary()}<br>● ${overtimeHourlyDisplay(mc.hourly).label} ＝ ${overtimeHourlyDisplay(mc.hourly).main===null?overtimeHourlyDisplay(mc.hourly).sub:money(overtimeHourlyDisplay(mc.hourly).main)}<br>● 本月加班費<br>　${overtimeFormulaDetail(mc)}`;
   setSalarySubTab(salarySubTab);
   renderSalaryCompare(mc,mm);
   renderProEntitlements();
