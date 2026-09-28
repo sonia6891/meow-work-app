@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v238-deploy-fix-natural-scroll-pro-banner">
+<meta name="meow-ui-build" content="v239-exact-pro-salary-badge">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4274,6 +4274,69 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
 }
 </style>
 
+
+<style id="salary-pro-badge-v239">
+@media(max-width:760px){
+  /* Exact user-provided crown + Pro badge for salary reconciliation. */
+  #page-salary .salary-tab-pro-exact{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:6px!important;
+    padding:6px 7px!important;
+    min-width:0!important;
+    overflow:visible!important;
+    white-space:nowrap!important;
+  }
+  #page-salary .salary-tab-pro-exact > span{
+    font-size:11px!important;
+    font-weight:950!important;
+    line-height:1!important;
+  }
+  #page-salary .salary-pro-badge-icon{
+    display:block!important;
+    width:44px!important;
+    height:auto!important;
+    flex:0 0 44px!important;
+    object-fit:contain!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+  }
+
+  #page-salary .salary-pro-section-title{
+    display:flex!important;
+    align-items:center!important;
+    gap:7px!important;
+  }
+  #page-salary .salary-pro-heading-badge{
+    display:block!important;
+    width:54px!important;
+    height:auto!important;
+    object-fit:contain!important;
+    margin-left:2px!important;
+  }
+
+  #page-salary .pro-smart-title > div{
+    display:flex!important;
+    align-items:center!important;
+    gap:7px!important;
+    min-width:0!important;
+  }
+  #page-salary .salary-pro-inline-badge{
+    display:block!important;
+    width:48px!important;
+    height:auto!important;
+    object-fit:contain!important;
+    flex:0 0 auto!important;
+  }
+
+  /* Hide/remove the earlier full-width Meow Assistant banner styling in salary only. */
+  #page-salary .salary-pro-meow-art{display:none!important}
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -4728,7 +4791,7 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
       <div class="salary-tabs" role="tablist" aria-label="薪資功能">
         <button type="button" class="salary-tab active" id="salaryTabCalc" role="tab" aria-selected="true">薪資試算</button>
         <button type="button" class="salary-tab" id="salaryTabReconcile" role="tab" aria-selected="false">薪資對帳 <span class="salary-tab-tier free">Free</span></button>
-        <button type="button" class="salary-tab salary-tab-pro salary-tab-pro-art" id="salaryTabPro" role="tab" aria-selected="false" aria-label="薪資對帳 Pro"><span class="salary-pro-tab-label">薪資對帳</span><span class="salary-pro-tab-thumb" aria-hidden="true"><img src="./assets/meow-assistant-pro-reference-v232.webp?v=237" alt=""></span></button>
+        <button type="button" class="salary-tab salary-tab-pro salary-tab-pro-exact" id="salaryTabPro" role="tab" aria-selected="false" aria-label="薪資對帳 Pro"><span>薪資對帳</span><img class="salary-pro-badge-icon" src="./assets/pro-salary-badge-v239.jpg?v=239" alt="Pro"></button>
       </div>
       <div class="salary-pane" id="salaryCalcPane">
       <div class="salary-section"><div class="salary-section-title"><span class="paw">🐾</span>薪資收入項目</div><div class="salary-grid">
@@ -4766,12 +4829,12 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
       </div>
       <div class="salary-pane hidden" id="salaryProPane">
       <div class="salary-section">
-        <div class="salary-section-title"><span class="paw">🐾</span>智慧薪資對帳 <span class="salary-tab-tier pro">Pro</span></div>
+        <div class="salary-section-title salary-pro-section-title"><span class="paw">🐾</span><span>智慧薪資對帳</span><img class="salary-pro-heading-badge" src="./assets/pro-salary-badge-v239.jpg?v=239" alt="Pro"></div>
         <div class="hint" style="margin-bottom:10px">免費版先看總額有沒有差；Pro 再幫你找出差在哪一項。</div>
         <div class="pro-grid smart-payroll-shell">
           <div class="pro-card pro-smart-hero" data-pro-feature="payslip_scan">
-            <div class="salary-pro-meow-art" aria-hidden="true"><img src="./assets/meow-assistant-pro-reference-v232.webp?v=237" alt=""></div>
-            <div class="pro-smart-title"><div><span class="pro-smart-kicker">🐾 智慧薪資對帳</span><span class="salary-tab-tier pro">Pro</span></div><span class="pro-badge">🔒 Pro</span></div>
+            
+            <div class="pro-smart-title"><div><span class="pro-smart-kicker">🐾 智慧薪資對帳</span><img class="salary-pro-inline-badge" src="./assets/pro-salary-badge-v239.jpg?v=239" alt="Pro"></div><span class="pro-badge">🔒 Pro</span></div>
             <p class="pro-smart-lead">讀每一份辛苦，不只看總額。上傳薪資單後，系統會逐項核對並把需要你確認的地方集中列出。</p>
             <div class="pro-smart-points">
               <span>◉ 三層交叉檢查</span><span>◉ 逐項找差異與漏項</span><span>◉ 額外加項／扣項自動列示</span><span>◉ 歷史對帳可回看</span>
