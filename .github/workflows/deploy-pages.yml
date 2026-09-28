@@ -58,6 +58,8 @@ jobs:
         run: node tests/meow-assistant-leave-law.test.cjs
       - name: Annual leave 10-hour shift regression
         run: node tests/annual-leave-10h-regression.test.cjs
+      - name: Statutory leave salary linkage regression
+        run: node tests/leave-salary-linkage.test.cjs
       - name: Meow Assistant natural-language discovery baseline
         run: node tests/meow-assistant-auto-discovery.test.cjs
       - name: Install browser tests
