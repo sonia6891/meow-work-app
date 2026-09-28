@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v225-assistant-leave-relative-dates">
+<meta name="meow-ui-build" content="v226-assistant-negation-scope">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -9434,6 +9434,21 @@ function meowAssistantLeaveType(text){
 function meowAssistantLeaveLabel(type){
   return({sick:'病假',menstrual:'生理假',personal:'事假',annual:'特休'})[type]||'假別';
 }
+function meowAssistantLeaveNegated(text,leaveType=''){
+  const t=normalizeMeowAssistantText(text);
+  const token=leaveType==='menstrual'?'(?:生理假|月經假|月事假)'
+    :leaveType==='annual'?'(?:特休|年假|特別休假)'
+    :leaveType==='sick'?'(?:病假|傷病假)'
+    :leaveType==='personal'?'(?:事假)'
+    :'(?:生理假|月經假|月事假|特休|年假|特別休假|病假|傷病假|事假)';
+  // 「沒有取消特休」是否定取消，不等於取消特休；避免把雙重否定／否定取消誤判成移除。
+  if(new RegExp('(?:不是|並非)\\s*(?:沒有|沒|未).{0,6}'+token).test(t))return false;
+  if(new RegExp('(?:沒有|沒|未|並沒有|並沒).{0,3}(?:要)?(?:取消|刪除|刪掉|撤銷|拿掉).{0,4}'+token).test(t))return false;
+  const before=new RegExp('(?:並沒有|根本沒有|從來沒有|沒有|並沒|根本沒|從來沒|沒|未曾|未)(?:有)?(?:要|曾|真的|實際)?\\s*(?:請|休|用|排|登記|標記|記|算)?\\s*.{0,4}'+token);
+  const identity=new RegExp('(?:不是|並非|不算|不該算|不應算|不要算|不能算)\\s*.{0,3}'+token);
+  const after=new RegExp(token+'.{0,5}(?:標錯|記錯|登記錯|排錯|算錯|不是|並非)');
+  return before.test(t)||identity.test(t)||after.test(t);
+}
 function meowAssistantShiftTarget(text){
   const t=normalizeMeowAssistantText(text);
   if(/(?:改|排|設|設定|換|調).{0,3}(?:休|休假)|(?:休假|放假|不上班)/.test(t))return{kind:'off',shiftName:'休'};
@@ -9737,10 +9752,11 @@ function meowAssistantParse(raw){
   }
 
   const leaveType=meowAssistantLeaveType(text),leaveDates=leaveType?meowAssistantMutationDates(text):[];
-  const leaveMutationVerb=/(幫我|我要|我要請|想請|要請|請|改成|改為|改|更改|換成|設成|設定成|標記|登記|記成|排成|取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
+  const leaveNegated=leaveType?meowAssistantLeaveNegated(text,leaveType):false;
+  const leaveMutationVerb=/(幫我|我要|我要請|想請|要請|請|改成|改為|改|更改|換成|設成|設定成|標記|登記|記成|排成|取消|不要|不用|刪除|刪掉|拿掉|撤銷|沒有|沒請|未請|不是|並非|標錯|記錯|登記錯|排錯|算錯)/.test(text);
   const leaveQuestion=/(怎麼請|如何請|可以請|能請|幾天|多少|剩|還有|規定|權益|有薪|無薪|扣薪|薪水|工資)/.test(text);
-  if(leaveType&&leaveDates.length&&(leaveMutationVerb||!leaveQuestion)){
-    const cancel=/(取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
+  if(leaveType&&leaveDates.length&&(leaveMutationVerb||leaveNegated||!leaveQuestion)){
+    const cancel=leaveNegated||/(取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
     return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text,leaveType),hoursSource:meowAssistantLeaveHoursSource(text),raw:text};
   }
   const knowledgeList=meowAssistantKnowledgeIntents(text);
