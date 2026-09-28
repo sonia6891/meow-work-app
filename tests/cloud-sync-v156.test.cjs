@@ -65,13 +65,13 @@ assert(
   html.includes("data.app&&data.app!=='喵的，又要上班了'"),
   'Backup import must reject oversized files and backups for another app.'
 );
-const swReloadVersion=(html.match(/meow-sw-reloaded-v(\d+)/)||[])[1];
 const swRegisterVersion=(html.match(/register\('\.\/sw\.js\?v=(\d+)'/)||[])[1];
 assert(
-  Number(swReloadVersion)>=156 &&
-  Number(swRegisterVersion)>=156 &&
-  swReloadVersion===swRegisterVersion,
-  'Service worker registration must stay cache-busted and keep matching versions after recovery changes.'
+  Number(swRegisterVersion)>=265 &&
+  !html.includes('meow-sw-reloaded-') &&
+  !html.includes('location.reload()') &&
+  !html.includes("location.replace('./?build="),
+  'Service worker updates must stay cache-busted without forcibly reloading an active screen.'
 );
 
 
