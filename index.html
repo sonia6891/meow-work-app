@@ -8272,18 +8272,29 @@ function isLeaveRecorded(date){
   const st=state.dayStatus[date];
   return !!(st&&st.type&&st.type!=='none'&&st.type!=='overtime');
 }
-function eventConflictDetails(event,ignoreId){
+function eventConflictDetails(event,ignoreId,eventPool){
   if(!event||!event.date)return[];
   const details=[];
   const dt=new Date(event.date+'T00:00:00');
   if(!Number.isNaN(dt.getTime())&&scheduleForDate(dt)==='work'&&!isLeaveRecorded(event.date)){
     const override=state.scheduleOverrides&&state.scheduleOverrides[event.date];details.push({type:'work',title:(override&&override.shiftName||threeShiftForDate(dt)?.label||state.schedule.shiftName||'A班')+' 上班日',detail:'這一天依目前班表需要上班'});
   }
-  itineraryEvents().forEach(other=>{
+  const pool=Array.isArray(eventPool)?eventPool:itineraryEvents();
+  pool.forEach(other=>{
     if(other.id===ignoreId||other.id===event.id)return;
     if(eventsOverlap(event,other))details.push({type:'event',title:other.title||other.note||'既有行程',detail:eventTimeLabel(other)});
   });
   return details;
+}
+function groupItineraryEventsByDate(events){
+  const grouped=new Map();
+  (events||[]).forEach(event=>{
+    const key=String(event&&event.date||'');
+    if(!key)return;
+    if(!grouped.has(key))grouped.set(key,[]);
+    grouped.get(key).push(event);
+  });
+  return grouped;
 }
 function itineraryDateMeta(date){
   const d=new Date(date+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);
@@ -8425,7 +8436,7 @@ function renderAttendance(){
     :(todoShowCompleted?'隱藏已完成':'顯示已完成')+' <span>›</span>';
 
   const box=$('itineraryUpcomingList');
-  if(!box)return;
+  if(!box||box.classList.contains('hidden'))return;
   if(eventsActive){
     const today=iso(new Date());
     const all=itineraryEvents().slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.start||'').localeCompare(String(b.start||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
@@ -10851,7 +10862,8 @@ function renderV219ScheduleDay(){
 }
 function renderV219ItineraryBoard(){
   if(!$('v219TodayList'))return;
-  const now=new Date(),today=iso(now),todayEvents=itineraryEvents().filter(e=>e.date===today).sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
+  const allEvents=itineraryEvents(),eventsByDate=groupItineraryEventsByDate(allEvents),allTodos=todoItems();
+  const now=new Date(),today=iso(now),todayEvents=(eventsByDate.get(today)||[]).slice().sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
   if($('v219TodayDate'))$('v219TodayDate').textContent=(now.getMonth()+1)+'月'+now.getDate()+'日';
   const rows=[];
   const shift=v219ScheduleShiftLabel(today);
@@ -10859,7 +10871,7 @@ function renderV219ItineraryBoard(){
   todayEvents.forEach(e=>rows.push({time:e.start||'—',title:e.title||e.note||'行程',sub:eventTimeLabel(e)}));
   $('v219TodayList').innerHTML=(rows.length?rows:[{time:'—',title:'今天沒有安排',sub:'可以好好休息一下'}]).map(r=>'<div class="v219-timeline-row"><time>'+escapeHtml(r.time)+'</time><i class="v219-timeline-dot"></i><div class="v219-timeline-content"><b>'+escapeHtml(r.title)+'</b><small>'+escapeHtml(r.sub)+'</small></div></div>').join('');
 
-  const allTodos=todoItems().slice().sort((a,b)=>{
+  allTodos.sort((a,b)=>{
     if(Boolean(a.completed)!==Boolean(b.completed))return a.completed?1:-1;
     const ad=a.date||'9999-12-31',bd=b.date||'9999-12-31';
     return ad.localeCompare(bd)||String(a.createdAt||'').localeCompare(String(b.createdAt||''));
@@ -10879,9 +10891,12 @@ function renderV219ItineraryBoard(){
   qsa('#v219TodoList [data-v219-todo-toggle]').forEach(b=>b.onclick=()=>toggleTodoDone(b.dataset.v219TodoToggle));
   qsa('#v219TodoList [data-v219-todo-edit]').forEach(b=>b.onclick=()=>openTodo(b.dataset.v219TodoEdit));
 
-  const conflicts=[];
-  itineraryEvents().forEach(e=>{const found=eventConflictDetails(e,e.id);if(found&&found.length)conflicts.push({event:e,detail:found[0]})});
-  if($('v219ConflictContent'))$('v219ConflictContent').innerHTML=conflicts.length?'<div class="v219-conflict-item"><b>'+escapeHtml(conflicts[0].event.date+' '+(conflicts[0].event.start||'')+' '+(conflicts[0].event.title||'行程'))+'</b><small>'+escapeHtml(conflicts[0].detail.detail||'與班表時段重疊，建議調整時間。')+'</small></div>':'<div style="padding:8px;color:#8c7568">目前沒有行程衝突。</div>';
+  let firstConflict=null;
+  for(const event of allEvents){
+    const found=eventConflictDetails(event,event.id,eventsByDate.get(event.date)||[]);
+    if(found&&found.length){firstConflict={event,detail:found[0]};break}
+  }
+  if($('v219ConflictContent'))$('v219ConflictContent').innerHTML=firstConflict?'<div class="v219-conflict-item"><b>'+escapeHtml(firstConflict.event.date+' '+(firstConflict.event.start||'')+' '+(firstConflict.event.title||'行程'))+'</b><small>'+escapeHtml(firstConflict.detail.detail||'與班表時段重疊，建議調整時間。')+'</small></div>':'<div style="padding:8px;color:#8c7568">目前沒有行程衝突。</div>';
 
   const y=current.getFullYear(),m=current.getMonth(),first=new Date(y,m,1),offset=first.getDay(),days=new Date(y,m+1,0).getDate(),cells=[];
   for(let i=0;i<42;i++){const d=i-offset+1;if(d<1||d>days){cells.push('<div class="v219-mini-day"></div>');continue}const dt=new Date(y,m,d),date=iso(dt),todayCls=date===today?' today':'',label=v219ScheduleShiftLabel(date);cells.push('<div class="v219-mini-day'+todayCls+'"><b>'+d+'</b><small>'+escapeHtml(label)+'</small></div>')}
@@ -10919,14 +10934,33 @@ function render(){
   placeMobileRestCard();
   void syncNativePaydayWidget();
 }
+function renderActiveTab(){
+  if(activeTab==='dashboard'){
+    safeRender('dashboard',renderDashboard);
+  }else if(activeTab==='calendar'){
+    safeRender('calendar',renderCalendar);
+    syncReferencePageControls();
+    renderV219ScheduleDay();
+  }else if(activeTab==='attendance'){
+    safeRender('attendance',renderAttendance);
+  }else if(activeTab==='salary'){
+    safeRender('salary',renderSalary);
+  }else if(activeTab==='settings'){
+    prepareReferenceSettings();
+    safeRender('settings',renderSettings);
+    renderReferenceSettings();
+    renderV219SettingsHeader();
+  }
+  placeMobileRestCard();
+  void syncNativePaydayWidget();
+}
 function setTab(tab){
   activeTab=tab;
   document.documentElement.dataset.activeTab=tab;
   qsa('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+tab));
   qsa('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   window.scrollTo({top:0,behavior:'smooth'});
-  if(tab==='calendar')safeRender('calendar',renderCalendar);
-  render();
+  renderActiveTab();
 }
 
 
