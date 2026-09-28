@@ -21,7 +21,7 @@ const INTENTS = [
 ] as const;
 
 const APP_DATA = [
-  "schedule","attendance","overtime","leave","salary","payslip","settings","payday",
+  "schedule","attendance","overtime","leave","itinerary","todo","salary","payslip","settings","payday",
   "employment","entitlement","none"
 ] as const;
 
@@ -150,11 +150,11 @@ const schema = {
     operation: {
       type: "object",
       additionalProperties: false,
-      required: ["kind","dates","fromDate","toDate","hours","year","month","leaveType"],
+      required: ["kind","dates","fromDate","toDate","hours","year","month","leaveType","leaveLabel","title","note","startTime","endTime","reminder"],
       properties: {
         kind: {
           type: "string",
-          enum: ["none","add_overtime","remove_overtime","move_overtime","set_leave","remove_leave","view_schedule","undo_last"]
+          enum: ["none","add_overtime","remove_overtime","move_overtime","set_leave","remove_leave","add_event","remove_event","add_todo","remove_todo","view_schedule","undo_last"]
         },
         dates: {
           type: "array",
@@ -165,7 +165,13 @@ const schema = {
         hours: { anyOf: [{ type: "number" }, { type: "null" }] },
         year: { anyOf: [{ type: "integer" }, { type: "null" }] },
         month: { anyOf: [{ type: "integer", minimum: 1, maximum: 12 }, { type: "null" }] },
-        leaveType: { anyOf: [{ type: "string", enum: ["sick","menstrual","personal","annual"] }, { type: "null" }] }
+        leaveType: { anyOf: [{ type: "string", enum: ["sick","menstrual","personal","annual","marriage","bereavement","occupationalInjury","official","maternity","miscarriage","pregnancyRest","prenatal","paternity","familyCare","parentalLeave","compensatory","custom"] }, { type: "null" }] },
+        leaveLabel: nullableString,
+        title: nullableString,
+        note: nullableString,
+        startTime: nullableString,
+        endTime: nullableString,
+        reminder: { anyOf: [{ type: "string", enum: ["none","1h","1d","3d"] }, { type: "null" }] }
       }
     }
   }
@@ -263,17 +269,22 @@ Deno.serve(async (req: Request) => {
     "涉及薪資計算但需要實際班表／薪資資料時 risk=financial_calculation。",
     "涉及刪除、移動、覆蓋紀錄等資料變更時 risk=sensitive_mutation。",
     "如果只是情緒抱怨但同時包含可辨識需求，要理解需求，不要只把它當情緒。",
-    "如果使用者明確要求 App 新增／取消／移動加班、登記／更改／取消假別，或查看某月班表，operation 要輸出結構化操作；不要直接執行，只負責解析。",
+    "如果使用者明確要求 App 新增／取消／移動加班、登記／更改／取消任何假別、新增／取消行程、新增／取消待辦事項，或查看某月班表，operation 要輸出結構化操作；不要直接執行，只負責解析。",
     "假別修改要區分『詢問規則』與『修改班表』：例如『病假可以請幾天』是 sickLeaveRights；『9/28 幫我改病假』是 set_leave。『特休還剩多少』是 annualLeave；『9/29 我要請特休』是 set_leave。",
     "否定與糾正句必須優先處理語意範圍：『9/21 沒有請特休』『21號我沒請年假』『21號不是特休』『21號特休標錯了』都表示該日不應有該假別，operation.kind=remove_leave；不得因句中出現『請特休』字樣而判成 set_leave。",
     "雙重否定／否定取消不可反判：『21號沒有取消特休』『21號不是沒有請特休』不等於 remove_leave；如果語意仍不確定，kind=none 並 shouldClarify=true，絕對不要猜著修改資料。",
     "『不是 A，是 B』『日期講錯了，是另一日』屬糾正；只有能唯一解析原日期與新日期時才輸出對應操作，否則先追問，不得同時把兩個日期都設成假別。",
-    "假別對照固定為 sick=病假／傷病假、menstrual=生理假／月經假、personal=事假、annual=特休／年假。明確修改時 operation.leaveType 必須填入；若假別不明確就追問，不可猜。",
+    "假別結構化對照：sick=普通傷病假／病假／傷病假；menstrual=生理假／月經假；personal=事假；annual=特休／年假／特別休假；marriage=婚假；bereavement=喪假；occupationalInjury=公傷病假／職災傷病假；official=公假；maternity=產假；miscarriage=流產假／小產假；pregnancyRest=安胎休養請假；prenatal=產檢假；paternity=陪產檢及陪產假／陪產假；familyCare=家庭照顧假；parentalLeave=育嬰留職停薪／育嬰留停／口語育嬰假；compensatory=補休。公司自訂的明確『XX假』可用 custom 並把原名稱放 leaveLabel。假別不明確時追問，不可猜。",
     "set_leave / remove_leave 的 dates 必須是可唯一確定的 YYYY-MM-DD；若使用者說今天、明天、後天、某月某日，要依 appContext.today 解析。使用者明確說『改成／請／登記／設成』時可 set_leave 覆蓋當天原有班表標記，實際覆蓋仍由 App 本機驗證與可復原機制控制。",
     "operation 的日期一律使用 YYYY-MM-DD。相對日期（今天、昨天、明天、禮拜五等）要以 appContext.today 與 recentContext 解析；不確定就 kind=none 並 shouldClarify=true。",
+    "連續請假／育嬰留職停薪等若使用者給明確起訖日，可以把完整日期放 dates；若區間很長，也可填 fromDate/toDate 供 App 展開。缺起日或迄日就追問，不可自行補日期。",
+    "新增行程使用 add_event：至少要有唯一日期與 title；時間可以省略。若有明確時間，startTime/endTime 使用 HH:MM；只有一個時間就填 startTime、endTime=null。取消行程使用 remove_event，必須用 title、dates 或兩者足以唯一辨識；不唯一就追問。",
+    "新增待辦使用 add_todo：title 必填，日期與時間可省略；取消待辦使用 remove_todo，必須用 title、dates 或兩者足以唯一辨識。使用者說『代辦』也視為『待辦』。",
+    "提醒只有使用者明確說前1小時／前1天／前3天時才設定 reminder=1h／1d／3d；沒有提提醒就 reminder=none，不可自行開通知。",
+
     "承接前文的操作，例如『那個拿掉』『不是22，是24』『移到禮拜五』，只有在 recentContext 能唯一解析對象時才輸出 operation，並 referencesPriorContext=true、contextResolution 說明解析結果。",
     "新增／取消／移動資料屬 sensitive_mutation。若日期或對象無法唯一確定，不可猜測。",
-    "查看班表使用 view_schedule，year/month 必須解析完成；修改加班使用 add_overtime、remove_overtime、move_overtime；修改假別使用 set_leave、remove_leave。",
+    "查看班表使用 view_schedule，year/month 必須解析完成；修改加班使用 add_overtime、remove_overtime、move_overtime；修改假別使用 set_leave、remove_leave；行程使用 add_event、remove_event；待辦使用 add_todo、remove_todo。",
     "如果使用者明確表示『撤回剛才』『復原上一個動作』『剛剛那個不要了』『取消剛才那一步』，且 recentContext 顯示上一個動作是 App 修改，operation.kind=undo_last；若無法確認上一個動作，不可猜測。",
     "意圖對照：\n" + intentGuide
   ].join("\n");
