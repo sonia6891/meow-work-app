@@ -11353,6 +11353,14 @@ function meowAssistantClockValue(period,hour,minute=0){
 function meowAssistantTimes(raw){
   const t=normalizeMeowAssistantText(raw),out=[];
   const add=x=>{if(x&&!out.includes(x))out.push(x)};
+  const clockRange=t.match(/(凌晨|早上|上午|中午|下午|傍晚|晚上)?\s*(\d{1,2})\s*(?:點|時)(?:(\d{1,2})\s*分|半)?\s*(?:到|至|~|～)\s*(凌晨|早上|上午|中午|下午|傍晚|晚上)?\s*(\d{1,2})\s*(?:點|時)(?:(\d{1,2})\s*分|半)?/);
+  if(clockRange){
+    const p1=clockRange[1]||'',p2=clockRange[4]||p1;
+    const m1=clockRange[3]!==undefined?clockRange[3]:(clockRange[0].split(/到|至|~|～/)[0].includes('半')?30:0);
+    const right=clockRange[0].split(/到|至|~|～/)[1]||'';
+    const m2=clockRange[6]!==undefined?clockRange[6]:(right.includes('半')?30:0);
+    return[meowAssistantClockValue(p1,clockRange[2],m1),meowAssistantClockValue(p2,clockRange[5],m2)].filter(Boolean);
+  }
   for(const m of t.matchAll(/(?<!\d)([01]?\d|2[0-3]):([0-5]\d)(?!\d)/g))add(pad(Number(m[1]))+':'+pad(Number(m[2])));
   for(const m of t.matchAll(/(凌晨|早上|上午|中午|下午|傍晚|晚上)?\s*(\d{1,2})\s*(?:點|時)(?:(\d{1,2})\s*分|半)?/g)){
     add(meowAssistantClockValue(m[1]||'',m[2],m[3]!==undefined?m[3]:(m[0].includes('半')?30:0)));
@@ -11375,6 +11383,7 @@ function meowAssistantActionTitle(raw,kind){
     .replace(/今天|今日|明天|明日|後天|昨天|昨日|前天/g,' ')
     .replace(/(?:凌晨|早上|上午|中午|下午|傍晚|晚上)?\s*\d{1,2}\s*(?:點|時)(?:\d{1,2}\s*分|半)?/g,' ')
     .replace(/(?<!\d)(?:[01]?\d|2[0-3]):[0-5]\d(?!\d)/g,' ')
+    .replace(/(?:到|至|~|～)/g,' ')
     .replace(/前\s*(?:3|1)\s*(?:天|小時)\s*(?:提醒我|提醒)?|前三天\s*(?:提醒我|提醒)?|前一天\s*(?:提醒我|提醒)?|前一小時\s*(?:提醒我|提醒)?/g,' ')
     .replace(/請幫我|麻煩幫我|幫我|我要|我想要|我想|請|麻煩/g,' ')
     .replace(/新增|增加|建立|加一個|加個|記一個|排一個|安排|取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了/g,' ')
