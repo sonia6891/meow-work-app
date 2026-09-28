@@ -352,8 +352,8 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         check('390px 深色模式已實際套用到 html.dark', await page.evaluate(() => document.documentElement.classList.contains('dark')));
 
         const darkPages = [
-          {name:'calendar', open:'calendar', selectors:['#page-calendar','.ref-worktype-panel','.ref-template-card','.schedule-v138-heading','.schedule-settings','.calendar-card']},
-          {name:'attendance', open:'attendance', selectors:['#page-attendance','.ref-itinerary-hero','.attendance-v142-tabs','.v219-board-card']},
+          {name:'calendar', open:'calendar', selectors:['#page-calendar','.ref-template-card','.schedule-v138-heading','.schedule-settings','.calendar-card']},
+          {name:'attendance', open:'attendance', selectors:['#page-attendance','.attendance-v142-tabs','.v219-board-card']},
           {name:'salary', open:'salary', selectors:['#page-salary','.ref-salary-hero','.salary-card','.salary-tabs','.salary-section','.salary-field']},
           {name:'settings', open:'settings', selectors:['#page-settings','.ref-settings-hero','.v219-settings-profile-card','.ref-settings-card','.ref-settings-row','.settings-modern-card']}
         ];
