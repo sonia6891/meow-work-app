@@ -7130,7 +7130,7 @@ async function loadEntitlement(){
     scheduleExpiry();
     if(!canCloudSync()){
       await stopAccountRealtime();cloudReady=false;
-      setCloudStatus(hasCloudEntitlement()?(developerAccess?'開發者雲端同步啟用中':'Pro 可用・請先啟用雲端同步'):(trialStartedAt||entitlementUntil?'雲端同步已暫停・方案未生效或已到期':'未啟用・Pro 專屬'));
+      setCloudStatus(hasCloudEntitlement()?(developerAccess?'開發者雲端同步啟用中':'Pro 雲端正在準備工作區'):(trialStartedAt||entitlementUntil?'雲端同步已暫停・方案未生效或已到期':'未啟用・Pro 專屬'));
     }else if(!cloudReady){await loadAccountState();if(sameAccess(uid,epoch)&&canCloudSync())await subscribeAccountRealtime()}
   }catch(e){
     if(!sameAccess(uid,epoch)||request!==entitlementRequest)return;
@@ -7164,7 +7164,17 @@ async function subscribeAccountRealtime(){
       if(!sameAccess(uid,epoch)||!canCloudSync())return;
       const cloud=payload.new&&payload.new.payload;
       if(cloud&&cloud.deviceId!==deviceId)void loadAccountState();
-    }).subscribe(status=>{if(sameAccess(uid,epoch)&&status==='CHANNEL_ERROR')setCloudStatus('即時連線中斷・本機資料保留')});
+    }).subscribe(status=>{
+      if(!sameAccess(uid,epoch)||!canCloudSync())return;
+      if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)){
+        setCloudStatus('即時連線中斷・本機資料保留');
+        return;
+      }
+      if(status==='SUBSCRIBED'&&cloudStatus==='即時連線中斷・本機資料保留'){
+        setCloudStatus('已重新連線・正在確認雲端版本…');
+        void loadAccountState();
+      }
+    });
 }
 function applyRemoteRow(row){
   const cloud=row.payload||{},snapshot=newestMeaningfulCloudSnapshot(cloud)||(cloud.state?cloud:null);
@@ -7194,7 +7204,7 @@ async function loadAccountState(){
   }catch(e){if(sameAccess(uid,epoch))setCloudStatus('雲端讀取失敗・本機資料仍可使用')}
 }
 async function saveAccountState(showAlert=false,resolveConflict=false){
-  if(!canCloudSync()){if(showAlert)alert('雲端同步需要有效 Pro／試用，並由你啟用。登入本身不會開啟同步。');return false}
+  if(!canCloudSync()){if(showAlert)alert('雲端同步需要有效 Pro／試用資格；Free 版本只保存在本機。');return false}
   if(!navigator.onLine){setCloudStatus('離線・變更尚未上傳');return false}
   if(pendingCloud&&!resolveConflict){setCloudStatus('有版本衝突・請先選擇');return false}
   if(!cloudReady){await loadAccountState();return false}
