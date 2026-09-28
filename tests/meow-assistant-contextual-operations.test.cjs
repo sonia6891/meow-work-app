@@ -47,6 +47,8 @@ let checkResult=null;
 const factory=new Function('__calls','__getCheck',`
   const num=v=>Number(v)||0;
   const state={settings:{defaultOvertimeHours:10,dailyWorkHours:10}};
+  const MEOW_ASSISTANT_LEAVE_TYPES=new Set(['sick','menstrual','personal','annual','marriage','bereavement','occupationalInjury','official','maternity','miscarriage','pregnancyRest','prenatal','paternity','familyCare','parentalLeave','compensatory','custom']);
+  const meowAssistantExpandDateRange=(a,b)=>[a,b].filter(Boolean);
   const pad=n=>String(n).padStart(2,'0');
   const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
   const renderMeowAssistantReply=(m,t='')=>__calls.renders.push({m,t});
@@ -79,7 +81,7 @@ const api=factory(calls,()=>checkResult);
   });
   assert.strictEqual(handled,true);
   assert.strictEqual(calls.checks.length,1,'leave mutation must pass local validation');
-  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:10,hoursSource:'schedule-default'});
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',leaveLabel:'',dates:['2026-09-28'],hours:10,hoursSource:'schedule-default'});
 
   calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
   handled=await api.run({
@@ -87,7 +89,24 @@ const api=factory(calls,()=>checkResult);
     operation:{kind:'remove_leave',dates:['2026-09-29'],fromDate:null,toDate:null,hours:null,year:null,month:null,leaveType:'annual'}
   });
   assert.strictEqual(handled,true);
-  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'removeLeave',leaveType:'annual',dates:['2026-09-29']});
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'removeLeave',leaveType:'annual',leaveLabel:'',dates:['2026-09-29']});
+
+  // Itinerary and todo operations are also structured mutations and must pass local validation.
+  calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
+  handled=await api.run({
+    confidence:.99,
+    operation:{kind:'add_event',dates:['2026-10-03'],title:'回診',note:'',startTime:'15:00',endTime:'16:00',reminder:'1h'}
+  });
+  assert.strictEqual(handled,true);
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'addEvent',dates:['2026-10-03'],title:'回診',note:'',startTime:'15:00',endTime:'16:00',reminder:'1h'});
+
+  calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
+  handled=await api.run({
+    confidence:.99,
+    operation:{kind:'add_todo',dates:['2026-10-05'],title:'繳房租',note:'',startTime:'18:30',endTime:null,reminder:'1d'}
+  });
+  assert.strictEqual(handled,true);
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'addTodo',dates:['2026-10-05'],title:'繳房租',note:'',startTime:'18:30',endTime:'',reminder:'1d'});
 
   // Low confidence may never mutate.
   calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
@@ -132,7 +151,7 @@ const api=factory(calls,()=>checkResult);
   assert.strictEqual(calls.executes.length,0);
 
   // Router contract must explicitly support contextual operations.
-  for(const token of ['add_overtime','remove_overtime','move_overtime','set_leave','remove_leave','view_schedule']){
+  for(const token of ['add_overtime','remove_overtime','move_overtime','set_leave','remove_leave','add_event','remove_event','add_todo','remove_todo','view_schedule']){
     assert(edge.includes(token),'edge operation enum missing '+token);
   }
   assert(edge.includes('referencesPriorContext=true'),'contextual-operation prompt guard missing');
