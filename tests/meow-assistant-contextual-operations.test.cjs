@@ -46,7 +46,7 @@ let checkResult=null;
 
 const factory=new Function('__calls','__getCheck',`
   const num=v=>Number(v)||0;
-  const state={settings:{defaultOvertimeHours:10,dailyWorkHours:8}};
+  const state={settings:{defaultOvertimeHours:10,dailyWorkHours:10}};
   const pad=n=>String(n).padStart(2,'0');
   const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
   const renderMeowAssistantReply=(m,t='')=>__calls.renders.push({m,t});
@@ -79,7 +79,7 @@ const api=factory(calls,()=>checkResult);
   });
   assert.strictEqual(handled,true);
   assert.strictEqual(calls.checks.length,1,'leave mutation must pass local validation');
-  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:8,hoursSource:'schedule-default'});
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:10,hoursSource:'schedule-default'});
 
   calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
   handled=await api.run({
