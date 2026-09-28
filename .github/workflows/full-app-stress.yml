@@ -1,0 +1,172 @@
+name: Full App Stress Test
+
+on:
+  push:
+    branches:
+      - stress/full-app-20260929-a
+    paths:
+      - '.github/workflows/full-app-stress.yml'
+      - 'tests/**'
+      - 'index.html'
+      - 'assets/**'
+      - 'src/**'
+      - 'supabase/functions/**'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout stress branch
+        uses: actions/checkout@v6
+        with:
+          ref: stress/full-app-20260929-a
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install browser runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.57.0
+          npx playwright install --with-deps chromium
+          python3 -m venv .stress-venv
+          .stress-venv/bin/python -m pip install --upgrade pip
+          .stress-venv/bin/pip install playwright==1.57.0
+          .stress-venv/bin/python -m playwright install chromium
+
+      - name: Run complete regression and pressure suite
+        id: stress
+        shell: bash
+        run: |
+          set +e
+          mkdir -p test-results/full-stress-logs
+          REPORT="test-results/full-stress-latest.md"
+          FAILFILE="test-results/full-stress-failures.txt"
+          : > "$REPORT"
+          echo "0" > "$FAILFILE"
+
+          add_failure() {
+            local n
+            n=$(cat "$FAILFILE")
+            echo $((n+1)) > "$FAILFILE"
+          }
+
+          run_case() {
+            local label="$1"
+            shift
+            local safe
+            safe=$(printf '%s' "$label" | tr ' /:' '___' | tr -cd '[:alnum:]_.-')
+            local log="test-results/full-stress-logs/${safe}.log"
+            local start end elapsed
+            start=$(date +%s)
+            if timeout 420s "$@" >"$log" 2>&1; then
+              end=$(date +%s); elapsed=$((end-start))
+              printf -- "- ✅ %s — %ss\n" "$label" "$elapsed" >> "$REPORT"
+              return 0
+            else
+              local code=$?
+              end=$(date +%s); elapsed=$((end-start))
+              printf -- "- ❌ %s — exit %s, %ss\n" "$label" "$code" "$elapsed" >> "$REPORT"
+              {
+                echo ""
+                echo "### Failure: $label"
+                echo '~~~text'
+                tail -n 80 "$log"
+                echo '~~~'
+              } >> "$REPORT"
+              add_failure
+              return 1
+            fi
+          }
+
+          {
+            echo "# 《喵的，又要上班了》完整壓力測試"
+            echo ""
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Runner: ${RUNNER_OS}"
+            echo "- Node: $(node -v)"
+            echo "- UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo ""
+            echo "## A. 全部 Node / CJS 回歸"
+          } >> "$REPORT"
+
+          for f in $(find tests -maxdepth 1 -type f -name '*.cjs' | sort); do
+            run_case "CJS ${f}" node "$f"
+          done
+
+          {
+            echo ""
+            echo "## B. 舊版 Python Playwright 回歸"
+          } >> "$REPORT"
+
+          for f in tests/browser-v112.py tests/browser-frame-v113.py tests/browser-line-v116.py tests/browser-logout-v114.py; do
+            run_case "PY ${f}" .stress-venv/bin/python "$f"
+          done
+
+          {
+            echo ""
+            echo "## C. 關鍵流程重複壓測"
+          } >> "$REPORT"
+
+          critical=(
+            tests/meow-assistant-negation-12690.test.cjs
+            tests/meow-assistant-natural-actions-20000.test.cjs
+            tests/meow-assistant-action-execution.test.cjs
+            tests/meow-assistant-multiturn-e2e.test.cjs
+            tests/meow-assistant-multiturn-fuzz-1000.test.cjs
+            tests/meow-assistant-contextual-operations.test.cjs
+            tests/meow-assistant-conversation-memory.test.cjs
+            tests/annual-leave-10h-regression.test.cjs
+            tests/cloud-sync-v156.test.cjs
+            tests/theme-persistence.test.cjs
+          )
+          for round in $(seq 1 10); do
+            for f in "${critical[@]}"; do
+              run_case "ROUND ${round} ${f}" node "$f"
+            done
+          done
+
+          failures=$(cat "$FAILFILE")
+          {
+            echo ""
+            echo "## 結果"
+            echo ""
+            if [ "$failures" -eq 0 ]; then
+              echo "**PASS：全部測試通過，失敗 0。**"
+            else
+              echo "**FAIL：共有 ${failures} 個測試項目失敗。**"
+            fi
+          } >> "$REPORT"
+
+          echo "failures=$failures" >> "$GITHUB_OUTPUT"
+          cat "$REPORT"
+          exit 0
+
+      - name: Commit stress report back to stress branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          failures="${{ steps.stress.outputs.failures }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add test-results/full-stress-latest.md test-results/full-stress-failures.txt test-results/full-stress-logs
+          git commit -m "test: full app stress report failures=${failures} [skip ci]" || exit 0
+          git push origin HEAD:stress/full-app-20260929-a
+
+      - name: Fail workflow when any test failed
+        if: always()
+        shell: bash
+        run: |
+          failures="${{ steps.stress.outputs.failures }}"
+          echo "Failures: $failures"
+          test "${failures:-999}" = "0"
