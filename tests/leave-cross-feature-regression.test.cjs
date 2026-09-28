@@ -85,8 +85,8 @@ const consecutiveApi=new Function('state',`
   }
 });
 const streak=consecutiveApi(2026,8);
-assert.strictEqual(streak.days,3,'family-care leave must break the work streak even though its label is not 病假/事假/特休');
-assert.strictEqual(streak.start,'2026-09-01');
-assert.strictEqual(streak.end,'2026-09-03');
+assert.strictEqual(streak.days,4,'family-care leave must break the original streak while real overtime on an off-day still counts as work');
+assert.strictEqual(streak.start,'2026-09-05');
+assert.strictEqual(streak.end,'2026-09-08');
 
 console.log('leave cross-feature regression: ok');
