@@ -11399,6 +11399,14 @@ function meowAssistantEventTodoOperation(raw){
   const todo=/(待辦事項|代辦事項|待辦|代辦|\bTODO\b)/i.test(t);
   const event=/(行程|活動|約會|\bEVENT\b)/i.test(t);
   if(todo===event)return null;
+  const token=todo?'(?:待辦事項|代辦事項|待辦|代辦|TODO)':'(?:行程|活動|約會|EVENT)';
+  const noCancel=new RegExp('(?:不要|不用|別|不必|沒有|沒|未)(?:再|要)?\\s*(?:取消|刪除|刪掉|拿掉|移除|撤銷).{0,18}'+token,'i')
+    .test(t)||new RegExp(token+'.{0,18}(?:不要|不用|別|不必|沒有|沒|未)(?:再|要)?\\s*(?:取消|刪除|刪掉|拿掉|移除|撤銷)','i').test(t);
+  const doubleNegative=new RegExp('(?:不是|並非)\\s*(?:沒有|沒|未).{0,12}(?:新增|增加|建立|安排).{0,12}'+token,'i').test(t);
+  if(noCancel||doubleNegative){
+    const kind=todo?'todo':'event',dates=meowAssistantMutationDates(t),title=meowAssistantActionTitle(t,kind);
+    return{ok:true,type:'personalNoChange',personalKind:kind,dates,title,raw:t};
+  }
   const add=/(新增|增加|建立|加一個|加個|記一個|排一個|安排)/.test(t);
   const remove=/(取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了)/.test(t);
   if(add===remove)return null;
@@ -11723,7 +11731,7 @@ function meowAssistantResolvePersonalItem(plan,kind){
 }
 function meowAssistantPlanCheck(plan){
   if(!plan||!plan.ok)return plan;
-  if(plan.type==='viewSchedule'||plan.type==='smartPayslipReconcile'||plan.type==='knowledge'||plan.type==='knowledgeMulti'||plan.type==='leaveNoChange')return plan;
+  if(plan.type==='viewSchedule'||plan.type==='smartPayslipReconcile'||plan.type==='knowledge'||plan.type==='knowledgeMulti'||plan.type==='leaveNoChange'||plan.type==='personalNoChange')return plan;
   if(plan.type==='shiftChange'){
     if(!(plan.dates||[]).length)return{ok:false,message:'我有抓到改班需求，但沒有辨識出日期。'};
     if(!['work','off'].includes(plan.kind))return{ok:false,message:'我有抓到改班需求，但沒有辨識出要改成哪個班別。'};
@@ -12937,6 +12945,13 @@ async function previewMeowAssistant(){
   if(parsed.type==='viewSchedule'){await showMeowAssistantMonth(parsed.year,parsed.month);if(input)input.value='';return}
   if(parsed.type==='leaveNoChange'){
     renderMeowAssistantReply('了解，你的意思是這個假別沒有被取消／否定；我不會修改 '+parsed.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(parsed.leaveType,parsed.leaveLabel)+'紀錄。','success');
+    if(input)input.value='';
+    return;
+  }
+  if(parsed.type==='personalNoChange'){
+    const label=parsed.personalKind==='todo'?'待辦':'行程';
+    const target=(parsed.title?('「'+parsed.title+'」'):'這筆'+label);
+    renderMeowAssistantReply('了解，你的意思是不要取消／刪除'+target+'；我不會修改任何'+label+'資料。','success');
     if(input)input.value='';
     return;
   }
