@@ -346,6 +346,63 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.screenshot({ path: path.join(out, 'account-v119-pro-390.png'), fullPage: true });
         await page.locator('#proPlanDialogClose').click();
 
+        // v256: confirmed regression checks from the phone review.
+        await page.evaluate(() => window.__accountV119.dashboard());
+        await page.waitForTimeout(120);
+        check('390px 總覽底部貓咪圖卡恢復顯示', await page.locator('#mobileRestCard').isVisible());
+        const restRect=await page.locator('#mobileRestCard').boundingBox();
+        check('390px 總覽貓咪圖卡有實際寬高', !!restRect && restRect.width>300 && restRect.height>40);
+
+        await page.evaluate(() => window.__accountV119.attendance());
+        await page.waitForTimeout(120);
+        const todayLayout=await page.evaluate(()=>{
+          const board=document.querySelector('.v219-itinerary-board').getBoundingClientRect();
+          const today=document.querySelector('.v219-today-card').getBoundingClientRect();
+          return{
+            boardWidth:board.width,todayWidth:today.width,
+            title:document.querySelector('.v219-board-title')?.innerText||'',
+            date:document.getElementById('v219TodayDate')?.innerText||'',
+            rows:document.getElementById('v219TodayList')?.innerText||''
+          };
+        });
+        check('390px 今天的安排改為橫向滿版', todayLayout.todayWidth>=todayLayout.boardWidth-2);
+        check('今天的安排顯示日期與班別', /\d+月\d+日/.test(todayLayout.date) && /班|休/.test(todayLayout.rows));
+
+        await page.evaluate(() => window.__accountV119.settings());
+        await page.waitForTimeout(120);
+        check('設定帳號卡保留 Google SVG', await page.locator('.ref-settings-icon.google svg').isVisible());
+        check('設定帳號卡保留 LINE SVG', await page.locator('.ref-settings-icon.line svg').isVisible());
+        check('設定帳號卡保留方案皇冠 SVG', await page.locator('.ref-settings-icon.crown svg').isVisible());
+
+        await page.evaluate(() => window.__accountV119.theme('dark'));
+        await page.waitForTimeout(120);
+        const iconColors=await page.evaluate(()=>({
+          google:getComputedStyle(document.querySelector('.ref-settings-icon.google')).backgroundColor,
+          line:getComputedStyle(document.querySelector('.ref-settings-icon.line')).backgroundColor,
+          crown:getComputedStyle(document.querySelector('.ref-settings-icon.crown')).backgroundColor,
+          profileTip:getComputedStyle(document.querySelector('.v219-settings-profile-card>div>small')).color
+        }));
+        check('深色 Google icon 仍是白底品牌圖示', /rgb\(255, 255, 255\)/.test(iconColors.google));
+        check('深色 LINE icon 仍是 LINE 綠底', /rgb\(6, 199, 85\)/.test(iconColors.line));
+        check('深色方案 icon 保留金色區分', !/rgb\(33, 25, 22\)/.test(iconColors.crown));
+
+        await page.evaluate(() => window.__accountV119.attendance());
+        await page.waitForTimeout(120);
+        const darkToday=await page.evaluate(()=>{
+          const content=document.querySelector('.v219-timeline-content');
+          const b=content?.querySelector('b');
+          return{
+            bg:content?getComputedStyle(content).backgroundColor:'',
+            text:b?getComputedStyle(b).color:''
+          };
+        });
+        check('深色 A班上班卡不再使用淺色背景', !/rgb\(255, 248, 242\)/.test(darkToday.bg));
+        check('深色 A班上班文字保持高亮', /rgb\(255, 247, 241\)/.test(darkToday.text));
+        await page.screenshot({ path:path.join(out,'v256-dark-attendance-390.png'), fullPage:true });
+
+        await page.evaluate(() => window.__accountV119.theme('light'));
+        await page.waitForTimeout(80);
+
         // v255: verify the actual 390px dark mobile visuals, not only CSS source presence.
         await page.evaluate(() => window.__accountV119.theme('dark'));
         await page.waitForTimeout(120);
