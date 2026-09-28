@@ -2,25 +2,25 @@ TAP version 13
 # Subtest: backend verification succeeds before StoreKit finish
 ok 1 - backend verification succeeds before StoreKit finish
   ---
-  duration_ms: 2.918277
+  duration_ms: 1.885264
   type: 'test'
   ...
 # Subtest: verification/network failure never finishes the StoreKit transaction
 ok 2 - verification/network failure never finishes the StoreKit transaction
   ---
-  duration_ms: 1.464665
+  duration_ms: 1.004245
   type: 'test'
   ...
 # Subtest: unfinished transaction recovery stays wired on app startup path
 ok 3 - unfinished transaction recovery stays wired on app startup path
   ---
-  duration_ms: 1.258697
+  duration_ms: 0.948181
   type: 'test'
   ...
 # Subtest: restore purchases remains wired to AppStore.sync and current entitlements
 ok 4 - restore purchases remains wired to AppStore.sync and current entitlements
   ---
-  duration_ms: 1.063319
+  duration_ms: 0.741308
   type: 'test'
   ...
 1..4
@@ -31,4 +31,4 @@ ok 4 - restore purchases remains wired to AppStore.sync and current entitlements
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 15.908624
+# duration_ms 9.65204

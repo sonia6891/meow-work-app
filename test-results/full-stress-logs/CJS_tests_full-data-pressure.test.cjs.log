@@ -1,0 +1,17 @@
+PASS 大量資料筆數完整注入 :: {"replaceMs":0,"renderMs":3348.9000000000087,"dayStatus":1866,"events":5000,"overrides":730,"months":120,"fingerprintBytes":917233}
+PASS 大量資料完整 render 不崩潰 :: {"renderMs":3348.9000000000087}
+PASS 大量狀態可建立穩定 fingerprint :: {"bytes":917233}
+PASS 大量資料可完整本機儲存 :: {"ok":true,"elapsed":24.59999999999127,"bytes":917402,"dayStatus":1866,"events":5000}
+PASS 大量本機儲存未超過合理 CI 時間 :: {"elapsed":24.59999999999127,"bytes":917402}
+PASS 120 次連續資料變更後狀態正確 :: {"mutationMs":2918.899999999994,"tabMs":407949.70000000007,"base":50119,"net":80372.51805555556,"gross":85663.51805555556,"otPay":23844.518055555556}
+FAIL 120 次快速頁籤切換未卡死 :: {"tabMs":407949.70000000007}
+AssertionError [ERR_ASSERTION]: 120 次快速頁籤切換未卡死
+    at check (/home/runner/work/meow-work-app/meow-work-app/tests/full-data-pressure.test.cjs:73:10)
+    at /home/runner/work/meow-work-app/meow-work-app/tests/full-data-pressure.test.cjs:194:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

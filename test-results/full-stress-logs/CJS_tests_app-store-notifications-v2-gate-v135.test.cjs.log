@@ -2,43 +2,43 @@ TAP version 13
 # Subtest: refund and revoke always expire entitlement
 ok 1 - refund and revoke always expire entitlement
   ---
-  duration_ms: 1.065312
+  duration_ms: 0.564966
   type: 'test'
   ...
 # Subtest: expired and grace-period-expired events expire entitlement
 ok 2 - expired and grace-period-expired events expire entitlement
   ---
-  duration_ms: 0.195227
+  duration_ms: 0.132168
   type: 'test'
   ...
 # Subtest: failed renewal maps to grace period or past due
 ok 3 - failed renewal maps to grace period or past due
   ---
-  duration_ms: 0.149862
+  duration_ms: 0.065758
   type: 'test'
   ...
 # Subtest: renewal status changes preserve cancel-at-period-end semantics
 ok 4 - renewal status changes preserve cancel-at-period-end semantics
   ---
-  duration_ms: 0.235182
+  duration_ms: 0.093921
   type: 'test'
   ...
 # Subtest: valid App Store states are written to user entitlements
 ok 5 - valid App Store states are written to user entitlements
   ---
-  duration_ms: 0.164389
+  duration_ms: 0.070616
   type: 'test'
   ...
 # Subtest: server notification events are durably recorded
 ok 6 - server notification events are durably recorded
   ---
-  duration_ms: 0.141957
+  duration_ms: 0.056344
   type: 'test'
   ...
 # Subtest: TEST notifications are accepted without changing entitlement
 ok 7 - TEST notifications are accepted without changing entitlement
   ---
-  duration_ms: 0.196509
+  duration_ms: 0.084527
   type: 'test'
   ...
 1..7
@@ -49,4 +49,4 @@ ok 7 - TEST notifications are accepted without changing entitlement
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 12.744905
+# duration_ms 6.518274
