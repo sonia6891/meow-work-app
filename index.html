@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v258-attendance-separated-coffee-hero-final">
+<meta name="meow-ui-build" content="v259-itinerary-todo-single-card-coffee-hero">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -5418,6 +5418,80 @@ html.dark .holiday-tag{
 }
 </style>
 
+
+<style id="attendance-single-content-v259">
+@media(max-width:760px){
+  /* v259: mobile keeps only the canonical v219 content card. */
+  #page-attendance #itineraryUpcomingList{
+    display:none!important;
+  }
+  #page-attendance .v219-todo-card{
+    width:100%!important;
+  }
+  #page-attendance #v219TodoList{
+    display:grid!important;
+    gap:7px!important;
+  }
+  #page-attendance .v219-todo-row{
+    display:grid!important;
+    grid-template-columns:32px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:9px!important;
+    padding:8px 0!important;
+    border-bottom:1px solid var(--mobile-line,#513d31)!important;
+  }
+  #page-attendance .v219-todo-row:last-child{
+    border-bottom:0!important;
+  }
+  #page-attendance .v219-todo-check{
+    width:30px!important;
+    height:30px!important;
+    border-radius:50%!important;
+    border:2px solid #9c806e!important;
+    background:transparent!important;
+    color:#fff!important;
+    font-weight:950!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:0!important;
+  }
+  #page-attendance .v219-todo-row.done .v219-todo-check{
+    background:#6d8b64!important;
+    border-color:#6d8b64!important;
+  }
+  #page-attendance .v219-todo-main{
+    min-width:0!important;
+    border:0!important;
+    background:transparent!important;
+    color:inherit!important;
+    text-align:left!important;
+    padding:0!important;
+  }
+  #page-attendance .v219-todo-main b{
+    display:block!important;
+    font-size:13px!important;
+    line-height:1.35!important;
+  }
+  #page-attendance .v219-todo-main small{
+    display:block!important;
+    margin-top:3px!important;
+    font-size:10px!important;
+    color:var(--mobile-muted,#c9b5a7)!important;
+  }
+  #page-attendance .v219-todo-row.done .v219-todo-main{
+    opacity:.62!important;
+  }
+  #page-attendance .v219-todo-row.done .v219-todo-main b{
+    text-decoration:line-through!important;
+  }
+  #page-attendance .v219-todo-empty{
+    padding:12px 4px!important;
+    color:var(--mobile-muted,#c9b5a7)!important;
+    font-size:11px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -8160,6 +8234,7 @@ function renderAttendance(){
   if(todoCard)todoCard.classList.toggle('hidden',eventsActive);
   if(conflictCard)conflictCard.classList.toggle('hidden',!eventsActive);
   if(boardRight)boardRight.dataset.attendanceMode=eventsActive?'events':'todos';
+  renderV219ItineraryBoard();
   const openTodos=todoItems().filter(t=>!t.completed).length;
   $('todoOpenCount').textContent=String(openTodos);
   if($('refAttendanceListTitle'))$('refAttendanceListTitle').textContent=eventsActive?'今天的安排':'待辦清單';
@@ -10607,9 +10682,22 @@ function renderV219ItineraryBoard(){
   todayEvents.forEach(e=>rows.push({time:e.start||'—',title:e.title||e.note||'行程',sub:eventTimeLabel(e)}));
   $('v219TodayList').innerHTML=(rows.length?rows:[{time:'—',title:'今天沒有安排',sub:'可以好好休息一下'}]).map(r=>'<div class="v219-timeline-row"><time>'+escapeHtml(r.time)+'</time><i class="v219-timeline-dot"></i><div class="v219-timeline-content"><b>'+escapeHtml(r.title)+'</b><small>'+escapeHtml(r.sub)+'</small></div></div>').join('');
 
-  const todos=todoItems().slice().sort((a,b)=>Boolean(a.completed)-Boolean(b.completed)).slice(0,4);
-  if($('v219TodoCount'))$('v219TodoCount').textContent=todos.length?todos.filter(t=>t.completed).length+' / '+todos.length:'0 / 0';
-  $('v219TodoList').innerHTML=todos.length?todos.map(t=>'<div class="v219-todo-row '+(t.completed?'done':'')+'"><i></i><span>'+escapeHtml(t.title||'未命名待辦')+'</span></div>').join(''):'';
+  const allTodos=todoItems().slice().sort((a,b)=>{
+    if(Boolean(a.completed)!==Boolean(b.completed))return a.completed?1:-1;
+    const ad=a.date||'9999-12-31',bd=b.date||'9999-12-31';
+    return ad.localeCompare(bd)||String(a.createdAt||'').localeCompare(String(b.createdAt||''));
+  });
+  const todos=todoShowCompleted?allTodos:allTodos.filter(t=>!t.completed);
+  const openCount=allTodos.filter(t=>!t.completed).length;
+  if($('v219TodoCount'))$('v219TodoCount').textContent=openCount+' / '+allTodos.length;
+  $('v219TodoList').innerHTML=todos.length?todos.map(t=>{
+    return '<div class="v219-todo-row '+(t.completed?'done':'')+'">'+
+      '<button type="button" class="v219-todo-check" data-v219-todo-toggle="'+escapeHtml(t.id)+'" aria-label="'+(t.completed?'標記為未完成':'標記為完成')+'">'+(t.completed?'✓':'')+'</button>'+
+      '<button type="button" class="v219-todo-main" data-v219-todo-edit="'+escapeHtml(t.id)+'"><b>'+escapeHtml(t.title||'未命名待辦')+'</b><small>'+escapeHtml(todoDateLabel(t.date,t.time))+'</small></button>'+
+      '</div>';
+  }).join(''):'<div class="v219-todo-empty">目前沒有待辦事項</div>';
+  qsa('#v219TodoList [data-v219-todo-toggle]').forEach(b=>b.onclick=()=>toggleTodoDone(b.dataset.v219TodoToggle));
+  qsa('#v219TodoList [data-v219-todo-edit]').forEach(b=>b.onclick=()=>openTodo(b.dataset.v219TodoEdit));
 
   const conflicts=[];
   itineraryEvents().forEach(e=>{const found=eventConflictDetails(e,e.id);if(found&&found.length)conflicts.push({event:e,detail:found[0]})});
