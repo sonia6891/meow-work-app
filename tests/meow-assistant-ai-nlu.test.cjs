@@ -38,6 +38,16 @@ assert(edge.includes('naturalDisaster'),'natural-disaster intent missing');
 assert(edge.includes('"set_leave"'),'leave set operation missing');
 assert(edge.includes('"remove_leave"'),'leave remove operation missing');
 assert(edge.includes('leaveType'),'leave type structured field missing');
+assert(edge.includes('"add_event"') && edge.includes('"remove_event"'),'itinerary operation kinds missing');
+assert(edge.includes('"add_todo"') && edge.includes('"remove_todo"'),'todo operation kinds missing');
+assert(edge.includes('"parentalLeave"'),'parental leave structured type missing');
+assert(edge.includes('"familyCare"'),'family-care leave structured type missing');
+assert(edge.includes('"maternity"') && edge.includes('"prenatal"') && edge.includes('"paternity"'),'gender-equality leave structured types missing');
+assert(edge.includes('"marriage"') && edge.includes('"bereavement"') && edge.includes('"occupationalInjury"') && edge.includes('"official"'),'labor-leave structured types missing');
+assert(edge.includes('leaveLabel'),'custom leave label field missing');
+assert(edge.includes('startTime') && edge.includes('endTime') && edge.includes('reminder'),'itinerary/todo time fields missing');
+assert(html.includes("plan.type==='addEvent'") && html.includes("plan.type==='removeEvent'"),'local itinerary execution bridge missing');
+assert(html.includes("plan.type==='addTodo'") && html.includes("plan.type==='removeTodo'"),'local todo execution bridge missing');
 assert(!/sk-[A-Za-z0-9_-]{12,}/.test(edge),'OpenAI secret must never be committed');
 
 console.log('PASS Meow Assistant OpenAI NLU integration contract');
