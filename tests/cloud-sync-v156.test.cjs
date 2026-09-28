@@ -128,4 +128,17 @@ assert(
   'Pro users must be able to restore a previous automatic cloud backup from the app.'
 );
 
+assert(
+  html.includes("['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status)") &&
+  html.includes("status==='SUBSCRIBED'") &&
+  html.includes("已重新連線・正在確認雲端版本…"),
+  'Realtime must surface error, timeout and closed states and re-check cloud state after reconnect.'
+);
+assert(
+  !html.includes('登入本身不會開啟同步') &&
+  !html.includes('Pro 可用・請先啟用雲端同步') &&
+  html.includes('Free 版本只保存在本機。'),
+  'Cloud messaging must match automatic Pro sync and local-only Free behavior.'
+);
+
 console.log('Cloud sync v190 regression checks passed.');
