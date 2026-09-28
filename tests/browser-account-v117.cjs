@@ -23,6 +23,8 @@ const bridge = `window.__accountV119={
   attendance:()=>setTab('attendance'),
   salary:()=>setTab('salary'),
   dashboard:()=>setTab('dashboard'),
+  tab:()=>activeTab,
+  needsLogin:()=>document.documentElement.classList.contains('auth-needs-login'),
   theme:(value)=>setTheme(value),
   parseLocalScheduleVision,
   parseMeowAssistant:(text)=>meowAssistantParse(text),
@@ -260,6 +262,44 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     check('主畫面 App 的 LINE 登入不再建立第二視窗', await standalonePage.evaluate(() => window.__openCalls.length === 0));
     check('主畫面 App 的 LINE 登入使用單一畫面 OAuth', await standalonePage.evaluate(() => window.__accountTest.oauth.at(-1).provider === 'custom:line' && window.__accountTest.oauth.at(-1).options.skipBrowserRedirect !== true));
     await standaloneContext.close();
+
+    // Auth stability regression: a transient or background SIGNED_OUT must never yank
+    // an active local workspace back to the login screen.
+    const raceUser = { id: 'acct-auth-race', email: 'member@example.test', app_metadata: { provider: 'google' } };
+    const { context: raceContext, page: racePage } = await openPage(browser, base, 390, raceUser);
+    await racePage.evaluate(() => window.__accountV119.salary());
+    check('Auth race baseline stays on salary tab', await racePage.evaluate(() => window.__accountV119.tab() === 'salary'));
+    await racePage.evaluate(() => window.__authCallback?.('SIGNED_OUT', null));
+    await racePage.waitForTimeout(900);
+    check('短暫 SIGNED_OUT 重新確認到 session 後不跳登入頁', !(await racePage.evaluate(() => window.__accountV119.openWelcome())));
+    check('短暫 SIGNED_OUT 不改變目前頁籤', await racePage.evaluate(() => window.__accountV119.tab() === 'salary'));
+    check('短暫 SIGNED_OUT 不重新加上登入遮罩', !(await racePage.evaluate(() => window.__accountV119.needsLogin())));
+
+    await racePage.evaluate(() => {
+      localStorage.setItem('__account_test_signed_out','1');
+      window.__authCallback?.('SIGNED_OUT', null);
+    });
+    await racePage.waitForTimeout(900);
+    check('非主動 session 失效保留目前本機工作區', await racePage.evaluate(() => window.__accountV119.owner() === 'acct-auth-race'));
+    check('非主動 session 失效不強制跳登入頁', !(await racePage.evaluate(() => window.__accountV119.openWelcome())));
+    check('非主動 session 失效不改變目前頁籤', await racePage.evaluate(() => window.__accountV119.tab() === 'salary'));
+    check('非主動 session 失效不顯示登入遮罩', !(await racePage.evaluate(() => window.__accountV119.needsLogin())));
+
+    await racePage.reload({ waitUntil: 'domcontentloaded' });
+    await racePage.waitForFunction(() => window.__accountV119 !== undefined);
+    await racePage.waitForTimeout(900);
+    check('有既有工作區但 session 暫時讀不到時，重開仍直接進 App', !(await racePage.evaluate(() => window.__accountV119.openWelcome())));
+    check('session 暫時讀不到時仍保留帳號本機工作區', await racePage.evaluate(() => window.__accountV119.owner() === 'acct-auth-race'));
+    check('session 暫時讀不到時解除 auth boot 鎖', !(await racePage.evaluate(() => document.documentElement.classList.contains('auth-booting'))));
+
+    await racePage.evaluate(user => {
+      localStorage.removeItem('__account_test_signed_out');
+      window.__accountTest.user=user;
+      window.__authCallback?.('SIGNED_IN', { user });
+    }, raceUser);
+    await racePage.waitForTimeout(250);
+    check('session 恢復後保持原帳號工作區且不跳登入', await racePage.evaluate(() => window.__accountV119.owner() === 'acct-auth-race' && !window.__accountV119.openWelcome()));
+    await raceContext.close();
 
     for (const width of [320, 390, 430]) {
       const user = { id: `acct-${width}`, email: 'member@example.test', app_metadata: { provider: 'google' } };
