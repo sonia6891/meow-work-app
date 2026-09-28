@@ -13400,8 +13400,9 @@ async function backupCloudNow(showAlert=true){
     if(!data||!data.updated_at)throw Error('missing_sync_confirmation');
     cloudRevision=data.updated_at;cloudPayload=payload;cloudLastSuccess=data.updated_at;pendingCloud=null;localDirty=false;writeWorkspaceMeta();
     await refreshCloudBackupStatus();
-    setCloudStatus('已同步・已建立雲端備份');
-    if(showAlert)alert('已備份到雲端。');
+    const versionCreated=!!data.backup_created;
+    setCloudStatus(versionCreated?'已同步・已建立歷史雲端版本':'已同步到雲端・目前尚無新的歷史版本');
+    if(showAlert)alert(versionCreated?'已備份到雲端，並保留上一個歷史版本。':'已備份目前資料到雲端；歷史版本會在後續資料變更時建立。');
     return true;
   }catch(e){
     if(e&&e.code==='40001')setCloudStatus('雲端已有更新版本・請重新確認');
