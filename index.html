@@ -11277,6 +11277,7 @@ function meowAssistantLeaveNegated(text,leaveType='',leaveLabel=''){
 }
 function meowAssistantShiftTarget(text){
   const t=normalizeMeowAssistantText(text);
+  if(meowAssistantLeaveInfo(t).type)return null;
   if(/(?:改|排|設|設定|換|調).{0,3}(?:休|休假)|(?:休假|放假|不上班)/.test(t))return{kind:'off',shiftName:'休'};
   const m=t.match(/(?:改成|改為|更改成|調成|換成|排成|設成|設定成|改|調)?\s*(A班|B班|早班|中班|晚班|夜班|大夜班?|小夜班?)/i);
   if(!m)return null;
