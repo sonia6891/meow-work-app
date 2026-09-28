@@ -64,6 +64,8 @@ jobs:
         run: |
           npm install --no-save playwright@1.57.0
           npx playwright install --with-deps chromium
+      - name: Full data pressure regression
+        run: node tests/full-data-pressure.test.cjs
       - name: Google, LINE, Free access, logout and mobile layout tests
         run: node tests/browser-account-v117.cjs
       - name: Verify live LINE provider redirect and scopes
