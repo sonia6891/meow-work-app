@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v255-dark-mobile-visual-parity-payday-widget">
+<meta name="meow-ui-build" content="v256-dashboard-cat-itinerary-settings-icons">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -5175,6 +5175,168 @@ html.dark .holiday-tag{
   }
   html.dark .bottom-nav button{background:transparent!important;color:#cbb7a9!important}
   html.dark .bottom-nav button.active{background:#4a3427!important;color:#ffd18e!important}
+}
+</style>
+
+
+<style id="ui-regression-fixes-v256">
+/* v256 — targeted fixes for the user's confirmed mobile regressions. */
+@media(max-width:760px){
+  /* Dashboard: restore the cat rest card beneath the mobile overview and allow it to scroll into view. */
+  html[data-active-tab="dashboard"],
+  html[data-active-tab="dashboard"] body{
+    height:auto!important;
+    min-height:100%!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+  html[data-active-tab="dashboard"] .main{
+    height:auto!important;
+    min-height:calc(100dvh - var(--nav-h))!important;
+    overflow:visible!important;
+    padding-bottom:calc(var(--nav-h) + 18px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-active-tab="dashboard"] #page-dashboard.active{
+    height:auto!important;
+    overflow:visible!important;
+    padding-bottom:6px!important;
+  }
+  #page-dashboard.active>.mobile-rest-card{
+    display:block!important;
+    width:100%!important;
+    margin:12px 0 8px!important;
+  }
+  #page-dashboard.active>.mobile-rest-card img{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    border-radius:18px!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  /* Itinerary: Today is one full-width horizontal card, then the lower cards share the next row. */
+  #page-attendance .v219-itinerary-board{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:9px!important;
+  }
+  #page-attendance .v219-today-card{
+    grid-column:1/-1!important;
+    width:100%!important;
+  }
+  #page-attendance .v219-board-right{
+    grid-column:1/-1!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:9px!important;
+    width:100%!important;
+  }
+  #page-attendance .v219-board-title{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+  }
+  #page-attendance .v219-timeline-row{
+    grid-template-columns:52px 10px minmax(0,1fr)!important;
+    align-items:center!important;
+  }
+  #page-attendance .v219-timeline-content{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    min-width:0!important;
+  }
+  #page-attendance .v219-timeline-content b{
+    min-width:0!important;
+    font-size:13px!important;
+  }
+  #page-attendance .v219-timeline-content small{
+    margin-top:0!important;
+    white-space:nowrap!important;
+    font-size:11px!important;
+  }
+
+  /* Dark itinerary: A班上班 and its time must remain high contrast. */
+  html.dark #page-attendance .v219-today-card{
+    background:#2a211d!important;
+    border-color:#513d31!important;
+  }
+  html.dark #page-attendance .v219-board-title b{color:#f7eee8!important}
+  html.dark #page-attendance #v219TodayDate{color:#efbd79!important;font-weight:850!important}
+  html.dark #page-attendance .v219-timeline-row time{
+    color:#efbd79!important;
+    font-weight:850!important;
+  }
+  html.dark #page-attendance .v219-timeline-dot{background:#efbd79!important}
+  html.dark #page-attendance .v219-timeline-content{
+    background:#332720!important;
+    border:1px solid #594437!important;
+    color:#fff7f1!important;
+  }
+  html.dark #page-attendance .v219-timeline-content b{color:#fff7f1!important}
+  html.dark #page-attendance .v219-timeline-content small{color:#d8c5b7!important}
+
+  /* Settings profile: restore readable warm highlight under the profile name. */
+  html.dark #page-settings .v219-settings-profile-card>div>span{
+    color:#d9c7ba!important;
+  }
+  html.dark #page-settings .v219-settings-profile-card>div>small{
+    display:inline-block!important;
+    background:#3d2d22!important;
+    color:#ffd18e!important;
+    border:1px solid #6c4d35!important;
+    font-weight:850!important;
+    opacity:1!important;
+  }
+
+  /* Restore branded account icons after the generic dark-card rule. */
+  html.dark #page-settings .ref-settings-icon.google{
+    display:grid!important;
+    place-items:center!important;
+    background:#fff!important;
+    border:1px solid #ded8d2!important;
+    color:#4285f4!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  html.dark #page-settings .ref-settings-icon.line{
+    display:grid!important;
+    place-items:center!important;
+    background:#06c755!important;
+    border:1px solid #06c755!important;
+    color:#fff!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  html.dark #page-settings .ref-settings-icon.crown{
+    display:grid!important;
+    place-items:center!important;
+    background:#4b3a20!important;
+    border:1px solid #8c6a2d!important;
+    color:#f3c65f!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  html.dark #page-settings .ref-settings-icon:is(.google,.line,.crown) svg{
+    display:block!important;
+    width:21px!important;
+    height:21px!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+}
+@media(max-width:390px){
+  #page-attendance .v219-board-right{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  }
+  #page-attendance .v219-timeline-content{
+    gap:6px!important;
+  }
+  #page-attendance .v219-timeline-content small{
+    font-size:10px!important;
+  }
 }
 </style>
 
@@ -10348,7 +10510,7 @@ function renderV219ScheduleDay(){
 function renderV219ItineraryBoard(){
   if(!$('v219TodayList'))return;
   const now=new Date(),today=iso(now),todayEvents=itineraryEvents().filter(e=>e.date===today).sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
-  if($('v219TodayDate'))$('v219TodayDate').textContent=(now.getMonth()+1)+' 月 '+now.getDate()+' 日';
+  if($('v219TodayDate'))$('v219TodayDate').textContent=(now.getMonth()+1)+'月'+now.getDate()+'日';
   const rows=[];
   const shift=v219ScheduleShiftLabel(today);
   if(scheduleForDate(now)==='work')rows.push({time:'08:00',title:shift+' 上班',sub:'08:00 - 17:00'});
