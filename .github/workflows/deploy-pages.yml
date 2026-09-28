@@ -35,6 +35,8 @@ jobs:
         run: node tests/meow-assistant-contextual-operations.test.cjs
       - name: Meow Assistant negation/correction corpus — 12,690 cases
         run: node tests/meow-assistant-negation-12690.test.cjs
+      - name: Meow Assistant leave / itinerary / todo natural-language corpus — 20,000+ cases
+        run: node tests/meow-assistant-natural-actions-20000.test.cjs
       - name: Meow Assistant multi-turn stateful E2E
         run: node tests/meow-assistant-multiturn-e2e.test.cjs
       - name: Meow Assistant multi-turn fuzz — 1000 stateful turns
