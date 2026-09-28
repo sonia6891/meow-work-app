@@ -21,6 +21,9 @@ const bridge = `window.__accountV119={
   settings:()=>setTab('settings'),
   calendar:()=>setTab('calendar'),
   attendance:()=>setTab('attendance'),
+  salary:()=>setTab('salary'),
+  dashboard:()=>setTab('dashboard'),
+  theme:(value)=>setTheme(value),
   parseLocalScheduleVision,
   parseMeowAssistant:(text)=>meowAssistantParse(text),
   parsePayrollFixture:(words)=>{
@@ -342,6 +345,42 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         check('升級入口會跳出 Free／Pro 比較視窗', await page.locator('#proPlanDialog').isVisible() && await page.locator('#proPlanSettings').isVisible());
         await page.screenshot({ path: path.join(out, 'account-v119-pro-390.png'), fullPage: true });
         await page.locator('#proPlanDialogClose').click();
+
+        // v255: verify the actual 390px dark mobile visuals, not only CSS source presence.
+        await page.evaluate(() => window.__accountV119.theme('dark'));
+        await page.waitForTimeout(120);
+        check('390px 深色模式已實際套用到 html.dark', await page.evaluate(() => document.documentElement.classList.contains('dark')));
+
+        const darkPages = [
+          {name:'calendar', open:'calendar', selectors:['#page-calendar','.ref-worktype-panel','.ref-template-card','.schedule-v138-heading','.v219-schedule-day-card','.calendar-card']},
+          {name:'attendance', open:'attendance', selectors:['#page-attendance','.ref-itinerary-hero','.attendance-v142-tabs','.v219-board-card']},
+          {name:'salary', open:'salary', selectors:['#page-salary','.ref-salary-hero','.salary-card','.salary-tabs','.salary-section','.salary-field']},
+          {name:'settings', open:'settings', selectors:['#page-settings','.ref-settings-hero','.v219-settings-profile-card','.ref-settings-card','.ref-settings-row','.settings-modern-card']}
+        ];
+        for (const spec of darkPages) {
+          await page.evaluate(open => window.__accountV119[open](), spec.open);
+          await page.waitForTimeout(120);
+          const visual = await page.evaluate(selectors => {
+            const parse = value => {
+              const match=String(value||'').match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+              return match ? [+match[1],+match[2],+match[3]] : null;
+            };
+            const rows=selectors.map(selector=>{
+              const el=document.querySelector(selector);
+              if(!el)return{selector,missing:true};
+              const cs=getComputedStyle(el),rgb=parse(cs.backgroundColor);
+              const light=!!(rgb&&rgb[0]>=235&&rgb[1]>=235&&rgb[2]>=235);
+              return{selector,missing:false,background:cs.backgroundColor,backgroundImage:cs.backgroundImage,light};
+            });
+            return{rows,pageBackground:getComputedStyle(document.querySelector(selectors[0])).backgroundColor};
+          }, spec.selectors);
+          check(`390px 深色 ${spec.name} 關鍵區塊都存在`, visual.rows.every(row=>!row.missing));
+          check(`390px 深色 ${spec.name} 不再出現白色／近白色主區塊`, visual.rows.every(row=>!row.light));
+          fs.writeFileSync(path.join(out,`dark-${spec.name}-v255.json`),JSON.stringify(visual,null,2));
+          await page.screenshot({ path:path.join(out,`dark-${spec.name}-v255-390.png`), fullPage:true });
+        }
+        await page.evaluate(() => window.__accountV119.theme('light'));
+        await page.waitForTimeout(80);
 
         await page.evaluate(() => window.__accountV119.calendar());
         await page.waitForTimeout(180);
