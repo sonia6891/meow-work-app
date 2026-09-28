@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v261-itinerary-left-todo-right-horizontal-today">
+<meta name="meow-ui-build" content="v262-itinerary-left-todo-right-title-single-line">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -5604,6 +5604,49 @@ html.dark .holiday-tag{
   }
   #page-attendance .v219-today-card .v219-timeline-content>small{
     font-size:8px!important;
+  }
+}
+</style>
+
+
+<style id="attendance-title-hero-v262">
+@media(max-width:760px){
+  /* 今天的安排四個字固定單行，不再折成「今天的安／排」。 */
+  #page-attendance .v219-today-card .v219-board-title{
+    min-width:0!important;
+    padding-right:34px!important;
+    gap:5px!important;
+  }
+  #page-attendance .v219-today-card .v219-board-title>b{
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+    overflow:visible!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    letter-spacing:-.02em!important;
+  }
+  #page-attendance .v219-today-card #v219TodayDate{
+    flex:1 1 auto!important;
+    min-width:0!important;
+    white-space:nowrap!important;
+    text-align:right!important;
+    font-size:9px!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+  }
+
+  /* 深色 Hero 進一步融入整頁咖啡棕底。 */
+  html.dark .hero-wrap{
+    background:#18120f!important;
+  }
+  html.dark .hero-wrap .hero-mobile-dark{
+    filter:sepia(.46) saturate(.68) brightness(.96) contrast(1.02)!important;
+    opacity:.84!important;
+  }
+  html.dark .hero-wrap::after{
+    background:linear-gradient(180deg,rgba(58,43,34,.30) 0%,rgba(42,31,25,.38) 58%,rgba(24,18,15,.72) 100%)!important;
+    mix-blend-mode:normal!important;
   }
 }
 </style>
