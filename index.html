@@ -7096,6 +7096,9 @@ async function stopAccountRealtime(){
 }
 function scheduleExpiry(){
   clearTimeout(expiryTimer);
+  // Developer access is server-authorized and is not governed by a leftover subscription expiry timestamp.
+  // Ignoring this guard can create a 1 ms reschedule loop when a developer account also has an expired trial row.
+  if(developerAccess)return;
   const until=Date.parse(entitlementUntil||'');
   if(!hasCloudEntitlement()||!Number.isFinite(until))return;
   expiryTimer=setTimeout(()=>{
