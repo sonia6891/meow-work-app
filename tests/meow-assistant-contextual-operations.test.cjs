@@ -79,7 +79,7 @@ const api=factory(calls,()=>checkResult);
   });
   assert.strictEqual(handled,true);
   assert.strictEqual(calls.checks.length,1,'leave mutation must pass local validation');
-  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:8});
+  assert.deepStrictEqual(calls.executes[0],{ok:true,type:'leave',leaveType:'menstrual',dates:['2026-09-28'],hours:8,hoursSource:'schedule-default'});
 
   calls.renders=[];calls.checks=[];calls.executes=[];checkResult=null;
   handled=await api.run({
