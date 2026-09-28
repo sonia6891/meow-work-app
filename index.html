@@ -7006,7 +7006,6 @@ function persistLocalSnapshot(){
     localSaveError=false;return true;
   }catch(e){localSaveError=true;renderSyncStatus();return false}
 }
-function syncPayload(history=[]){return{version:3,savedAt:lastSavedAt||new Date().toISOString(),deviceId,state,history}}
 function cloudHistoryEntries(payload){return Array.isArray(payload&&payload.history)?payload.history.filter(x=>x&&x.state):[]}
 function meaningfulSnapshot(snapshot){return !!(snapshot&&snapshot.state&&hasMeaningfulUserData(snapshot.state))}
 function newestMeaningfulCloudSnapshot(payload){
@@ -8051,14 +8050,6 @@ function yearlyLeaveUsage(type){
   },0);
 }
 function fmtHours(v){return Number(v||0).toLocaleString('zh-TW',{maximumFractionDigits:1})}
-function leaveBalanceInfo(type,quotaDays){
-  const daily=Math.max(.5,num(state.settings.dailyWorkHours)||8),totalDays=num(quotaDays),totalHours=totalDays*daily,usedHours=yearlyLeaveUsage(type),remainHours=Math.max(0,totalHours-usedHours);
-  return{daily,totalDays,totalHours,usedHours,remainHours,usedDays:usedHours/daily,remainDays:remainHours/daily,pct:totalHours>0?Math.min(100,usedHours/totalHours*100):0};
-}
-function leaveUsageInfo(type){
-  const daily=Math.max(.5,num(state.settings.dailyWorkHours)||8),usedHours=yearlyLeaveUsage(type);
-  return{daily,usedHours,usedDays:usedHours/daily};
-}
 function legalLeaveBalanceInfo(type,legalDays,carryHours=0,includeMenstrualExcess=false){
   const daily=Math.max(.5,num(state.settings.dailyWorkHours)||8);
   const totalDays=num(legalDays),totalHours=totalDays*daily;
@@ -8738,12 +8729,6 @@ function amountCandidates(line){
     return Number.isFinite(n)?Math.abs(n):null;
   }).filter(n=>n!==null&&n<=10000000);
 }
-function chooseOcrAmount(line,mode){
-  const nums=amountCandidates(line);
-  if(!nums.length)return null;
-  if(mode==='last')return nums[nums.length-1];
-  return Math.max(...nums);
-}
 function levenshteinDistance(a,b){
   a=String(a||'');b=String(b||'');
   const m=a.length,n=b.length,prev=new Array(n+1),cur=new Array(n+1);
@@ -8900,7 +8885,6 @@ function numericTokenInfo(text){
   const rateLike=pct||(hasDecimal&&value>0&&value<10)||(!hasDecimal&&value>0&&value<=3&&compact.length<=2);
   return{value,raw:text,rateLike,percent:pct,hasDecimal};
 }
-function numericTokenValue(text){const x=numericTokenInfo(text);return x?x.value:null}
 function plausibleAmountForField(def,amount){
   if(!amount)return false;
   const v=num(amount.value!==undefined?amount.value:amount),rateLike=!!amount.rateLike,quantityLike=!!amount.quantityLike;
@@ -9401,10 +9385,6 @@ function applyManualPayslipAmount(fieldKey,a){
   payslipOcrResult.__matches.push({key:fieldKey,label:def.label,term:'人工指定',amount:num(a.value),value:num(a.value),confidence:1,method:'人工指定',source:'人工指定',labelNorm:anchor?{x:anchor.x,y:anchor.y}:null,amountNorm:a.norm,line:'使用者從圖片指定'});
   payslipOcrResult.__manualKeys=payslipOcrResult.__manualKeys||{};payslipOcrResult.__manualKeys[fieldKey]=true;
   hidePayslipAmountPicker();renderPayslipDetected();
-}
-function ocrStatusLabel(status){
-  const map={'loading tesseract core':'載入 OCR 核心','initializing tesseract':'初始化 OCR','loading language traineddata':'下載中文字庫','initializing api':'準備辨識','recognizing text':'辨識文字'};
-  return map[status]||status||'處理中';
 }
 function setPayslipScanStage(stage,message,percent){
   const n=Math.max(0,Math.min(4,Number(stage)||0));
@@ -10796,10 +10776,6 @@ function openProPlanDialog(){
 function closeProPlanDialog(){
   const dialog=$('proPlanDialog');if(dialog&&dialog.open)dialog.close();
 }
-function openProSettings(){
-  setTab('settings');
-  setTimeout(openProPlanDialog,0);
-}
 function renderSettings(){renderHeroProfile();if($('themeLight')&&$('themeDark')){const mode=themeModePreference;$('themeLight').classList.toggle('active',mode==='light');$('themeDark').classList.toggle('active',mode==='dark');if($('themeSystem'))$('themeSystem').classList.toggle('active',mode==='system');$('themeLight').lastElementChild.textContent=mode==='light'?'●':'○';$('themeDark').lastElementChild.textContent=mode==='dark'?'●':'○';if($('themeSystem'))$('themeSystem').lastElementChild.textContent=mode==='system'?'●':'○';}$('saveState').textContent=lastSavedAt?'上次儲存：'+new Date(lastSavedAt).toLocaleString('zh-TW'):'將目前設定與資料儲存到本機裝置';if($('accountStatus'))$('accountStatus').textContent=accountStatusText;if($('accountTitle'))$('accountTitle').textContent=authUser?'帳號已登入':'尚未登入';if($('accountLoginMethod'))$('accountLoginMethod').textContent=accountProviderText(authUser);if($('accountLoggedIn'))$('accountLoggedIn').classList.toggle('hidden',!authUser);if($('accountLoggedOut'))$('accountLoggedOut').classList.toggle('hidden',!!authUser);if($('accountLogout'))$('accountLogout').classList.toggle('hidden',!authUser);if($('accountDeleteZone'))$('accountDeleteZone').classList.toggle('hidden',!authUser);
 if($('accountUpgrade')){$('accountUpgrade').setAttribute('aria-expanded','false');$('accountUpgrade').setAttribute('aria-label','查看 Free／Pro 方案比較');if($('accountPlanChevron'))$('accountPlanChevron').textContent='›'}
 if($('appearanceBody'))$('appearanceBody').classList.toggle('hidden',!appearanceOpen);
@@ -11347,7 +11323,6 @@ function meowAssistantLeaveInfo(text){
   if(label&&!['請假','休假','放假','假日','什麼假','任何假'].includes(label))return{type:'custom',label};
   return{type:'',label:''};
 }
-function meowAssistantLeaveType(text){return meowAssistantLeaveInfo(text).type}
 function meowAssistantLeaveLabel(type,label=''){
   if(type==='custom'&&label)return label;
   return(MEOW_ASSISTANT_LEAVE_META[type]||MEOW_ASSISTANT_LEAVE_META.custom).label;
@@ -11573,9 +11548,6 @@ function meowAssistantKnowledgeIntents(text){
   if(/班表|排班|輪班/.test(t))return['scheduleGeneral'];
   if(/薪資|薪水|薪資單|工資|加班費|扣款|對帳/.test(t))return['payrollGeneral'];
   return[];
-}
-function meowAssistantKnowledgeIntent(text){
-  return meowAssistantKnowledgeIntents(text)[0]||'';
 }
 function meowAssistantCalcMonthAt(year,month){
   const prev=current;
@@ -11874,19 +11846,6 @@ function meowAssistantPlanCheck(plan){
   const blocked=(plan.dates||[]).filter(date=>{const st=state.dayStatus[date];return st&&st.type&&st.type!=='none'&&st.type!=='overtime'});
   if(blocked.length)return{ok:false,message:'這些日期已經有其他出勤／假別紀錄：'+blocked.map(meowAssistantDateLabel).join('、')+'。我先不覆蓋，請先到班表確認。'};
   return plan;
-}
-function meowAssistantPlanText(plan){
-  if(plan.type==='shiftChange')return '把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 改成 '+(plan.kind==='off'?'休假':plan.shiftName)+'。';
-  if(plan.type==='leave')return '把 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 設為'+meowAssistantLeaveLabel(plan.leaveType,plan.leaveLabel)+'，'+plan.hours+' 小時。';
-  if(plan.type==='removeLeave')return '取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的'+meowAssistantLeaveLabel(plan.leaveType,plan.leaveLabel)+'標記。';
-  if(plan.type==='addEvent')return '新增行程：'+plan.title+'（'+plan.dates.map(meowAssistantDateLabel).join('、')+(plan.startTime?' '+plan.startTime:'')+'）。';
-  if(plan.type==='removeEvent')return '取消行程：'+(plan.targetItem?.title||plan.title||'指定行程')+'。';
-  if(plan.type==='addTodo')return '新增待辦：'+plan.title+((plan.dates||[]).length?'（'+plan.dates.map(meowAssistantDateLabel).join('、')+'）':'')+'。';
-  if(plan.type==='removeTodo')return '取消待辦：'+(plan.targetItem?.title||plan.title||'指定待辦')+'。';
-  if(plan.type==='move')return '把 '+meowAssistantDateLabel(plan.from)+' 的加班移到 '+meowAssistantDateLabel(plan.to)+'，保留原本時數、日別與備註。';
-  if(plan.type==='remove')return '取消 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 的加班標記。';
-  const def=Math.max(.5,num(state.settings.defaultOvertimeHours)||10),suffix=plan.hours===def?'（使用你的預設加班時數）':'';
-  return '新增 '+plan.dates.map(meowAssistantDateLabel).join('、')+' 加班，每天 '+plan.hours+' 小時'+suffix+'。';
 }
 function meowAssistantOvertimeRecord(date,hours){
   const dt=new Date(date+'T00:00:00'),kind=scheduleForDate(dt)==='work'?'regular':'rest';
