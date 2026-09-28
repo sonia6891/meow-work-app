@@ -486,14 +486,24 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.evaluate(() => window.__accountV119.attendance());
         await page.waitForTimeout(120);
         check('第三頁使用參考圖的行程與待辦架構', (await page.locator('.v219-itinerary-heading').innerText()).includes('行程與待辦事項') && await page.locator('.v219-itinerary-board').isVisible());
-        check('行程分頁只顯示行程內容', await page.locator('.v219-today-card').isVisible() && !(await page.locator('.v219-todo-card').isVisible()) && await page.locator('.v219-conflict-card').isVisible());
-        check('行程分頁只顯示新增行程按鈕', await page.locator('#v219QuickEvent').isVisible() && !(await page.locator('#v219QuickTodoCard').isVisible()));
-        const todayWidth=await page.evaluate(()=>{
-          const card=document.querySelector('.v219-today-card'),board=document.querySelector('.v219-itinerary-board');
-          const cr=card.getBoundingClientRect(),br=board.getBoundingClientRect();
-          return{card:cr.width,board:br.width};
+        check('行程與待辦事項兩張主卡同一畫面可見', await page.locator('.v219-today-card').isVisible() && await page.locator('.v219-todo-card').isVisible());
+        check('行程與待辦兩個新增按鈕同時可見', await page.locator('#v219QuickEvent').isVisible() && await page.locator('#v219QuickTodoCard').isVisible());
+        const twoColumnLayout=await page.evaluate(()=>{
+          const today=document.querySelector('.v219-today-card'),todo=document.querySelector('.v219-todo-card'),board=document.querySelector('.v219-itinerary-board');
+          const tr=today.getBoundingClientRect(),rr=todo.getBoundingClientRect(),br=board.getBoundingClientRect();
+          const row=document.querySelector('.v219-today-card .v219-timeline-content');
+          const rs=row?getComputedStyle(row):null;
+          return{
+            today:{left:tr.left,right:tr.right,width:tr.width,top:tr.top},
+            todo:{left:rr.left,right:rr.right,width:rr.width,top:rr.top},
+            boardWidth:br.width,
+            todayContentDisplay:rs?.display||'',
+            todayContentColumns:rs?.gridTemplateColumns||''
+          };
         });
-        check('今天的安排是橫向滿版長卡', todayWidth.card >= todayWidth.board-2);
+        check('行程在左、待辦在右且維持同一排', twoColumnLayout.today.left < twoColumnLayout.todo.left && Math.abs(twoColumnLayout.today.top-twoColumnLayout.todo.top)<3 && twoColumnLayout.today.right <= twoColumnLayout.todo.left+1);
+        check('今天的安排留在左側行程卡內，不跨到下一列', twoColumnLayout.today.width < twoColumnLayout.boardWidth*.75);
+        check('今天的安排內容採橫向排列', twoColumnLayout.todayContentDisplay==='grid' && twoColumnLayout.todayContentColumns.split(' ').length>=2);
         await page.locator('#v219QuickEvent').click();
         check('新增行程按鈕直接開啟行程視窗', await page.locator('#eventDialog').evaluate(x=>x.open));
         check('新行程預設前 1 小時提醒', await page.locator('#eventReminder').inputValue() === '1h');
@@ -506,13 +516,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
 
         await page.locator('#attendanceTabTodos').click();
         check('待辦事項分頁可切換', await page.locator('#attendanceTabTodos').getAttribute('aria-selected') === 'true');
-        check('待辦事項分頁只顯示待辦清單', await page.locator('.v219-todo-card').isVisible() && !(await page.locator('.v219-today-card').isVisible()) && !(await page.locator('.v219-conflict-card').isVisible()));
-        const todoWidth=await page.evaluate(()=>{
-          const card=document.querySelector('.v219-todo-card'),board=document.querySelector('.v219-itinerary-board');
-          const cr=card.getBoundingClientRect(),br=board.getBoundingClientRect();
-          return{card:cr.width,board:br.width};
-        });
-        check('待辦清單在待辦事項下面橫向滿版', todoWidth.card >= todoWidth.board-2);
+        check('切到待辦事項後仍保持左右雙卡，不把行程推到下一列', await page.locator('.v219-todo-card').isVisible() && await page.locator('.v219-today-card').isVisible());
         await page.locator('#v219QuickTodoCard').click();
         check('新增待辦按鈕直接開啟待辦視窗', await page.locator('#todoDialog').evaluate(x=>x.open));
         check('新待辦預設前一天上午 9 點提醒', await page.locator('#todoReminder').inputValue() === '1d');
