@@ -504,6 +504,12 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         check('行程在左、待辦在右且維持同一排', twoColumnLayout.today.left < twoColumnLayout.todo.left && Math.abs(twoColumnLayout.today.top-twoColumnLayout.todo.top)<3 && twoColumnLayout.today.right <= twoColumnLayout.todo.left+1);
         check('今天的安排留在左側行程卡內，不跨到下一列', twoColumnLayout.today.width < twoColumnLayout.boardWidth*.75);
         check('今天的安排內容採橫向排列', twoColumnLayout.todayContentDisplay==='grid' && twoColumnLayout.todayContentColumns.split(' ').length>=2);
+        check('今天的安排標題固定單行不換行', await page.evaluate(()=>{
+          const title=document.querySelector('.v219-today-card .v219-board-title>b');
+          if(!title)return false;
+          const cs=getComputedStyle(title),rect=title.getBoundingClientRect();
+          return cs.whiteSpace==='nowrap' && rect.height < 24;
+        }));
         await page.locator('#v219QuickEvent').click();
         check('新增行程按鈕直接開啟行程視窗', await page.locator('#eventDialog').evaluate(x=>x.open));
         check('新行程預設前 1 小時提醒', await page.locator('#eventReminder').inputValue() === '1h');
