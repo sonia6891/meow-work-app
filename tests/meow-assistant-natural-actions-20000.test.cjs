@@ -179,6 +179,35 @@ for(let day=1;day<=20;day++){
   }
 }
 
+// High-risk negated cancellation: these phrases must NEVER delete an itinerary/todo.
+const eventNoCancelTemplates=[
+  (d,t)=>`不要取消10月${d}號${t}的行程`,
+  (d,t)=>`10月${d}號${t}行程先不要刪掉`,
+  (d,t)=>`10月${d}號的${t}行程不用移除`,
+  (d,t)=>`別撤銷10月${d}號${t}行程`
+];
+const todoNoCancelTemplates=[
+  (d,t)=>`不要取消10月${d}號${t}的待辦`,
+  (d,t)=>`10月${d}號${t}待辦先不要刪掉`,
+  (d,t)=>`10月${d}號的${t}代辦不用移除`,
+  (d,t)=>`別撤銷10月${d}號${t}待辦事項`
+];
+for(let day=1;day<=20;day++){
+  const date='2026-10-'+String(day).padStart(2,'0');
+  for(const title of eventTitles){
+    for(const make of eventNoCancelTemplates){
+      const q=make(day,title);
+      expect(q,a=>a&&a.ok&&a.type==='personalNoChange'&&a.personalKind==='event'&&a.dates[0]===date,{type:'personalNoChange',personalKind:'event',date,title});
+    }
+  }
+  for(const title of todoTitles){
+    for(const make of todoNoCancelTemplates){
+      const q=make(day,title);
+      expect(q,a=>a&&a.ok&&a.type==='personalNoChange'&&a.personalKind==='todo'&&a.dates[0]===date,{type:'personalNoChange',personalKind:'todo',date,title});
+    }
+  }
+}
+
 // Reminder phrases are parsed only when explicitly stated.
 for(let day=1;day<=20;day++){
   const date='2026-10-'+String(day).padStart(2,'0');
@@ -195,6 +224,6 @@ fs.writeFileSync('test-results/meow-assistant-natural-actions.json',JSON.stringi
   build:(html.match(/<meta name="meow-ui-build" content="([^"]+)"/)||[])[1]||'unknown',
   tested,failed:failures.length,
   leave_aliases:leaveAliases.length,
-  categories:['statutory_leave','custom_leave','leave_range','event_add_remove','todo_add_remove','explicit_reminder']
+  categories:['statutory_leave','custom_leave','leave_range','event_add_remove','todo_add_remove','event_todo_negated_cancel','explicit_reminder']
 },null,2));
 console.log('PASS Meow Assistant natural-language action corpus:',tested,'cases passed');
