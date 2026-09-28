@@ -146,5 +146,10 @@ assert(
   html.includes('已同步・已建立歷史雲端版本'),
   'Manual cloud save must distinguish the live cloud snapshot from an actual history checkpoint.'
 );
+assert(
+  html.includes('function scheduleExpiry(){') &&
+  html.includes('if(developerAccess)return;'),
+  'Developer access must not reschedule against an expired subscription timestamp.'
+);
 
 console.log('Cloud sync v190 regression checks passed.');
