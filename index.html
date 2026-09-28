@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v249-mol-leave-link-and-value-alignment">
+<meta name="meow-ui-build" content="v250-coffee-dark-and-widget-ready">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -41,7 +41,7 @@
   document.documentElement.classList.toggle('dark',theme==='dark');
   document.documentElement.style.colorScheme=theme;
   var meta=document.querySelector('meta[name=theme-color]');
-  if(meta)meta.setAttribute('content',theme==='dark'?'#0b1020':'#f7b342');
+  if(meta)meta.setAttribute('content',theme==='dark'?'#1b1512':'#f7b342');
 })();
 </script>
 <style>
@@ -4621,6 +4621,227 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
 }
 </style>
 
+
+<style id="coffee-dark-system-v250">
+/* v250 — one warm coffee-brown surface system for dark mode. */
+html.dark{
+  --bg:#18120f!important;
+  --paper:#211916!important;
+  --card:#2a211d!important;
+  --ink:#f7eee8!important;
+  --brown:#e2b28f!important;
+  --muted:#c9b5a7!important;
+  --line:#513d31!important;
+  --shadow:0 10px 28px rgba(0,0,0,.26)!important;
+
+  --mobile-surface:#2a211d!important;
+  --mobile-field:#211916!important;
+  --mobile-soft:#322720!important;
+  --mobile-text:#f7eee8!important;
+  --mobile-muted:#c9b5a7!important;
+  --mobile-line:#513d31!important;
+  --mobile-track:#5d493d!important;
+  --mobile-accent:#e2ad6c!important;
+  --mobile-nav-active:#4a3427!important;
+
+  /* Keep functional accent inks, but remove blue/green/pink block backgrounds. */
+  --mobile-blue-surface:#2c231f!important;
+  --mobile-blue-icon:#3b2e27!important;
+  --mobile-blue-ink:#b8cbd5!important;
+  --mobile-pink-surface:#302321!important;
+  --mobile-pink-icon:#422e2c!important;
+  --mobile-pink-ink:#e4a5ad!important;
+  --mobile-gold-surface:#34281f!important;
+  --mobile-gold-icon:#493526!important;
+  --mobile-gold-ink:#efbd79!important;
+  --mobile-green-surface:#29261f!important;
+  --mobile-green-icon:#393528!important;
+  --mobile-green-ink:#b9cfaa!important;
+  --mobile-purple-surface:#302620!important;
+  --mobile-purple-icon:#413129!important;
+  --mobile-purple-ink:#d5b8c7!important;
+  --mobile-teal-surface:#292621!important;
+  --mobile-teal-icon:#37332c!important;
+  --mobile-teal-ink:#b9ccc4!important;
+  --mobile-gray-surface:#2b2521!important;
+  --mobile-gray-icon:#3b322c!important;
+  --mobile-gray-ink:#d7c7ba!important;
+}
+
+html.dark body,
+html.dark .app,
+html.dark .shell,
+html.dark .main,
+html.dark #page-dashboard,
+html.dark #page-calendar,
+html.dark #page-attendance,
+html.dark #page-salary,
+html.dark #page-settings{
+  background:#18120f!important;
+  color:#f7eee8!important;
+}
+
+/* One card surface across all five main pages. */
+html.dark .card,
+html.dark .section,
+html.dark .salary-card,
+html.dark .salary-section,
+html.dark .salary-field,
+html.dark .result-card,
+html.dark .compare-card,
+html.dark .pro-card,
+html.dark .pro-recent-card,
+html.dark .salary-free-card,
+html.dark .salary-free-diff-bar,
+html.dark .calendar-card,
+html.dark .schedule-card,
+html.dark .schedule-card-v136,
+html.dark .schedule-settings,
+html.dark .ref-template-card,
+html.dark .ref-worktype-panel,
+html.dark .v219-board-card,
+html.dark .v219-reminder-card,
+html.dark .v219-calendar-color-panel,
+html.dark .todo-card-v142,
+html.dark .settings-card,
+html.dark .settings-modern-card,
+html.dark .ref-settings-card,
+html.dark .account-overview-card,
+html.dark .account-name-editor,
+html.dark .settings-item,
+html.dark .mda-worktypes,
+html.dark .mda-next-shift,
+html.dark .mda-leave-shell,
+html.dark .mda-reminder,
+html.dark .mda-kpi,
+html.dark .mda-leave-card{
+  background:#2a211d!important;
+  border-color:#513d31!important;
+  color:#f7eee8!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
+}
+
+/* Colored KPI/result cards become warm variations, not blue/white islands. */
+html.dark .tone-blue,
+html.dark .tone-pink,
+html.dark .tone-green,
+html.dark .tone-orange,
+html.dark .mda-kpi-blue,
+html.dark .mda-kpi-pink,
+html.dark .mda-kpi-green,
+html.dark .mda-kpi-orange,
+html.dark .dashboard-focus-card,
+html.dark .balance-card,
+html.dark .annual-balance,
+html.dark .sick-balance,
+html.dark .personal-balance{
+  background:linear-gradient(145deg,#30251f,#281f1b)!important;
+  border-color:#513d31!important;
+  color:#f7eee8!important;
+}
+
+/* Inputs / selectors stay dark brown throughout. */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark select,
+html.dark textarea,
+html.dark .field input,
+html.dark .field select,
+html.dark .field textarea,
+html.dark .salary-field input,
+html.dark .salary-field select,
+html.dark .salary-free-actual-input,
+html.dark .account-name-row input{
+  background:#211916!important;
+  color:#fff5ee!important;
+  border-color:#5a4336!important;
+  box-shadow:none!important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder{color:#9f8879!important}
+
+/* Tabs, buttons and tool rows share the same warm surfaces. */
+html.dark .salary-tabs,
+html.dark .attendance-v142-tabs,
+html.dark .settings-segmented,
+html.dark .ref-template-buttons{
+  background:#211916!important;
+  border-color:#513d31!important;
+}
+html.dark .salary-tab,
+html.dark .attendance-v142-tabs button,
+html.dark .settings-segmented button,
+html.dark .ref-template-buttons button,
+html.dark .btn,
+html.dark .icon-btn,
+html.dark .today-btn,
+html.dark .section-link,
+html.dark .account-plan-toggle{
+  background:#2a211d!important;
+  color:#e7d6ca!important;
+  border-color:#513d31!important;
+}
+html.dark .salary-tab.active,
+html.dark .attendance-v142-tabs button.active,
+html.dark .settings-segmented button.active,
+html.dark .ref-template-buttons button.active,
+html.dark .bottom-nav button.active{
+  background:linear-gradient(145deg,#513827,#422d22)!important;
+  color:#ffd18e!important;
+  border-color:#8e6741!important;
+  box-shadow:inset 0 0 0 1px rgba(236,178,104,.14)!important;
+}
+
+/* Calendar cells remain distinguishable but never turn white. */
+html.dark .day,
+html.dark .weekdays div,
+html.dark #page-calendar .v219-calendar-color-options button,
+html.dark #page-calendar .calendar-card .legend{
+  background:#261e1a!important;
+  border-color:#4a382f!important;
+  color:#f1e5dd!important;
+}
+html.dark .day.empty{background:#211a17!important;color:#88776d!important}
+
+/* Salary reconciliation and formula area. */
+html.dark #page-salary .salary-free-diff-bar,
+html.dark #page-salary .formula,
+html.dark #page-salary .scan-status,
+html.dark #page-salary .scan-result,
+html.dark #page-salary .itemized-panel,
+html.dark #page-salary .salary-history-panel{
+  background:#261e1a!important;
+  border-color:#513d31!important;
+  color:#f7eee8!important;
+}
+html.dark #page-salary .salary-free-diff-bar.negative,
+html.dark #page-salary .salary-free-diff-bar.positive,
+html.dark #page-salary .salary-free-diff-bar.equal{
+  background:#2d221d!important;
+  border-color:#5a4336!important;
+}
+
+/* Warm navigation and text hierarchy. */
+html.dark .bottom-nav{
+  background:rgba(27,20,17,.98)!important;
+  border-color:#49362c!important;
+  box-shadow:0 -8px 26px rgba(0,0,0,.30)!important;
+}
+html.dark .bottom-nav button{color:#cbb7a9!important}
+html.dark .hint,
+html.dark .mini-note,
+html.dark small,
+html.dark .mda-muted,
+html.dark .settings-item small{
+  color:#c9b5a7!important;
+}
+
+/* Keep functional status chips legible while card surfaces remain coffee-brown. */
+html.dark .status-pill,
+html.dark .holiday-tag{
+  border-color:rgba(255,255,255,.08)!important;
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -9060,7 +9281,7 @@ function renderSalary(){
   set('dedWelfare',mm.dedWelfare);
   set('dedPension',mm.dedPension);
   set('dedAttendance',mc.attendanceDeductionManual?mm.dedAttendance:mc.deductions.attendance);
-  if($('dedAttendanceHint'))$('dedAttendanceHint').textContent=mc.attendanceDeductionManual?'目前使用你手動輸入的考勤扣款；清空欄位即可恢復班表自動估算。':'班表自動估算：正常工時月工資基礎 '+money(mc.autoAttendance.wageBase)+'，1 日工資約 '+money(mc.autoAttendance.dailyWage)+'；事假 100%、普通病假／生理假 50%、特休 0%。目前事假 '+fmtHours(mc.autoAttendance.personalHours)+' 小時、病假 '+fmtHours(mc.autoAttendance.sickHours)+' 小時、生理假 '+fmtHours(mc.autoAttendance.menstrualHours)+' 小時。';
+  if($('dedAttendanceHint'))$('dedAttendanceHint').textContent=mc.attendanceDeductionManual?'目前使用你手動輸入的考勤扣款；清空欄位即可恢復班表自動估算。':'班表自動估算：依你的薪資設定與本月請假紀錄自動計算；事假 100%、普通病假／生理假 50%、特休 0%。目前事假 '+fmtHours(mc.autoAttendance.personalHours)+' 小時、病假 '+fmtHours(mc.autoAttendance.sickHours)+' 小時、生理假 '+fmtHours(mc.autoAttendance.menstrualHours)+' 小時。';
   set('dedTax',mm.dedTax);
   set('dedHealthExtra',mm.dedHealthExtra);
   set('dedOther',mm.dedOther);
@@ -9072,7 +9293,7 @@ function renderSalary(){
   $('resultOtPay').textContent=money(mc.otPay);
   $('resultGross').textContent=money(mc.gross);
   $('resultNet').textContent=money(mc.net);
-  $('formulaText').innerHTML=`<b>ⓘ 計算說明</b><br>● 輪班津貼依「每班津貼 × 實際出勤」自動計算<br>● 請假考勤扣款 ＝ ${mc.attendanceDeductionManual?'手動輸入 '+money(mc.deductions.attendance):'班表自動估算 '+money(mc.deductions.attendance)+'（正常工時月工資 '+money(mc.autoAttendance.wageBase)+'；1 日約 '+money(mc.autoAttendance.dailyWage)+'；事假 100%、病假／生理假 50%、特休 0%）'}<br>● 基礎時薪 ＝（底薪＋輪班津貼＋伙食津貼＋表現津貼）÷ 240 ＝ ${money(mc.hourly)}<br>● 加班費率 ＝ ${overtimeRateSummary()}<br>● ${overtimeHourlyDisplay(mc.hourly).label} ＝ ${overtimeHourlyDisplay(mc.hourly).main===null?overtimeHourlyDisplay(mc.hourly).sub:money(overtimeHourlyDisplay(mc.hourly).main)}<br>● 本月加班費<br>　${overtimeFormulaDetail(mc)}`;
+  $('formulaText').innerHTML=`<b>ⓘ 計算說明</b><br>● 輪班津貼依「每班津貼 × 實際出勤」自動計算<br>● 請假考勤扣款 ＝ ${mc.attendanceDeductionManual?'手動輸入 '+money(mc.deductions.attendance):'班表自動估算 '+money(mc.deductions.attendance)+'（依你的薪資設定與實際請假時數計算；事假 100%、病假／生理假 50%、特休 0%）'}<br>● 基礎時薪 ＝（底薪＋輪班津貼＋伙食津貼＋表現津貼）÷ 240 ＝ ${money(mc.hourly)}<br>● 加班費率 ＝ ${overtimeRateSummary()}<br>● ${overtimeHourlyDisplay(mc.hourly).label} ＝ ${overtimeHourlyDisplay(mc.hourly).main===null?overtimeHourlyDisplay(mc.hourly).sub:money(overtimeHourlyDisplay(mc.hourly).main)}<br>● 本月加班費<br>　${overtimeFormulaDetail(mc)}`;
   setSalarySubTab(salarySubTab);
   renderSalaryCompare(mc,mm);
   renderProEntitlements();
@@ -12531,7 +12752,7 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v249';
+    const reloadKey='meow-sw-reloaded-v250';
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
         if(sessionStorage.getItem(reloadKey))return;
@@ -12540,7 +12761,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=249',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=250',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
@@ -12553,7 +12774,7 @@ restoreIndexedMirrorIfNewer();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 // meow-build-freshness-v241: when an installed PWA resumes, compare the published build and reload once if newer.
 (function(){
-  const CURRENT_BUILD='v249-mol-leave-link-and-value-alignment';
+  const CURRENT_BUILD='v250-coffee-dark-and-widget-ready';
   let checking=false;
   async function checkFreshBuild(){
     if(checking||!navigator.onLine)return;
