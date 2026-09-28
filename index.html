@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v248-align-pay-values-yellow-nav">
+<meta name="meow-ui-build" content="v249-mol-leave-link-and-value-alignment">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4586,6 +4586,41 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
 }
 </style>
 
+
+<style id="salary-reconcile-value-baseline-v249">
+@media(max-width:760px){
+  #page-salary .salary-free-actual-card,
+  #page-salary .salary-free-estimated-card{
+    display:grid!important;
+    grid-template-rows:56px 44px!important;
+    align-content:start!important;
+    row-gap:12px!important;
+  }
+  #page-salary .salary-free-card-head{
+    min-height:56px!important;
+    height:56px!important;
+    margin:0!important;
+    align-self:start!important;
+    box-sizing:border-box!important;
+  }
+  #page-salary .salary-free-actual-input,
+  #page-salary .salary-free-estimated-card > strong{
+    align-self:start!important;
+    width:100%!important;
+    height:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    line-height:26px!important;
+  }
+  #page-salary .salary-free-estimated-card > strong{
+    display:flex!important;
+    align-items:center!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -6691,24 +6726,54 @@ function effectiveDayStatusHours(st){
   if(st.type==='overtime')return Math.max(.5,num(state.settings.defaultOvertimeHours)||10);
   return Math.max(.5,num(state.settings.dailyWorkHours)||8);
 }
-function attendanceDeductionEstimate(y,m){
-  const hourly=Math.max(0,num(state.settings.baseSalary))/240;
+function attendanceDeductionEstimate(y,m,normalMonthlyWage){
+  // Taiwan MOL monthly-paid leave estimate:
+  // 1 day wage = normal monthly wage / 30; hourly equivalent = / 240.
+  // Personal leave = no pay; ordinary sick / menstrual leave = half pay.
+  // A single scheduled work date is capped at 8 statutory hours for wage-deduction
+  // purposes, so a full 10-hour four-shift sick day is still treated as one leave day.
+  const wageBase=Math.max(0,num(normalMonthlyWage));
+  const dailyWage=wageBase/30;
+  const hourlyWage=wageBase/240;
   let personalHours=0,sickHours=0,menstrualHours=0;
+  let personalLegalHours=0,sickLegalHours=0,menstrualLegalHours=0;
+  let personalDeduction=0,sickDeduction=0,menstrualDeduction=0;
   const prefix=monthKey(y,m)+'-';
   for(const [date,st] of Object.entries(state.dayStatus||{})){
     if(!date.startsWith(prefix)||!st||!st.type||st.type==='none'||st.type==='overtime')continue;
     const dt=new Date(date+'T00:00:00');
     if(Number.isNaN(dt.getTime())||scheduleForDate(dt)!=='work')continue;
     const hours=effectiveDayStatusHours(st);
-    if(st.type==='personal')personalHours+=hours;
-    else if(st.type==='sick')sickHours+=hours;
-    else if(st.type==='menstrual')menstrualHours+=hours;
+    const legalHours=Math.min(8,Math.max(0,hours));
+    const leaveWage=Math.min(dailyWage,hourlyWage*legalHours);
+    if(st.type==='personal'){
+      personalHours+=hours;
+      personalLegalHours+=legalHours;
+      personalDeduction+=leaveWage;
+    }else if(st.type==='sick'){
+      sickHours+=hours;
+      sickLegalHours+=legalHours;
+      sickDeduction+=leaveWage*.5;
+    }else if(st.type==='menstrual'){
+      menstrualHours+=hours;
+      menstrualLegalHours+=legalHours;
+      menstrualDeduction+=leaveWage*.5;
+    }
   }
-  const amount=Math.max(0,Math.round(hourly*(personalHours+(sickHours+menstrualHours)*.5)));
-  return{amount,hourly,personalHours,sickHours,menstrualHours};
+  const amount=Math.max(0,Math.round(personalDeduction+sickDeduction+menstrualDeduction));
+  return{
+    amount,
+    hourly:hourlyWage,
+    hourlyWage,
+    dailyWage,
+    wageBase,
+    personalHours,sickHours,menstrualHours,
+    personalLegalHours,sickLegalHours,menstrualLegalHours,
+    personalDeduction,sickDeduction,menstrualDeduction
+  };
 }
 function calcMonth(){const y=current.getFullYear(),m=current.getMonth(),mm=state.months[monthKey(y,m)]||{},days=new Date(y,m+1,0).getDate();let expected=0,attendance=0,leaveDays=0,leaveHours=0,overtimeDays=0,dailyOt=0;const leaves={};const weekdayOt=[0,0,0,0,0,0,0];for(let d=1;d<=days;d++){const dt=new Date(y,m,d),date=iso(dt),base=scheduleForDate(dt),st=state.dayStatus[date];if(base==='work')expected++;if(base==='work'&&(!st||st.type==='none'||st.type==='overtime'))attendance++;if(st&&st.type&&st.type!=='none'){if(st.type==='overtime'){overtimeDays++;dailyOt+=effectiveDayStatusHours(st);weekdayOt[dt.getDay()]+=effectiveDayStatusHours(st)}else{leaveDays++;leaveHours+=effectiveDayStatusHours(st);const meta=typeMeta(st),key=st.type==='custom'?'custom:'+meta.label:st.type;if(!leaves[key])leaves[key]={label:meta.label,type:st.type,hours:0,days:0};leaves[key].hours+=effectiveDayStatusHours(st);leaves[key].days++}}}
- const manualOvertimeHours=('overtimeHours' in mm)?num(mm.overtimeHours):0;const overtimeHours=overtimeDays>0?dailyOt:manualOvertimeHours;const base=num(state.settings.baseSalary),shiftPerDay=num(state.settings.shiftAllowancePerDay),shiftAllowance=shiftPerDay*attendance,meal=num(state.settings.mealAllowance),performance=num(state.settings.performanceAllowance),transport=num(state.settings.transportAllowance),otherIncome=num(state.settings.otherIncome),hourly=(base+shiftAllowance+meal+performance)/240,otPay=monthlyOvertimePay(y,m,hourly,overtimeHours),gross=base+shiftAllowance+meal+performance+transport+otherIncome+otPay;const autoAttendance=attendanceDeductionEstimate(y,m),attendanceDeductionManual=Object.prototype.hasOwnProperty.call(mm,'dedAttendance'),attendanceDeduction=attendanceDeductionManual?num(mm.dedAttendance):autoAttendance.amount;const deductions={labor:num(mm.dedLabor),health:num(mm.dedHealth),welfare:num(mm.dedWelfare),pension:num(mm.dedPension),attendance:attendanceDeduction,tax:num(mm.dedTax),healthExtra:num(mm.dedHealthExtra),other:num(mm.dedOther)};const dedTotal=Object.values(deductions).reduce((a,b)=>a+b,0),net=Math.max(0,gross-dedTotal);return{y,m,mm,days,expected,attendance,leaveDays,leaveHours,overtimeDays,overtimeHours,dailyOt,weekdayOt,leaves,base,shiftPerDay,shiftAllowance,meal,performance,transport,otherIncome,hourly,otPay,gross,autoAttendance,attendanceDeductionManual,deductions,dedTotal,net}}
+ const manualOvertimeHours=('overtimeHours' in mm)?num(mm.overtimeHours):0;const overtimeHours=overtimeDays>0?dailyOt:manualOvertimeHours;const base=num(state.settings.baseSalary),shiftPerDay=num(state.settings.shiftAllowancePerDay),shiftAllowance=shiftPerDay*attendance,meal=num(state.settings.mealAllowance),performance=num(state.settings.performanceAllowance),transport=num(state.settings.transportAllowance),otherIncome=num(state.settings.otherIncome),normalWageBase=base+shiftAllowance+meal+performance,hourly=normalWageBase/240,otPay=monthlyOvertimePay(y,m,hourly,overtimeHours),gross=base+shiftAllowance+meal+performance+transport+otherIncome+otPay;const autoAttendance=attendanceDeductionEstimate(y,m,normalWageBase),attendanceDeductionManual=Object.prototype.hasOwnProperty.call(mm,'dedAttendance'),attendanceDeduction=attendanceDeductionManual?num(mm.dedAttendance):autoAttendance.amount;const deductions={labor:num(mm.dedLabor),health:num(mm.dedHealth),welfare:num(mm.dedWelfare),pension:num(mm.dedPension),attendance:attendanceDeduction,tax:num(mm.dedTax),healthExtra:num(mm.dedHealthExtra),other:num(mm.dedOther)};const dedTotal=Object.values(deductions).reduce((a,b)=>a+b,0),net=Math.max(0,gross-dedTotal);return{y,m,mm,days,expected,attendance,leaveDays,leaveHours,overtimeDays,overtimeHours,dailyOt,weekdayOt,leaves,base,shiftPerDay,shiftAllowance,meal,performance,transport,otherIncome,normalWageBase,hourly,otPay,gross,autoAttendance,attendanceDeductionManual,deductions,dedTotal,net}}
 function icon(id){return`<svg class="icon"><use href="#${id}"/></svg>`}
 function overtimeRates(){const mode=['unselected','legal','fixed','custom'].includes(state.settings.overtimeRateMode)?state.settings.overtimeRateMode:'unselected';if(mode==='unselected')return{mode,regularFirst:0,regularLater:0,restFirst:0,restLater:0,restOver8:0,holiday:0};if(mode==='fixed'){const r=Math.max(1,num(state.settings.overtimeFixedRate)||2);return{mode,regularFirst:r,regularLater:r,restFirst:r,restLater:r,restOver8:r,holiday:r}}if(mode==='custom')return{mode,regularFirst:Math.max(1,num(state.settings.overtimeRegularFirst)||4/3),regularLater:Math.max(1,num(state.settings.overtimeRegularLater)||5/3),restFirst:Math.max(1,num(state.settings.overtimeRestFirst)||4/3),restLater:Math.max(1,num(state.settings.overtimeRestLater)||5/3),restOver8:Math.max(1,num(state.settings.overtimeRestOver8)||8/3),holiday:1};return{mode:'legal',regularFirst:4/3,regularLater:5/3,restFirst:4/3,restLater:5/3,restOver8:8/3,holiday:1}}
 function overtimePayForHours(hourly,hours,kind,r=overtimeRates()){const h=Math.max(0,num(hours));if(!h)return 0;if(kind==='holiday')return hourly*h*r.holiday;if(kind==='rest')return hourly*(Math.min(h,2)*r.restFirst+Math.min(Math.max(h-2,0),6)*r.restLater+Math.max(h-8,0)*r.restOver8);return hourly*(Math.min(h,2)*r.regularFirst+Math.max(h-2,0)*r.regularLater)}
@@ -8995,7 +9060,7 @@ function renderSalary(){
   set('dedWelfare',mm.dedWelfare);
   set('dedPension',mm.dedPension);
   set('dedAttendance',mc.attendanceDeductionManual?mm.dedAttendance:mc.deductions.attendance);
-  if($('dedAttendanceHint'))$('dedAttendanceHint').textContent=mc.attendanceDeductionManual?'目前使用你手動輸入的考勤扣款；清空欄位即可恢復班表自動估算。':'班表自動估算：事假 '+fmtHours(mc.autoAttendance.personalHours)+' 小時、病假 '+fmtHours(mc.autoAttendance.sickHours)+' 小時、生理假 '+fmtHours(mc.autoAttendance.menstrualHours)+' 小時；特休不扣薪。';
+  if($('dedAttendanceHint'))$('dedAttendanceHint').textContent=mc.attendanceDeductionManual?'目前使用你手動輸入的考勤扣款；清空欄位即可恢復班表自動估算。':'班表自動估算：正常工時月工資基礎 '+money(mc.autoAttendance.wageBase)+'，1 日工資約 '+money(mc.autoAttendance.dailyWage)+'；事假 100%、普通病假／生理假 50%、特休 0%。目前事假 '+fmtHours(mc.autoAttendance.personalHours)+' 小時、病假 '+fmtHours(mc.autoAttendance.sickHours)+' 小時、生理假 '+fmtHours(mc.autoAttendance.menstrualHours)+' 小時。';
   set('dedTax',mm.dedTax);
   set('dedHealthExtra',mm.dedHealthExtra);
   set('dedOther',mm.dedOther);
@@ -9007,7 +9072,7 @@ function renderSalary(){
   $('resultOtPay').textContent=money(mc.otPay);
   $('resultGross').textContent=money(mc.gross);
   $('resultNet').textContent=money(mc.net);
-  $('formulaText').innerHTML=`<b>ⓘ 計算說明</b><br>● 輪班津貼依「每班津貼 × 實際出勤」自動計算<br>● 請假考勤扣款 ＝ ${mc.attendanceDeductionManual?'手動輸入 '+money(mc.deductions.attendance):'班表自動估算 '+money(mc.deductions.attendance)+'（事假 100%、病假／生理假 50%、特休 0%）'}<br>● 基礎時薪 ＝（底薪＋輪班津貼＋伙食津貼＋表現津貼）÷ 240 ＝ ${money(mc.hourly)}<br>● 加班費率 ＝ ${overtimeRateSummary()}<br>● ${overtimeHourlyDisplay(mc.hourly).label} ＝ ${overtimeHourlyDisplay(mc.hourly).main===null?overtimeHourlyDisplay(mc.hourly).sub:money(overtimeHourlyDisplay(mc.hourly).main)}<br>● 本月加班費<br>　${overtimeFormulaDetail(mc)}`;
+  $('formulaText').innerHTML=`<b>ⓘ 計算說明</b><br>● 輪班津貼依「每班津貼 × 實際出勤」自動計算<br>● 請假考勤扣款 ＝ ${mc.attendanceDeductionManual?'手動輸入 '+money(mc.deductions.attendance):'班表自動估算 '+money(mc.deductions.attendance)+'（正常工時月工資 '+money(mc.autoAttendance.wageBase)+'；1 日約 '+money(mc.autoAttendance.dailyWage)+'；事假 100%、病假／生理假 50%、特休 0%）'}<br>● 基礎時薪 ＝（底薪＋輪班津貼＋伙食津貼＋表現津貼）÷ 240 ＝ ${money(mc.hourly)}<br>● 加班費率 ＝ ${overtimeRateSummary()}<br>● ${overtimeHourlyDisplay(mc.hourly).label} ＝ ${overtimeHourlyDisplay(mc.hourly).main===null?overtimeHourlyDisplay(mc.hourly).sub:money(overtimeHourlyDisplay(mc.hourly).main)}<br>● 本月加班費<br>　${overtimeFormulaDetail(mc)}`;
   setSalarySubTab(salarySubTab);
   renderSalaryCompare(mc,mm);
   renderProEntitlements();
@@ -12466,7 +12531,7 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v248';
+    const reloadKey='meow-sw-reloaded-v249';
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
         if(sessionStorage.getItem(reloadKey))return;
@@ -12475,7 +12540,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=248',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=249',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
@@ -12488,7 +12553,7 @@ restoreIndexedMirrorIfNewer();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 // meow-build-freshness-v241: when an installed PWA resumes, compare the published build and reload once if newer.
 (function(){
-  const CURRENT_BUILD='v248-align-pay-values-yellow-nav';
+  const CURRENT_BUILD='v249-mol-leave-link-and-value-alignment';
   let checking=false;
   async function checkFreshBuild(){
     if(checking||!navigator.onLine)return;
