@@ -263,5 +263,7 @@ function iso(d){return d.toISOString().slice(0,10)}
   fs.writeFileSync(path.join(out,'full-data-pressure.json'),JSON.stringify({results,metrics,error:String(error&&error.stack||error)},null,2));
   try{server.close()}catch{}
   console.error(error);
-  process.exitCode=1;
+  // Playwright/Chromium can keep the event loop alive after an assertion failure.
+  // Exit explicitly so CI reports the real regression instead of hanging forever.
+  process.exit(1);
 });
