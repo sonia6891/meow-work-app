@@ -33,8 +33,11 @@ assert(
   'Theme must remain device-local and stay out of cloud snapshots.'
 );
 assert(
-  html.includes("history:history.slice(0,5)"),
-  'Cloud payload must retain bounded recovery history.'
+  !html.includes("history:history.slice(0,5)") &&
+  html.includes("version:6") &&
+  html.includes("from('user_sync_backups').select('payload,created_at,revision')") &&
+  html.includes(".limit(30)"),
+  'Live cloud payload must stay lean while historical month lookup reads the dedicated backup table.'
 );
 assert(
   html.includes("if(!preserveBeforeReplace())"),
