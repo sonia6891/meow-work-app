@@ -124,6 +124,8 @@ struct MeowDateWidgetView: View {
                 .padding(13)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("今天 \(month) \(day) \(weekday)")
     }
 
     @ViewBuilder
