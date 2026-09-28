@@ -365,7 +365,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
             rows:document.getElementById('v219TodayList')?.innerText||''
           };
         });
-        check('390px 今天的安排改為橫向滿版', todayLayout.todayWidth>=todayLayout.boardWidth-2);
+        check('390px 今天的安排留在左側行程卡，不跨成整頁滿版', todayLayout.todayWidth<todayLayout.boardWidth*.75);
         check('今天的安排顯示日期與班別', /\d+月\d+日/.test(todayLayout.date) && /班|休/.test(todayLayout.rows));
 
         await page.evaluate(() => window.__accountV119.settings());
