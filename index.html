@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v254-dark-overview-parity-payday-widget">
+<meta name="meow-ui-build" content="v255-dark-mobile-visual-parity-payday-widget">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -5026,6 +5026,155 @@ html.dark .holiday-tag{
     background:var(--dark-selected)!important;
     color:var(--dark-selected-text)!important;
   }
+}
+</style>
+
+
+<style id="dark-mobile-parity-v255">
+/* v255 — visual dark-mode parity across every mobile surface, not just Overview. */
+@media(max-width:760px){
+  html.dark #page-calendar,
+  html.dark #page-attendance,
+  html.dark #page-salary,
+  html.dark #page-settings{
+    background:#18120f!important;
+    background-image:none!important;
+    color:#f7eee8!important;
+  }
+
+  /* Main page cards / shells. */
+  html.dark #page-calendar :is(
+    .ref-worktype-panel,.ref-template-card,.ref-ai-card,.schedule-card-v136,
+    .schedule-v138-heading,.schedule-settings,.v219-schedule-settings-strip,
+    .v219-schedule-day-card,.calendar-card,.v219-calendar-color-panel,
+    .schedule-legend-card
+  ),
+  html.dark #page-attendance :is(
+    .ref-itinerary-hero,.v219-board-card,.v219-reminder-card,.v219-mini-calendar-card,
+    .itinerary-list-card,.todo-card-v142,.itinerary-empty-list,.todo-empty-v142,
+    .ref-itinerary-footer-note,.attendance-v142-head
+  ),
+  html.dark #page-salary :is(
+    .ref-salary-hero,.salary-card,.salary-section,.salary-field,.result-card,
+    .compare-card,.pro-card,.pro-recent-card,.salary-free-card,.salary-free-diff-bar,
+    .formula,.scan-status,.scan-result,.itemized-panel,.salary-history-panel,.pro-smart-hero
+  ),
+  html.dark #page-settings :is(
+    .ref-settings-hero,.v219-settings-profile-card,.settings-ui-v129>.card,
+    .settings-modern-card,.settings-modern-fold,.ref-settings-card,.settings-card,
+    .settings-pro-v129,.account-overview-card,.account-name-editor
+  ){
+    background:#2a211d!important;
+    background-image:none!important;
+    border-color:#513d31!important;
+    color:#f7eee8!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
+  }
+
+  /* Nested rows / controls — remove every remaining white island. */
+  html.dark #page-calendar :is(
+    .ref-worktype-row button,.ref-template-buttons,.ref-template-buttons button,
+    .schedule-template-fold,.schedule-v129-summary,.schedule-v129-summary>div,
+    .v219-schedule-settings-strip>div,.v219-schedule-settings-strip>button,
+    .weekdays,.weekdays div,.day,.calendar-card .legend,.v219-full-month,
+    .v219-calendar-color-options button,.icon-btn,.today-btn
+  ),
+  html.dark #page-attendance :is(
+    .attendance-v142-tabs,.attendance-v142-tabs button,.ref-attendance-list-head button,
+    .v219-reminder-options button,.v219-board-link,.v219-mini-day,.v219-conflict-item,
+    .todo-check-v142
+  ),
+  html.dark #page-salary :is(
+    .salary-tabs,.salary-tab,.salary-free-actual-input
+  ),
+  html.dark #page-settings :is(
+    .ref-settings-rows,.ref-settings-row,.settings-item,.settings-segmented,
+    .settings-segmented button,.v219-settings-profile-card button,.ref-settings-icon
+  ){
+    background:#211916!important;
+    background-image:none!important;
+    border-color:#513d31!important;
+    color:#f7eee8!important;
+    box-shadow:none!important;
+  }
+
+  /* Inputs must never render white in dark mode. */
+  html.dark #page-calendar :is(input,select,textarea),
+  html.dark #page-attendance :is(input,select,textarea),
+  html.dark #page-salary :is(input,select,textarea),
+  html.dark #page-settings :is(input,select,textarea){
+    background:#211916!important;
+    background-image:none!important;
+    border-color:#5a4336!important;
+    color:#fff5ee!important;
+    -webkit-text-fill-color:#fff5ee!important;
+  }
+
+  /* Selected state mirrors Overview's warm gold treatment. */
+  html.dark #page-calendar .ref-worktype-row button.active,
+  html.dark #page-calendar .ref-template-buttons button.active,
+  html.dark #page-attendance .attendance-v142-tabs button.active,
+  html.dark #page-attendance .attendance-v142-tabs button[aria-selected="true"],
+  html.dark #page-attendance .v219-reminder-options button.active,
+  html.dark #page-salary .salary-tab.active,
+  html.dark #page-settings .settings-segmented button.active{
+    background:#4a3427!important;
+    background-image:none!important;
+    color:#ffd18e!important;
+    border-color:#8e6741!important;
+    box-shadow:inset 0 0 0 1px rgba(236,178,104,.14)!important;
+  }
+
+  /* Text hierarchy: no dark-brown light-mode text left on dark cards. */
+  html.dark #page-calendar :is(
+    .ref-block-title,.schedule-v138-heading b,.schedule-v129-summary strong,.month-title,
+    .v219-schedule-day-card b,.v219-schedule-day-card strong
+  ),
+  html.dark #page-attendance :is(
+    .ref-page-hero-copy>b,.ref-attendance-list-head b,.v219-board-title,b,strong
+  ),
+  html.dark #page-salary :is(
+    .ref-page-hero-copy>b,.page-title,.salary-section-title,.result-card strong,
+    .salary-free-card-head b,.salary-free-estimated-card>strong,.pro-card b
+  ),
+  html.dark #page-settings :is(
+    .ref-page-hero-copy>b,.ref-settings-card-title,.ref-settings-row b,
+    .v219-settings-profile-card b,.settings-modern-head b,.settings-fold-toggle b
+  ){
+    color:#f7eee8!important;
+  }
+  html.dark #page-calendar :is(.hint,small,.schedule-v129-summary span),
+  html.dark #page-attendance :is(.hint,small,.v219-mini-week,.ref-page-hero-copy p),
+  html.dark #page-salary :is(.hint,.mini-note,small,.salary-field label,.ref-page-hero-copy p),
+  html.dark #page-settings :is(.hint,small,.ref-settings-row small,.ref-page-hero-copy p){
+    color:#c9b5a7!important;
+  }
+
+  /* Dark-mode dialogs opened from these pages. */
+  html.dark :is(.dialog,.pro-plan-dialog,.meow-assistant-dialog,.work-date-dialog){
+    background:#211916!important;
+    background-image:none!important;
+    color:#f7eee8!important;
+    border-color:#513d31!important;
+  }
+  html.dark :is(.dialog-head,.dialog-body,.dialog-foot,.meow-assistant-head,.meow-assistant-sheet){
+    background:#211916!important;
+    color:#f7eee8!important;
+    border-color:#513d31!important;
+  }
+  html.dark #meowAssistantDialog :is(.ref-assistant-quick,.meow-assistant-chat,.meow-assistant-compose textarea){
+    background:#2a211d!important;
+    background-image:none!important;
+    color:#f7eee8!important;
+    border-color:#513d31!important;
+  }
+
+  html.dark .bottom-nav{
+    background:rgba(24,18,15,.98)!important;
+    border-color:#49362c!important;
+  }
+  html.dark .bottom-nav button{background:transparent!important;color:#cbb7a9!important}
+  html.dark .bottom-nav button.active{background:#4a3427!important;color:#ffd18e!important}
 }
 </style>
 
