@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v223-annual-leave-hour-pool">
+<meta name="meow-ui-build" content="v224-assistant-leave-shift-hours">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -9447,10 +9447,16 @@ function meowAssistantShiftTarget(text){
   return{kind:'work',shiftName:label};
 }
 function meowAssistantLeaveHours(text,leaveType=''){
-  const t=normalizeMeowAssistantText(text),daily=leaveType==='annual'?8:Math.max(.5,num(state.settings.dailyWorkHours)||8);
+  const t=normalizeMeowAssistantText(text),daily=Math.max(.5,num(state.settings.dailyWorkHours)||8);
   if(/半天|半日/.test(t))return Math.max(.5,daily/2);
   const m=t.match(/(\d+(?:\.\d+)?)\s*(?:小時|鐘頭|HRS?|H)(?![A-Z])/i),v=m?Number(m[1]):NaN;
   return Number.isFinite(v)&&v>0&&v<=24?v:daily;
+}
+function meowAssistantLeaveHoursSource(text){
+  const t=normalizeMeowAssistantText(text);
+  if(/半天|半日/.test(t))return'explicit-partial';
+  if(/(\d+(?:\.\d+)?)\s*(?:小時|鐘頭|HRS?|H)(?![A-Z])/i.test(t))return'explicit-hours';
+  return'schedule-default';
 }
 function meowAssistantMutationDates(raw){
   const t=normalizeMeowAssistantText(raw),dates=[];
@@ -9733,7 +9739,7 @@ function meowAssistantParse(raw){
   const leaveQuestion=/(怎麼請|如何請|可以請|能請|幾天|多少|剩|還有|規定|權益|有薪|無薪|扣薪|薪水|工資)/.test(text);
   if(leaveType&&leaveDates.length&&(leaveMutationVerb||!leaveQuestion)){
     const cancel=/(取消|不要|不用|刪除|刪掉|拿掉|撤銷)/.test(text);
-    return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text,leaveType),raw:text};
+    return{ok:true,type:cancel?'removeLeave':'leave',leaveType,dates:leaveDates,hours:meowAssistantLeaveHours(text,leaveType),hoursSource:meowAssistantLeaveHoursSource(text),raw:text};
   }
   const knowledgeList=meowAssistantKnowledgeIntents(text);
   if(knowledgeList.length>1)return{ok:true,type:'knowledgeMulti',knowledgeList,raw:text};
@@ -10076,7 +10082,7 @@ function executeMeowAssistantPlan(plan){
     });
   }else if(plan.type==='leave'){
     plan.dates.forEach(date=>{
-      state.dayStatus[date]={type:plan.leaveType,hours:plan.hours,note:'',label:'',overtimeKind:''};
+      state.dayStatus[date]={type:plan.leaveType,hours:plan.hours,hoursSource:plan.hoursSource||'schedule-default',note:'',label:'',overtimeKind:''};
     });
   }else if(plan.type==='removeLeave'){
     plan.dates.forEach(date=>{if(state.dayStatus[date]&&state.dayStatus[date].type===plan.leaveType)delete state.dayStatus[date]});
@@ -11205,6 +11211,7 @@ $('saveDay').onclick=()=>{
     state.dayStatus[editingDate]={
       type,
       hours,
+      hoursSource:'manual',
       note:$('dialogNote').value.trim(),
       label:type==='custom'?($('dialogCustomLabel').value.trim()||'自訂假別'):'',overtimeKind:type==='overtime'?$('dialogOvertimeKind').value:''
     };
