@@ -9,7 +9,7 @@ const out = path.join(root, 'test-results');
 fs.mkdirSync(out, { recursive: true });
 
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const bridge = String.raw\`
+const bridge = String.raw`
 window.__fullDataPressure = {
   getState:()=>state,
   replaceState:(value)=>{ state=normalizeState(value); localEditVersion++; return true; },
@@ -27,7 +27,7 @@ window.__fullDataPressure = {
     document.documentElement.classList.remove('auth-needs-login','auth-booting','meow-welcome-open');
   }
 };
-\`;
+`;
 const anchor = html.lastIndexOf('})();');
 assert.ok(anchor > 0, 'App closure anchor exists');
 html = html.slice(0, anchor) + bridge + '\n' + html.slice(anchor);
@@ -50,7 +50,7 @@ const server = http.createServer((req,res)=>{
   fs.createReadStream(file).pipe(res);
 });
 
-const mockSupabase = String.raw\`
+const mockSupabase = String.raw`
 export function createClient(){return {
   auth:{
     getSession:async()=>({data:{session:null},error:null}),
@@ -62,7 +62,7 @@ export function createClient(){return {
   from(){const q={select(){return q},eq(){return q},order(){return q},limit:async()=>({data:[],error:null}),maybeSingle:async()=>({data:null,error:null}),upsert:async()=>({error:null})};return q},
   channel(){return{on(){return this},subscribe(){return this}}},
   removeChannel:async()=>{}
-}}\`;
+}}`;
 
 const results=[];
 const metrics={};
@@ -77,7 +77,7 @@ function iso(d){return d.toISOString().slice(0,10)}
 (async()=>{
   server.listen(0,'127.0.0.1');
   await new Promise(resolve=>server.once('listening',resolve));
-  const base=\`http://127.0.0.1:\${server.address().port}/\`;
+  const base=`http://127.0.0.1:${server.address().port}/`;
   const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 
   async function context(width=390){
