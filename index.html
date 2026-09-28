@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v244-dom-pro-badge-fixed">
+<meta name="meow-ui-build" content="v245-clean-salary-tabs">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -4275,247 +4275,119 @@ html.dark #page-calendar .schedule-legend-card .legend-item{
 </style>
 
 
-<style id="salary-pro-entry-v242-style">
-#page-salary .salary-pro-entry-v242{
-  width:100%!important;
-  min-height:76px!important;
-  margin:10px 0 12px!important;
-  padding:10px 14px!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 96px 20px!important;
-  align-items:center!important;
-  gap:10px!important;
-  border:2px solid #f0bd78!important;
-  border-radius:18px!important;
-  background:linear-gradient(135deg,#fff8eb,#fffdf9)!important;
-  box-shadow:0 7px 18px rgba(135,82,40,.10)!important;
-  color:#5b311f!important;
-  text-align:left!important;
-  cursor:pointer!important;
-  visibility:visible!important;
-  opacity:1!important;
-}
-#page-salary .salary-pro-entry-copy-v242{
-  display:block!important;
-  min-width:0!important;
-  visibility:visible!important;
-  opacity:1!important;
-}
-#page-salary .salary-pro-entry-copy-v242 b{
-  display:block!important;
-  font-size:18px!important;
-  line-height:1.15!important;
-  font-weight:950!important;
-  color:#512817!important;
-}
-#page-salary .salary-pro-entry-copy-v242 small{
-  display:block!important;
-  margin-top:5px!important;
-  font-size:11px!important;
-  line-height:1.2!important;
-  font-weight:850!important;
-  color:#9b633e!important;
-}
-#page-salary .salary-pro-entry-badge-v242{
-  display:block!important;
-  visibility:visible!important;
-  opacity:1!important;
-  width:96px!important;
-  max-width:96px!important;
-  height:58px!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  margin:0!important;
-  border:0!important;
-  border-radius:0!important;
-  position:static!important;
-  background:transparent!important;
-}
-#page-salary .salary-pro-entry-chevron-v242{
-  display:block!important;
-  font-size:28px!important;
-  line-height:1!important;
-  color:#b96a32!important;
-  font-weight:900!important;
-  text-align:right!important;
-}
-html.dark #page-salary .salary-pro-entry-v242{
-  background:linear-gradient(135deg,#30271e,#211d1a)!important;
-  border-color:#9b6b3c!important;
-  color:#f8eadb!important;
-}
-html.dark #page-salary .salary-pro-entry-copy-v242 b{color:#fff2e4!important}
-html.dark #page-salary .salary-pro-entry-copy-v242 small{color:#d7b08c!important}
-@media(max-width:430px){
-  #page-salary .salary-pro-entry-v242{
-    grid-template-columns:minmax(0,1fr) 88px 18px!important;
-    min-height:72px!important;
-    padding:9px 11px!important;
-  }
-  #page-salary .salary-pro-entry-badge-v242{
-    width:88px!important;
-    max-width:88px!important;
-    height:54px!important;
-  }
-}
-</style>
 
+<style id="salary-tabs-clean-v245">
+@media(max-width:760px){
+  #page-salary .salary-tabs{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+    align-items:stretch!important;
+  }
+  #page-salary .salary-tab{
+    width:100%!important;
+    min-width:0!important;
+    min-height:58px!important;
+    height:58px!important;
+    padding:6px 5px!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    white-space:nowrap!important;
+    line-height:1!important;
+  }
 
-<style id="salary-pro-vector-v244">
-#page-salary .salary-pro-vector{
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex:0 0 auto!important;
-  visibility:visible!important;
-  opacity:1!important;
-  overflow:visible!important;
-  background:transparent!important;
-}
-#page-salary .salary-pro-vector svg{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  overflow:visible!important;
-}
-#page-salary #salaryTabPro .salary-pro-vector{
-  width:58px!important;
-  height:38px!important;
-}
-#page-salary .salary-pro-section-title .salary-pro-vector{
-  width:64px!important;
-  height:42px!important;
-  margin-left:2px!important;
-}
-#page-salary .pro-smart-title .salary-pro-vector{
-  width:54px!important;
-  height:36px!important;
-}
-#page-salary .salary-pro-entry-v242 .salary-pro-vector{
-  width:96px!important;
-  height:58px!important;
-  justify-self:center!important;
-}
-@media(max-width:430px){
-  #page-salary .salary-pro-entry-v242 .salary-pro-vector{
-    width:88px!important;
-    height:54px!important;
+  /* Right Pro tab: same outer size as the first two, compact contents only. */
+  #page-salary #salaryTabPro.salary-tab-pro-clean{
+    flex-direction:column!important;
+    gap:2px!important;
+  }
+  #page-salary #salaryTabPro .salary-pro-tab-text{
+    display:block!important;
+    max-width:100%!important;
+    font-size:11px!important;
+    font-weight:950!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+  }
+
+  #page-salary .salary-pro-mini{
+    position:relative!important;
+    display:inline-flex!important;
+    align-items:flex-end!important;
+    justify-content:center!important;
+    width:54px!important;
+    height:28px!important;
+    flex:0 0 28px!important;
+    padding:7px 8px 1px 0!important;
+    box-sizing:border-box!important;
+    overflow:visible!important;
+  }
+  #page-salary .salary-pro-mini-word{
+    display:block!important;
+    font-size:19px!important;
+    line-height:.85!important;
+    font-weight:950!important;
+    font-family:-apple-system,BlinkMacSystemFont,"Arial Rounded MT Bold","Noto Sans TC",sans-serif!important;
+    font-style:italic!important;
+    letter-spacing:-1px!important;
+    color:#8b3510!important;
+    background:linear-gradient(180deg,#6f280b 0%,#a74313 55%,#dd7624 100%)!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+  }
+  #page-salary .salary-pro-mini-crown{
+    position:absolute!important;
+    left:18px!important;
+    top:0!important;
+    width:20px!important;
+    height:13px!important;
+    transform:rotate(-4deg)!important;
+  }
+  #page-salary .salary-pro-mini-crown svg{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  #page-salary .salary-pro-mini-rays{
+    position:absolute!important;
+    right:0!important;
+    top:8px!important;
+    width:12px!important;
+    height:18px!important;
+  }
+  #page-salary .salary-pro-mini-rays i{
+    position:absolute!important;
+    display:block!important;
+    width:3px!important;
+    height:8px!important;
+    border-radius:999px!important;
+    background:#f6a33a!important;
+    transform-origin:center bottom!important;
+  }
+  #page-salary .salary-pro-mini-rays i:nth-child(1){left:4px;top:0;transform:rotate(20deg)}
+  #page-salary .salary-pro-mini-rays i:nth-child(2){left:8px;top:6px;transform:rotate(63deg)}
+  #page-salary .salary-pro-mini-rays i:nth-child(3){left:3px;top:11px;transform:rotate(88deg);height:7px}
+
+  /* Keep Free badge compact so the three tabs read as one system. */
+  #page-salary #salaryTabReconcile .salary-tab-tier.free{
+    font-size:8px!important;
+    min-width:29px!important;
+    height:17px!important;
+    padding:1px 5px!important;
+    margin-left:3px!important;
   }
 }
-</style>
-
-<style id="salary-pro-vector-v245-shadow">
-#page-salary .salary-pro-vector svg{
-  filter:drop-shadow(0 2px 2px rgba(109,43,11,.22))!important;
-}
-</style>
-
-
-<style id="salary-pro-dom-v243">
-#page-salary .salary-pro-badge-dom{
-  position:relative!important;
-  display:inline-flex!important;
-  align-items:flex-end!important;
-  justify-content:center!important;
-  min-width:78px!important;
-  height:48px!important;
-  padding:13px 14px 2px 2px!important;
-  box-sizing:border-box!important;
-  overflow:visible!important;
-  flex:0 0 auto!important;
-}
-#page-salary .salary-pro-word{
-  display:block!important;
-  font-size:29px!important;
-  line-height:.86!important;
-  font-weight:950!important;
-  font-family:-apple-system,BlinkMacSystemFont,"Arial Rounded MT Bold","Noto Sans TC",sans-serif!important;
-  font-style:italic!important;
-  letter-spacing:-2px!important;
-  background:linear-gradient(180deg,#6f280b 0%,#a74313 52%,#e07c26 100%)!important;
-  -webkit-background-clip:text!important;
-  background-clip:text!important;
-  -webkit-text-fill-color:transparent!important;
-  color:#8b3510!important;
-  text-shadow:0 1px 0 rgba(255,190,105,.55),0 2px 2px rgba(79,32,11,.12)!important;
-}
-#page-salary .salary-pro-crown{
-  position:absolute!important;
-  width:31px!important;
-  height:22px!important;
-  left:26px!important;
-  top:0!important;
-  transform:rotate(-4deg)!important;
-}
-#page-salary .salary-pro-crown svg{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  overflow:visible!important;
-}
-#page-salary .salary-pro-rays{
-  position:absolute!important;
-  width:19px!important;
-  height:31px!important;
-  right:0!important;
-  top:11px!important;
-}
-#page-salary .salary-pro-rays i{
-  position:absolute!important;
-  display:block!important;
-  width:4px!important;
-  height:13px!important;
-  border-radius:999px!important;
-  background:linear-gradient(180deg,#ffbf55,#f28c24)!important;
-  transform-origin:center bottom!important;
-}
-#page-salary .salary-pro-rays i:nth-child(1){left:7px;top:0;transform:rotate(20deg)}
-#page-salary .salary-pro-rays i:nth-child(2){left:12px;top:10px;transform:rotate(63deg)}
-#page-salary .salary-pro-rays i:nth-child(3){left:5px;top:18px;transform:rotate(88deg);height:11px}
-
-#page-salary #salaryTabPro.salary-tab-pro-exact{
-  min-height:56px!important;
-  padding:4px 5px!important;
-  display:flex!important;
-  flex-direction:row!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:4px!important;
-}
-#page-salary #salaryTabPro .salary-pro-explicit-label{
-  display:inline-block!important;
-  font-size:11px!important;
-  font-weight:950!important;
-  white-space:nowrap!important;
-}
-#page-salary #salaryTabPro .salary-pro-badge-dom{
-  transform:scale(.72)!important;
-  transform-origin:center!important;
-  margin:-4px -10px!important;
-}
-
-#page-salary .salary-pro-entry-v242{
-  grid-template-columns:minmax(0,1fr) 92px 20px!important;
-}
-#page-salary .salary-pro-entry-v242 > .salary-pro-badge-dom{
-  justify-self:center!important;
-  transform:scale(1.02)!important;
-}
-
-#page-salary .salary-pro-section-title .salary-pro-badge-dom,
-#page-salary .pro-smart-title .salary-pro-badge-dom{
-  transform:scale(.78)!important;
-  transform-origin:left center!important;
-  margin-left:-6px!important;
-}
-
-@media(max-width:430px){
-  #page-salary .salary-pro-entry-v242{
-    grid-template-columns:minmax(0,1fr) 82px 18px!important;
-  }
-  #page-salary .salary-pro-entry-v242 > .salary-pro-badge-dom{
-    transform:scale(.92)!important;
-  }
+@media(max-width:390px){
+  #page-salary .salary-tab{font-size:10.5px!important;padding-left:3px!important;padding-right:3px!important}
+  #page-salary #salaryTabPro .salary-pro-tab-text{font-size:10.5px!important}
+  #page-salary .salary-pro-mini{transform:scale(.92)!important;transform-origin:center top!important}
 }
 </style>
 
@@ -4973,26 +4845,18 @@ html.dark #page-salary .salary-pro-entry-copy-v242 small{color:#d7b08c!important
       <div class="salary-tabs" role="tablist" aria-label="薪資功能">
         <button type="button" class="salary-tab active" id="salaryTabCalc" role="tab" aria-selected="true">薪資試算</button>
         <button type="button" class="salary-tab" id="salaryTabReconcile" role="tab" aria-selected="false">薪資對帳 <span class="salary-tab-tier free">Free</span></button>
-        <button type="button" class="salary-tab salary-tab-pro salary-tab-pro-exact" id="salaryTabPro" role="tab" aria-selected="false" aria-label="薪資對帳 Pro"><span class="salary-pro-explicit-label">薪資對帳</span><span class="salary-pro-badge-dom" aria-label="Pro">
-  <span class="salary-pro-crown" aria-hidden="true">
+        <button type="button" class="salary-tab salary-tab-pro salary-tab-pro-clean" id="salaryTabPro" role="tab" aria-selected="false" aria-label="薪資對帳 Pro">
+    <span class="salary-pro-tab-text">薪資對帳</span>
+    <span class="salary-pro-mini" aria-label="Pro">
+  <span class="salary-pro-mini-crown" aria-hidden="true">
     <svg viewBox="0 0 44 28"><path d="M4 21 7 6l10 8L22 3l5 11 10-8 3 15z" fill="#ffc24d" stroke="#6e2c0f" stroke-width="3" stroke-linejoin="round"/></svg>
   </span>
-  <span class="salary-pro-word">Pro</span>
-  <span class="salary-pro-rays" aria-hidden="true"><i></i><i></i><i></i></span>
-</span></button>
-      </div>
-      <button type="button" id="salaryProEntryV242" class="salary-pro-entry-v242" aria-label="開啟薪資對帳 Pro">
-    <span class="salary-pro-entry-copy-v242"><b>薪資對帳</b><small>Pro 智慧對帳</small></span>
-    <span class="salary-pro-badge-dom" aria-label="Pro">
-  <span class="salary-pro-crown" aria-hidden="true">
-    <svg viewBox="0 0 44 28"><path d="M4 21 7 6l10 8L22 3l5 11 10-8 3 15z" fill="#ffc24d" stroke="#6e2c0f" stroke-width="3" stroke-linejoin="round"/></svg>
-  </span>
-  <span class="salary-pro-word">Pro</span>
-  <span class="salary-pro-rays" aria-hidden="true"><i></i><i></i><i></i></span>
+  <span class="salary-pro-mini-word">Pro</span>
+  <span class="salary-pro-mini-rays" aria-hidden="true"><i></i><i></i><i></i></span>
 </span>
-    <span class="salary-pro-entry-chevron-v242" aria-hidden="true">›</span>
   </button>
-      <div class="salary-pane" id="salaryCalcPane">
+      </div>
+<div class="salary-pane" id="salaryCalcPane">
       <div class="salary-section"><div class="salary-section-title"><span class="paw">🐾</span>薪資收入項目</div><div class="salary-grid">
         <div class="salary-field"><div class="field-icon" style="background:var(--mobile-gold-icon, #fff0cc);color:var(--mobile-gold-ink, #d17a0a)"><svg class="icon"><use href="#i-coins"/></svg></div><label>底薪（元）</label><input id="salaryBase" type="number" min="0" step="1"></div>
         <div class="salary-field"><div class="field-icon" style="background:var(--mobile-gold-icon, #e4efff);color:var(--mobile-gold-ink, #5485d9)">☾</div><label>輪班津貼 / 天（元）</label><input id="salaryShift" type="number" min="0" step="1"></div>
@@ -5028,24 +4892,12 @@ html.dark #page-salary .salary-pro-entry-copy-v242 small{color:#d7b08c!important
       </div>
       <div class="salary-pane hidden" id="salaryProPane">
       <div class="salary-section">
-        <div class="salary-section-title salary-pro-section-title"><span class="paw">🐾</span><span class="salary-pro-explicit-title">薪資對帳</span><span class="salary-pro-badge-dom" aria-label="Pro">
-  <span class="salary-pro-crown" aria-hidden="true">
-    <svg viewBox="0 0 44 28"><path d="M4 21 7 6l10 8L22 3l5 11 10-8 3 15z" fill="#ffc24d" stroke="#6e2c0f" stroke-width="3" stroke-linejoin="round"/></svg>
-  </span>
-  <span class="salary-pro-word">Pro</span>
-  <span class="salary-pro-rays" aria-hidden="true"><i></i><i></i><i></i></span>
-</span></div>
+        <div class="salary-section-title"><span class="paw">🐾</span>智慧薪資對帳</div>
         <div class="hint" style="margin-bottom:10px">免費版先看總額有沒有差；Pro 再幫你找出差在哪一項。</div>
         <div class="pro-grid smart-payroll-shell">
           <div class="pro-card pro-smart-hero" data-pro-feature="payslip_scan">
             
-            <div class="pro-smart-title"><div><span class="pro-smart-kicker">🐾 智慧薪資對帳</span><span class="salary-pro-badge-dom" aria-label="Pro">
-  <span class="salary-pro-crown" aria-hidden="true">
-    <svg viewBox="0 0 44 28"><path d="M4 21 7 6l10 8L22 3l5 11 10-8 3 15z" fill="#ffc24d" stroke="#6e2c0f" stroke-width="3" stroke-linejoin="round"/></svg>
-  </span>
-  <span class="salary-pro-word">Pro</span>
-  <span class="salary-pro-rays" aria-hidden="true"><i></i><i></i><i></i></span>
-</span></div><span class="pro-badge">🔒 Pro</span></div>
+            <div class="pro-smart-title"><div><span class="pro-smart-kicker">🐾 智慧薪資對帳</span></div><span class="pro-badge">🔒 Pro</span></div>
             <p class="pro-smart-lead">讀每一份辛苦，不只看總額。上傳薪資單後，系統會逐項核對並把需要你確認的地方集中列出。</p>
             <div class="pro-smart-points">
               <span>◉ 三層交叉檢查</span><span>◉ 逐項找差異與漏項</span><span>◉ 額外加項／扣項自動列示</span><span>◉ 歷史對帳可回看</span>
@@ -12368,7 +12220,6 @@ qsa('[data-pro-action]').forEach(btn=>btn.onclick=()=>{
 if($('salaryTabCalc'))$('salaryTabCalc').onclick=()=>{setSalarySubTab('calc')};
 if($('salaryTabReconcile'))$('salaryTabReconcile').onclick=()=>{setSalarySubTab('reconcile')};
 if($('salaryTabPro'))$('salaryTabPro').onclick=()=>{setSalarySubTab('pro')};
-if($('salaryProEntryV242'))$('salaryProEntryV242').onclick=()=>{setSalarySubTab('pro');const pane=$('salaryProPane');if(pane)pane.scrollIntoView({behavior:'smooth',block:'start'})};
 if($('closePayslipScan'))$('closePayslipScan').onclick=()=>{payslipScanOpen=false;renderSalary()};
 
 if($('payslipFileInput'))$('payslipFileInput').onchange=e=>{const file=e.target.files&&e.target.files[0];if(file){payslipCurrentFile=file;void runPayslipOcr(file)}};
@@ -12405,7 +12256,7 @@ window.addEventListener('load',()=>{void initStoreTransactionListener();void loa
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
-    const reloadKey='meow-sw-reloaded-v244';
+    const reloadKey='meow-sw-reloaded-v245';
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       try{
         if(sessionStorage.getItem(reloadKey))return;
@@ -12414,7 +12265,7 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
       location.reload();
     });
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=244',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=245',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
     }catch(e){}
@@ -12427,7 +12278,7 @@ restoreIndexedMirrorIfNewer();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 // meow-build-freshness-v241: when an installed PWA resumes, compare the published build and reload once if newer.
 (function(){
-  const CURRENT_BUILD='v244-dom-pro-badge-fixed';
+  const CURRENT_BUILD='v245-clean-salary-tabs';
   let checking=false;
   async function checkFreshBuild(){
     if(checking||!navigator.onLine)return;
