@@ -10160,7 +10160,7 @@ function renderItemizedComparison(mc,mm){
     const netMissing=!hasActualNet;
     const count=pending.length+(netMissing?1:0);
     attention.classList.toggle('hidden',count===0);
-    attention.textContent=count?'發現 '+count+' 個項目需要你確認。未判讀或兩次判讀不一致的項目不會自動猜。':'';
+    attention.textContent=count?'發現 '+count+' 個項目需要你確認。未判讀或多次判讀未形成共識的項目不會自動猜。':'';
   }
 
   const groups=$('itemizedSmartGroups');
