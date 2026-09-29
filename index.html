@@ -6638,20 +6638,21 @@ html.dark .holiday-tag{
     </div>
     <div class="ref-assistant-quick">
       <b>直接用語音告訴喵助理要做什麼：</b>
-      <small class="ref-assistant-voice-hint">直接說日常口語就可以：改班、加班、請假、新增行程、新增待辦，或做薪資對帳。</small>
+      <small class="ref-assistant-voice-hint">直接用日常口語就可以：調整班表、加班與請假，管理行程與待辦，做薪資對帳，也能詢問勞動法規。</small>
       <div>
-        <button type="button" data-meow-prompt="9月30號幫我改成晚班">🎙 更動班表</button>
-        <button type="button" data-meow-prompt="明天幫我登記加班4小時">⏱ 登記加班</button>
-        <button type="button" data-meow-prompt="9月30號幫我請病假">☂ 登記請假</button>
-        <button type="button" data-meow-prompt="我明天要帶貓咪去看醫生">📅 新增行程</button>
-        <button type="button" data-meow-prompt="明天記得買貓砂">☑ 新增待辦</button>
+        <button type="button" data-meow-prompt="9月30號幫我改成晚班">🎙 調整班表</button>
+        <button type="button" data-meow-prompt="明天幫我登記加班4小時">⏱ 調整加班</button>
+        <button type="button" data-meow-prompt="9月30號幫我請病假">☂ 調整請假</button>
+        <button type="button" data-meow-prompt="我明天要帶貓咪去看醫生">📅 行程管理</button>
+        <button type="button" data-meow-prompt="明天記得買貓砂">☑ 待辦管理</button>
         <button type="button" data-meow-prompt="幫我做薪資對帳">💰 薪資對帳</button>
+        <button type="button" data-meow-prompt="勞基法對加班上限怎麼規定">⚖ 勞動法規問答</button>
       </div>
     </div>
     <div class="meow-assistant-chat hidden" id="meowAssistantReply" aria-live="polite"></div>
-    <div class="meow-assistant-pro-strip">☼　按麥克風直接說：明天買貓砂、後天看醫生、改班、加班、請假，或幫我薪資對帳　🐾</div>
+    <div class="meow-assistant-pro-strip">☼　按麥克風直接說：改班、加班、請假、行程、待辦、薪資，或直接問勞動法規　🐾</div>
     <div class="meow-assistant-compose">
-      <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="直接說：明天買貓砂、後天看醫生、幫我改班…"></textarea>
+      <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="直接說：明天買貓砂、幫我改班，或問勞基法問題…"></textarea>
       <span class="meow-assistant-attach" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8.5 12.5l6.2-6.2a3.4 3.4 0 014.8 4.8l-8.4 8.4a5 5 0 01-7.1-7.1l8-8"/><path d="M6.8 14.2l7.3-7.3"/></svg></span>
       <button type="button" class="meow-assistant-mic" id="meowAssistantMic" aria-label="語音輸入"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4M8.5 21h7"/></svg></button>
       <button type="button" class="btn primary" id="meowAssistantSend" aria-label="送出">送出</button>
@@ -11803,7 +11804,7 @@ async function handleMeowAssistantKnowledgeMulti(ids,text){
 }
 async function handleMeowAssistantKnowledge(id,text){
   const month=meowAssistantMonthDataFromText(text),mc=meowAssistantCalcMonthAt(month.year,month.month),label=(mc.m+1)+' 月';
-  if(id==='help'){renderMeowAssistantReply('你可以問我：今天／明天什麼班、下次上班或休假、本月出勤與加班、本月預估薪資、加班費、扣款、發薪日、特休餘額、依法特休有幾天、婚假、家庭照顧假、病假權益、最低工資、薪資差額、為什麼薪資變少、薪資單漏項／多扣，或直接說「幫我對薪資單」。');return}
+  if(id==='help'){renderMeowAssistantReply('你可以直接叫我調整班表、加班、請假，新增或取消行程與待辦，做薪資對帳；也可以問勞動法規，例如工時、休息時間、加班上限、補休、國定假日、特休、婚假、家庭照顧假、病假權益、最低工資、變形工時或 84-1 等問題。涉及個案時，我會結合 App 資料與勞動資料庫協助判讀。');return}
   if(id==='todayShift'||id==='tomorrowShift'){
     const d=new Date();if(id==='tomorrowShift')d.setDate(d.getDate()+1);
     renderMeowAssistantReply((id==='todayShift'?'今天':'明天')+'是「'+meowAssistantShiftText(d)+'」。');return;

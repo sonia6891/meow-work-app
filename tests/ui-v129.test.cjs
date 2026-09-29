@@ -218,7 +218,10 @@ for(const id of ['meowAssistantFab','meowAssistantDialog','meowAssistantDragHand
 assert(html.includes('.meow-assistant-dialog.minimized'),'Meow Assistant minimized floating state missing');
 assert(html.includes('function bindMeowAssistantDrag()'),'Meow Assistant drag binding missing');
 assert(html.includes("setMeowAssistantMinimized(!d.classList.contains('minimized'))"),'Meow Assistant minimize/expand control missing');
-assert(html.includes("placeholder=\"直接說：明天買貓砂、後天看醫生、幫我改班…\""),'Meow Assistant input should teach natural voice commands');
+assert(html.includes("placeholder=\"直接說：明天買貓砂、幫我改班，或問勞基法問題…\""),'Meow Assistant input should teach natural voice commands and labor-law questions');
+assert(html.includes('🎙 調整班表')&&html.includes('⏱ 調整加班')&&html.includes('☂ 調整請假'),'Meow Assistant quick actions should use adjustment wording');
+assert(html.includes('📅 行程管理')&&html.includes('☑ 待辦管理'),'Meow Assistant quick actions should expose itinerary/todo management without overstating edit support');
+assert(html.includes('⚖ 勞動法規問答'),'Meow Assistant must advertise labor-law Q&A');
 assert(html.includes(":'已更新班表。';") && html.includes("renderMeowAssistantReply(reply,'success')"),'Meow Assistant success copy must stay concise');
 assert(html.includes('async function meowAssistantCloudSnapshot(year,month)'),'Month-aware cloud schedule lookup missing');
 assert(html.includes('cloudHistoryEntries(payload)'),'Month lookup must consider cloud history snapshots');
