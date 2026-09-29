@@ -75,8 +75,10 @@ assert(payslipEdge.includes('fieldCropRead'), 'server targeted field recheck mis
 assert(payslipEdge.includes('fieldRechecks'), 'server targeted recheck output missing');
 assert(payslipEdge.includes('錯誤的自信答案比待確認更糟'), 'server must prefer uncertainty over guessing');
 assert(payslipEdge.includes('逐字抄寫員') && payslipEdge.includes('禁止依語意猜字'), 'exact-label recheck must be image-transcription focused rather than semantic guessing');
-assert(payslipEdge.includes('名稱待確認（兩次逐字判讀不一致）'), 'ambiguous payroll labels must not be forced');
-assert(payslipEdge.includes('trustedKnown = exactAgreement && choiceAgreement'), 'exact label and semantic choice must both agree before auto-labeling');
+assert(payslipEdge.includes('名稱待確認（三次逐字判讀未形成共識）'), 'ambiguous payroll labels must not be forced');
+assert(payslipEdge.includes('best.rs.length >= 2') && payslipEdge.includes('2/3 高信心逐字共識'), 'extra labels need multi-pass consensus before auto-labeling');
+assert(payslipEdge.includes('resolvedIsKnown'), 'known payroll labels need exact transcription/class agreement');
+assert(payslipEdge.includes('safeTranscript'), 'unseen payroll labels may only auto-fill after repeated high-confidence literal transcription');
 assert(html.includes('修正項目名稱'), 'unresolved extra payroll labels need a manual correction action');
 assert(payslipEdge.includes('resolved === "伙食津貼"'), 'only literal meal allowance may map to the standard meal field');
 assert(payslipEdge.includes('resolved === "餐費補助"'), 'meal subsidy must stay separate after exact-label recheck');
@@ -88,7 +90,7 @@ assert(html.includes('id="rerunPayslipScan"'), 'smart payroll rerun action missi
 assert(html.includes('id="clearPayslipScan"'), 'smart payroll clear action missing');
 assert(html.includes('照片不會顯示在畫面上'), 'smart payroll scan privacy copy missing');
 assert(html.includes('id="itemizedSmartGroups"'), 'smart payroll grouped review UI missing');
-assert(html.includes('未判讀或兩次判讀不一致的項目不會自動猜'), 'smart payroll pending-review copy missing');
+assert(html.includes('未判讀或多次判讀未形成共識的項目不會自動猜'), 'smart payroll pending-review copy missing');
 assert(html.includes('payslipCurrentFile'), 'session-only payslip rerun file state missing');
 assert(html.includes("$('closePayslipScan').onclick=()=>{payslipScanOpen=false;renderSalary()}"), 'closing the scan panel must keep the current payslip in memory');
 assert(html.includes('🔒 本次對帳工作階段'), 'compact payslip session privacy label missing');
