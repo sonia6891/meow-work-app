@@ -1,0 +1,95 @@
+name: Build signed Android release bundle
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Prepare the current web artwork
+        run: |
+          python3 -m pip install --quiet pillow
+          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/55737aaf2c45506d5e29d823d614db2626d1ad79dd3ea82806858d64c267a2bc.png" -o /tmp/meow-app-icon.png
+          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/b8ccc9163e5d72861ccb895c9425ea26942dcbc01b1f112860ca39e8cc48795c.png" -o /tmp/meow-splash.png
+          python3 - <<'PY'
+          from PIL import Image, ImageOps
+          icon=ImageOps.fit(Image.open('/tmp/meow-app-icon.png').convert('RGB'),(1024,1024),method=Image.Resampling.LANCZOS)
+          for size in (180,192,512):
+              ImageOps.fit(icon,(size,size),method=Image.Resampling.LANCZOS).save(f'app-icon-v178-{size}.png',format='PNG',optimize=True)
+          splash=Image.open('/tmp/meow-splash.png').convert('RGB')
+          splash.save('splash-v183.jpg',format='JPEG',quality=92,optimize=True,progressive=True)
+          PY
+
+      - name: Install dependencies and sync native web bundle
+        working-directory: native
+        run: |
+          npm ci
+          npm run sync:web
+          node scripts/patch-android-billing.mjs
+          npx cap sync android
+
+      - name: Configure Play upload signing
+        env:
+          PLAY_UPLOAD_KEYSTORE_BASE64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_BASE64 }}
+          MEOW_UPLOAD_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          MEOW_UPLOAD_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+          MEOW_UPLOAD_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: |
+          test -n "$PLAY_UPLOAD_KEYSTORE_BASE64"
+          test -n "$MEOW_UPLOAD_KEY_ALIAS"
+          test -n "$MEOW_UPLOAD_STORE_PASSWORD"
+          test -n "$MEOW_UPLOAD_KEY_PASSWORD"
+          printf '%s' "$PLAY_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/meow-play-upload.jks"
+          echo "MEOW_UPLOAD_KEYSTORE=$RUNNER_TEMP/meow-play-upload.jks" >> "$GITHUB_ENV"
+          echo "MEOW_UPLOAD_KEY_ALIAS=$MEOW_UPLOAD_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "MEOW_UPLOAD_STORE_PASSWORD=$MEOW_UPLOAD_STORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "MEOW_UPLOAD_KEY_PASSWORD=$MEOW_UPLOAD_KEY_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Set unique Play version
+        run: |
+          echo "MEOW_VERSION_CODE=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" >> "$GITHUB_ENV"
+          echo "MEOW_VERSION_NAME=1.0.$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+
+      - name: Build signed Android App Bundle
+        working-directory: native/android
+        run: ./gradlew --no-daemon bundleRelease
+
+      - name: Upload signed AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meow-work-google-play-aab
+          path: native/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Require Play Console publishing credentials
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: test -n "$PLAY_SERVICE_ACCOUNT_JSON"
+
+      - name: Upload to Google Play internal testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.lumilab.meowwork
+          releaseFiles: native/android/app/build/outputs/bundle/release/app-release.aab
+          tracks: internal
+          status: completed

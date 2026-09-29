@@ -1,0 +1,93 @@
+name: Bootstrap native Android project
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - sw.js
+      - manifest.webmanifest
+      - support.html
+      - terms.html
+      - privacy.html
+      - assets/**
+      - workcat-home-v12.png
+      - native/package.json
+      - native/package-lock.json
+      - native/capacitor.config.json
+      - native/scripts/**
+      - native/android-sources/**
+      - native/.gitignore
+      - .github/workflows/bootstrap-native-android.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bootstrap-native-android-main
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Prepare the current web artwork
+        run: |
+          python3 -m pip install --quiet pillow
+          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/55737aaf2c45506d5e29d823d614db2626d1ad79dd3ea82806858d64c267a2bc.png" -o /tmp/meow-app-icon.png
+          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/b8ccc9163e5d72861ccb895c9425ea26942dcbc01b1f112860ca39e8cc48795c.png" -o /tmp/meow-splash.png
+          python3 - <<'PY'
+          from PIL import Image, ImageOps
+          icon=Image.open('/tmp/meow-app-icon.png').convert('RGB')
+          icon=ImageOps.fit(icon,(1024,1024),method=Image.Resampling.LANCZOS)
+          for size in (180,192,512):
+              ImageOps.fit(icon,(size,size),method=Image.Resampling.LANCZOS).save(f'app-icon-v178-{size}.png',format='PNG',optimize=True)
+          splash=Image.open('/tmp/meow-splash.png').convert('RGB')
+          splash.save('splash-v183.jpg',format='JPEG',quality=92,optimize=True,progressive=True)
+          PY
+
+      - name: Install pinned Capacitor platforms
+        working-directory: native
+        run: npm ci
+
+      - name: Generate and patch the Play project
+        working-directory: native
+        run: |
+          rm -rf android
+          npm run sync:web
+          npx cap add android
+          node scripts/patch-android-billing.mjs
+          npx cap sync android
+
+      - name: Build Android debug APK
+        working-directory: native/android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Save generated native project
+        run: |
+          git add native/android
+          if git diff --cached --quiet; then
+            echo "Generated Android project is already up to date."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Generate Android Play Billing project"
+            git push
+          fi

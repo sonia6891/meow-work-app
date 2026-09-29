@@ -9,6 +9,7 @@ const privacySourcePath = resolve(root, 'ios-sources/PrivacyInfo.xcprivacy');
 const privacyTargetPath = resolve(root, 'ios/App/App/PrivacyInfo.xcprivacy');
 const entitlementsSourcePath = resolve(root, 'ios-sources/App.entitlements');
 const entitlementsTargetPath = resolve(root, 'ios/App/App/App.entitlements');
+const infoPlistPath = resolve(root, 'ios/App/App/Info.plist');
 
 const bridgeSource = readFileSync(bridgeSourcePath, 'utf8');
 const sceneSource = readFileSync(scenePath, 'utf8');
@@ -22,25 +23,15 @@ const uniqueImports = [...new Set(imports)];
 
 const bridgeBody = bridgeSource.replace(importPattern, '').trim();
 let sceneBody = sceneSource.replace(importPattern, '').trim();
-
-if (!sceneBody.includes('window?.rootViewController = CAPBridgeViewController()')) {
-  throw new Error('Expected generated Capacitor SceneDelegate root controller was not found.');
+const defaultRoot = 'window?.rootViewController = CAPBridgeViewController()';
+const customRoot = 'window?.rootViewController = ViewController()';
+if (sceneBody.includes(defaultRoot)) {
+  sceneBody = sceneBody.replace(defaultRoot, customRoot);
+  const output = [uniqueImports.join('\n'), '', bridgeBody, '', sceneBody, ''].join('\n');
+  writeFileSync(scenePath, output);
+} else if (!sceneBody.includes(customRoot) || !sceneBody.includes('class ViewController: CAPBridgeViewController')) {
+  throw new Error('Expected either the generated Capacitor SceneDelegate or the already patched MeowWork SceneDelegate.');
 }
-sceneBody = sceneBody.replace(
-  'window?.rootViewController = CAPBridgeViewController()',
-  'window?.rootViewController = ViewController()'
-);
-
-const output = [
-  uniqueImports.join('\n'),
-  '',
-  bridgeBody,
-  '',
-  sceneBody,
-  ''
-].join('\n');
-
-writeFileSync(scenePath, output);
 
 const privacyManifest = readFileSync(privacySourcePath, 'utf8');
 writeFileSync(privacyTargetPath, privacyManifest);
@@ -48,12 +39,21 @@ writeFileSync(privacyTargetPath, privacyManifest);
 const entitlements = readFileSync(entitlementsSourcePath, 'utf8');
 writeFileSync(entitlementsTargetPath, entitlements);
 
+let infoPlist = readFileSync(infoPlistPath, 'utf8');
+if (!infoPlist.includes('<string>com.lumilab.meowwork</string>')) {
+  const callbackScheme = `\t<key>CFBundleURLTypes</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>CFBundleURLName</key>\n\t\t\t<string>com.lumilab.meowwork.auth</string>\n\t\t\t<key>CFBundleURLSchemes</key>\n\t\t\t<array>\n\t\t\t\t<string>com.lumilab.meowwork</string>\n\t\t\t</array>\n\t\t</dict>\n\t</array>\n`;
+  infoPlist = infoPlist.replace(/<\/dict>\s*<\/plist>\s*$/, `${callbackScheme}</dict>\n</plist>\n`);
+}
+if (!infoPlist.includes('<string>com.lumilab.meowwork</string>')) throw new Error('Could not register the native OAuth callback URL scheme.');
+writeFileSync(infoPlistPath, infoPlist);
+
 let project = readFileSync(projectPath, 'utf8');
 let deviceFamilyMatches = project.match(/TARGETED_DEVICE_FAMILY = "1,2";/g) || [];
-if (deviceFamilyMatches.length < 2) {
+const alreadyPhoneOnly = (project.match(/TARGETED_DEVICE_FAMILY = 1;/g) || []).length >= 2;
+if (deviceFamilyMatches.length < 2 && !alreadyPhoneOnly) {
   throw new Error('Unable to locate iPhone+iPad target settings before narrowing v1 to iPhone.');
 }
-project = project.replace(/TARGETED_DEVICE_FAMILY = "1,2";/g, 'TARGETED_DEVICE_FAMILY = 1;');
+if (!alreadyPhoneOnly) project = project.replace(/TARGETED_DEVICE_FAMILY = "1,2";/g, 'TARGETED_DEVICE_FAMILY = 1;');
 
 const privacyBuildId = 'A15100000000000000000001';
 const privacyFileId = 'A15100000000000000000002';
@@ -99,4 +99,4 @@ if (!project.includes('PrivacyInfo.xcprivacy in Resources')) {
 }
 writeFileSync(projectPath, project);
 
-console.log('Patched generated SceneDelegate, native bridges, app PrivacyInfo.xcprivacy, and Sign in with Apple entitlements.');
+console.log('Patched generated SceneDelegate, OAuth URL scheme, native bridges, app PrivacyInfo.xcprivacy, and Sign in with Apple entitlements.');

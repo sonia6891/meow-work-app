@@ -7032,9 +7032,62 @@ async function getAuthClient(){
   if(authClient)return authClient;
   const mod=await import('https://esm.sh/@supabase/supabase-js@2?bundle');
   authClient=mod.createClient(SUPABASE_URL,SUPABASE_KEY,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:!isNativeCapacitor(),flowType:isNativeCapacitor()?'pkce':'implicit'}
   });
   return authClient;
+}
+function isNativeCapacitor(){
+  try{return !!window.Capacitor&&typeof window.Capacitor.getPlatform==='function'&&window.Capacitor.getPlatform()!=='web'}catch(e){return false}
+}
+function capacitorPlugin(name){
+  return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins[name]||null;
+}
+function nativeOAuthRedirect(){return 'com.lumilab.meowwork://auth/callback'}
+let nativeOAuthCallbackInFlight='';
+function showNativeOAuthError(provider,message){
+  const issue={provider,error:message||'登入回呼沒有建立有效工作階段'};
+  setAccountStatus((provider==='line'?'LINE':'Google')+' 登入未完成');
+  if($('welcomeMessage'))$('welcomeMessage').textContent=authCallbackMessage(issue);
+  try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(e){}
+}
+async function finishNativeOAuthCallback(client,url){
+  let callback;
+  try{callback=new URL(url)}catch(e){return false}
+  if(callback.protocol!=='com.lumilab.meowwork:'||callback.host!=='auth'||callback.pathname!=='/callback')return false;
+  if(nativeOAuthCallbackInFlight===url)return true;
+  nativeOAuthCallbackInFlight=url;
+  const provider=readLocalString(WELCOME_REAUTH_KEY)||'google';
+  const browser=capacitorPlugin('Browser');
+  if(browser&&typeof browser.close==='function')try{await browser.close()}catch(e){}
+  const callbackError=callback.searchParams.get('error_description')||callback.searchParams.get('error')||callback.searchParams.get('error_code');
+  if(callbackError){showNativeOAuthError(provider,callbackError);return true}
+  const code=callback.searchParams.get('code');
+  if(code){
+    const {data,error}=await client.auth.exchangeCodeForSession(code);
+    if(error)throw error;
+    if(data&&data.session&&data.session.user){try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(e){};await handleSignedIn(data.session.user,data.session);return true}
+  }
+  const hash=new URLSearchParams(callback.hash.replace(/^#/,''));
+  const accessToken=hash.get('access_token'),refreshToken=hash.get('refresh_token');
+  if(accessToken&&refreshToken){
+    const {data,error}=await client.auth.setSession({access_token:accessToken,refresh_token:refreshToken});
+    if(error)throw error;
+    if(data&&data.session&&data.session.user){try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(e){};await handleSignedIn(data.session.user,data.session);return true}
+  }
+  showNativeOAuthError(provider,'登入回呼沒有包含有效授權碼');
+  return true;
+}
+async function installNativeOAuthCallback(client){
+  if(!isNativeCapacitor())return;
+  const app=capacitorPlugin('App');
+  if(!app||typeof app.addListener!=='function')throw new Error('原生登入回呼模組尚未安裝。');
+  await app.addListener('appUrlOpen',event=>{
+    void finishNativeOAuthCallback(client,event&&event.url||'').catch(error=>showNativeOAuthError(readLocalString(WELCOME_REAUTH_KEY)||'google',error&&error.message));
+  });
+  if(typeof app.getLaunchUrl==='function'){
+    const launch=await app.getLaunchUrl();
+    if(launch&&launch.url)await finishNativeOAuthCallback(client,launch.url);
+  }
 }
 // Account identity, local workspaces and Pro cloud access are independent.
 const WELCOME_KEY='meow-work-welcome-v1',OWNER_KEY='meow-work-local-owner-v1',LAST_AUTH_USER_KEY='meow-work-last-auth-user-v1';
@@ -7400,6 +7453,7 @@ async function initAuth(){
   }
   try{
     const client=await getAuthClient();
+    await installNativeOAuthCallback(client);
     let data=null,error=null;
     for(let attempt=0;attempt<3;attempt++){
       const result=await client.auth.getSession();
@@ -7562,12 +7616,13 @@ async function signInWithGoogle(){
     const client=await getAuthClient();
     setAccountStatus('正在前往 Google 登入…');
     rememberAuthAttempt('google');
-    const redirectTo=location.origin+location.pathname;
-    const {error}=await client.auth.signInWithOAuth({
+    const native=isNativeCapacitor(),redirectTo=native?nativeOAuthRedirect():location.origin+location.pathname;
+    const {data,error}=await client.auth.signInWithOAuth({
       provider:'google',
-      options:{redirectTo,queryParams:{access_type:'offline',prompt:'select_account'}}
+      options:{redirectTo,skipBrowserRedirect:native,queryParams:{access_type:'offline',prompt:'select_account'}}
     });
     if(error)throw error;
+    if(native){const browser=capacitorPlugin('Browser');if(!browser||typeof browser.open!=='function')throw new Error('原生瀏覽器登入模組尚未安裝。');await browser.open({url:data.url});}
   }catch(e){
     try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(err){}
     setAccountStatus('Google 登入失敗');
@@ -7579,12 +7634,13 @@ async function signInWithLine(){
     const client=await getAuthClient();
     setAccountStatus('正在前往 LINE 登入…');
     rememberAuthAttempt('line');
-    const redirectTo=location.origin+location.pathname;
-    const {error}=await client.auth.signInWithOAuth({
+    const native=isNativeCapacitor(),redirectTo=native?nativeOAuthRedirect():location.origin+location.pathname;
+    const {data,error}=await client.auth.signInWithOAuth({
       provider:LINE_PROVIDER_ID,
-      options:{redirectTo,scopes:'openid profile'}
+      options:{redirectTo,scopes:'openid profile',skipBrowserRedirect:native}
     });
     if(error)throw error;
+    if(native){const browser=capacitorPlugin('Browser');if(!browser||typeof browser.open!=='function')throw new Error('原生瀏覽器登入模組尚未安裝。');await browser.open({url:data.url});}
   }catch(e){
     try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(err){}
     setAccountStatus('LINE 登入失敗');
@@ -10800,9 +10856,21 @@ function storePlatformName(){
     return p==='android'?'Google Play':'App Store';
   }catch(e){return'App Store'}
 }
+function storePlatformId(){
+  try{return window.Capacitor&&typeof window.Capacitor.getPlatform==='function'?window.Capacitor.getPlatform():''}catch(e){return''}
+}
 async function verifyAppStoreSignedTransaction(signedTransaction){
   if(!signedTransaction)throw new Error('App Store 沒有回傳可驗證的交易資料。');
   return invokeUserFunction('verify-app-store-transaction',{signedTransaction});
+}
+async function verifyStoreTransaction(item,platform){
+  if(platform==='ios')return verifyAppStoreSignedTransaction(item&&item.signedTransaction);
+  if(platform==='android'){
+    const purchaseToken=String(item&&item.purchaseToken||'');
+    if(!purchaseToken)throw new Error('Google Play 沒有回傳可驗證的購買憑證。');
+    return invokeUserFunction('verify-google-play-purchase',{purchaseToken,productId:String(item&&item.productId||'')});
+  }
+  throw new Error('不支援的商店平台。');
 }
 let storeTransactionListenerReady=false,storeUnfinishedSyncRunning=false;
 async function finishVerifiedStoreTransaction(bridge,item){
@@ -10811,13 +10879,12 @@ async function finishVerifiedStoreTransaction(bridge,item){
   await bridge.finishTransaction({transactionId:String(id)});
 }
 async function verifyAndFinishStoreItem(item,bridge){
-  const signed=item&&item.signedTransaction;
-  if(!signed)throw new Error('App Store 沒有回傳可驗證的交易資料。');
-  await verifyAppStoreSignedTransaction(signed);
+  const platform=item&&item.platform||window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform();
+  await verifyStoreTransaction(item,platform);
   await finishVerifiedStoreTransaction(bridge,item);
 }
 async function handleStoreTransactionUpdate(info){
-  if(!authUser||!info||info.platform!=='ios'||!info.signedTransaction)return;
+  if(!authUser||!info||!['ios','android'].includes(info.platform))return;
   const bridge=storeBillingBridge();
   if(!bridge)return;
   try{
@@ -10825,9 +10892,9 @@ async function handleStoreTransactionUpdate(info){
     await loadEntitlement();
     await loadBillingHistory();
     render();
-    setAccountStatus('App Store 訂閱狀態已同步');
+    setAccountStatus('商店訂閱狀態已同步');
   }catch(e){
-    setAccountStatus('App Store 交易待重新驗證');
+    setAccountStatus((info.platform==='android'?'Google Play':'App Store')+' 交易待重新驗證');
   }
 }
 async function initStoreTransactionListener(){
@@ -10913,10 +10980,11 @@ async function startStoreSubscription(plan){
   const isYear=plan==='yearly';
   const price=storeDisplayPrice(plan);
   const eligible=storeIntroEligible(plan);
+  const storeName=storePlatformName(),storeNameShort=storePlatformId()==='android'?'Google Play':'Apple ID';
   const offerLine=eligible===true
-    ?'此 Apple ID 符合 3 天免費試用資格。'
+    ?'此 '+storeNameShort+' 符合 3 天免費試用資格。'
     :eligible===false
-      ?'此 Apple ID 目前不符合免費試用資格，將依商店顯示價格開始訂閱。'
+      ?'此 '+storeNameShort+' 目前不符合免費試用資格，將依商店顯示價格開始訂閱。'
       :'免費試用資格將由商店在購買時確認。';
   const ok=confirm('開始 Pro 訂閱？\n\n'+
     '方案：'+(isYear?'年繳':'月繳')+' Pro・'+price+(isYear?'／年':'／月')+'\n'+
@@ -10933,14 +11001,14 @@ async function startStoreSubscription(plan){
     });
     if(result&&result.cancelled){setAccountStatus('已取消訂閱流程');return}
     if(result&&result.pending){
-      setAccountStatus('訂閱等待 App Store 核准');
-      alert('這筆訂閱目前仍在等待 App Store 核准。核准後 Pro 會自動更新。');
+      setAccountStatus('訂閱等待商店核准');
+      alert('這筆訂閱目前仍在等待商店核准。核准後 Pro 會自動更新。');
       return;
     }
-    if(result&&result.platform==='ios'){
+    if(result&&['ios','android'].includes(result.platform)){
       await verifyAndFinishStoreItem(result,bridge);
     }else{
-      throw new Error('目前只完成 iOS App Store 驗證；Android Play Billing 將在下一階段接上。');
+      throw new Error('商店沒有回傳有效的交易平台資料。');
     }
     await loadEntitlement();
     await loadBillingHistory();
@@ -10967,20 +11035,21 @@ async function restoreStorePurchases(){
   }
   const btn=$('restoreStorePurchases');if(btn)btn.disabled=true;
   try{
-    setAccountStatus('正在向 App Store 恢復購買…');
+    setAccountStatus('正在向商店恢復購買…');
     const result=await bridge.restorePurchases();
     const items=Array.isArray(result&&result.entitlements)?result.entitlements:[];
     let verified=0;
     for(const item of items){
-      const signed=item&&item.signedTransaction;
-      if(!signed)continue;
+      const platform=item&&item.platform||storePlatformId();
+      if(platform==='ios'&&!(item&&item.signedTransaction))continue;
+      if(platform==='android'&&!(item&&item.purchaseToken))continue;
       await verifyAndFinishStoreItem(item,bridge);
       verified++;
     }
     await loadEntitlement();
     await loadBillingHistory();
     render();
-    if(verified)alert('已恢復 '+verified+' 筆有效 App Store 訂閱。');
+    if(verified)alert('已恢復 '+verified+' 筆有效商店訂閱。');
     else alert('目前沒有可恢復的有效 Pro 訂閱。');
     setAccountStatus('購買狀態已同步');
   }catch(e){
@@ -11040,11 +11109,12 @@ function renderProPlanSettings(){
   if(offerHint){
     const eligible=anyStoreIntroEligible();
     if(storeBillingBridge()&&storeProductsLoaded){
+      const storeName=storePlatformName(),accountName=storePlatformId()==='android'?'Google Play 帳號':'Apple ID';
       offerHint.textContent=eligible===true
-        ?'此 Apple ID 符合 3 天免費試用資格。試用結束後依所選方案自動續訂，可隨時在 App Store 管理／取消。'
+        ?'此 '+accountName+' 符合 3 天免費試用資格。試用結束後依所選方案自動續訂，可隨時在 '+storeName+' 管理／取消。'
         :eligible===false
-          ?'此 Apple ID 目前不符合免費試用資格，會依 App Store 顯示的價格直接開始訂閱。'
-          :'免費試用資格會由 App Store 在購買時確認。';
+          ?'此 '+accountName+' 目前不符合免費試用資格，會依 '+storeName+' 顯示的價格直接開始訂閱。'
+          :'免費試用資格會由商店在購買時確認。';
     }else{
       offerHint.textContent='首次符合資格的訂閱可享 3 天免費試用。正式 iOS／Android 版以 App Store／Google Play 實際顯示的在地化價格與資格為準。';
     }

@@ -7,9 +7,15 @@
     "sync:web": "node scripts/sync-web.mjs",
     "cap:sync": "npm run sync:web && npx cap sync",
     "cap:add:ios": "npm run sync:web && npx cap add ios",
-    "cap:open:ios": "npx cap open ios"
+    "cap:add:android": "npm run sync:web && npx cap add android && node scripts/patch-android-billing.mjs",
+    "cap:patch:android": "node scripts/patch-android-billing.mjs",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.1",
+    "@capacitor/browser": "8.0.4",
     "@capacitor/core": "8.5.2",
     "@capacitor/ios": "8.5.2"
   },

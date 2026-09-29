@@ -13,7 +13,8 @@ function loadVerificationGate({ verify, finish }) {
   assert.ok(match, 'verifyAndFinishStoreItem must exist in index.html');
 
   const context = {
-    verifyAppStoreSignedTransaction: verify,
+    window: { Capacitor: { getPlatform: () => 'ios' } },
+    verifyStoreTransaction: verify,
     finishVerifiedStoreTransaction: finish
   };
   vm.createContext(context);
@@ -28,7 +29,7 @@ function loadVerificationGate({ verify, finish }) {
 test('backend verification succeeds before StoreKit finish', async () => {
   const calls = [];
   const verifyAndFinish = loadVerificationGate({
-    verify: async signed => calls.push('verify:' + signed),
+    verify: async item => calls.push('verify:' + item.signedTransaction),
     finish: async (_bridge, item) => calls.push('finish:' + item.transaction.id)
   });
 
@@ -43,8 +44,8 @@ test('backend verification succeeds before StoreKit finish', async () => {
 test('verification/network failure never finishes the StoreKit transaction', async () => {
   const calls = [];
   const verifyAndFinish = loadVerificationGate({
-    verify: async signed => {
-      calls.push('verify:' + signed);
+    verify: async item => {
+      calls.push('verify:' + item.signedTransaction);
       throw new Error('network unavailable');
     },
     finish: async () => calls.push('finish')

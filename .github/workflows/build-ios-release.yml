@@ -1,0 +1,119 @@
+name: Build signed iOS App Store artifact
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Prepare current app artwork
+        run: |
+          python3 -m venv "$RUNNER_TEMP/meow-icon-venv"
+          "$RUNNER_TEMP/meow-icon-venv/bin/python" -m pip install --quiet pillow
+          mkdir -p native/ios-sources
+          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/55737aaf2c45506d5e29d823d614db2626d1ad79dd3ea82806858d64c267a2bc.png" -o native/ios-sources/app-icon-v178-source.png
+          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/b8ccc9163e5d72861ccb895c9425ea26942dcbc01b1f112860ca39e8cc48795c.png" -o native/ios-sources/splash-v183-source.png
+          "$RUNNER_TEMP/meow-icon-venv/bin/python" - <<'PY'
+          from PIL import Image, ImageOps
+          icon=ImageOps.fit(Image.open('native/ios-sources/app-icon-v178-source.png').convert('RGB'),(1024,1024),method=Image.Resampling.LANCZOS)
+          icon.save('native-icon-v178-1024.png',format='PNG',optimize=True)
+          splash=Image.open('native/ios-sources/splash-v183-source.png').convert('RGB')
+          canvas=Image.new('RGB',(2732,2732),'#90BCE9')
+          art=ImageOps.contain(splash,(2732,2732),method=Image.Resampling.LANCZOS)
+          canvas.paste(art,((2732-art.width)//2,(2732-art.height)//2))
+          canvas.save('native-splash-v183-2732.png',format='PNG',optimize=True)
+          for size in (180,192,512):
+              ImageOps.fit(icon,(size,size),method=Image.Resampling.LANCZOS).save(f'app-icon-v178-{size}.png',format='PNG',optimize=True)
+          splash.save('splash-v183.jpg',format='JPEG',quality=92,optimize=True,progressive=True)
+          PY
+
+      - name: Install native dependencies and sync web bundle
+        working-directory: native
+        run: |
+          npm ci
+          npm run sync:web
+          node scripts/patch-ios-bridge.mjs
+          npx cap sync ios
+          gem install xcodeproj --no-document
+          ruby scripts/add-date-widget.rb
+          cp ../native-icon-v178-1024.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
+          cp ../native-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png
+          cp ../native-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png
+          cp ../native-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-2.png
+
+      - name: Configure App Store Connect signing credentials
+        env:
+          APPLE_ASC_KEY_P8: ${{ secrets.APPLE_ASC_KEY_P8 }}
+          APPLE_ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
+          APPLE_ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          test -n "$APPLE_ASC_KEY_P8"
+          test -n "$APPLE_ASC_KEY_ID"
+          test -n "$APPLE_ASC_ISSUER_ID"
+          test -n "$APPLE_TEAM_ID"
+          printf '%s' "$APPLE_ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey_$APPLE_ASC_KEY_ID.p8"
+          echo "APPLE_ASC_KEY_PATH=$RUNNER_TEMP/AuthKey_$APPLE_ASC_KEY_ID.p8" >> "$GITHUB_ENV"
+          echo "APPLE_ASC_KEY_ID=$APPLE_ASC_KEY_ID" >> "$GITHUB_ENV"
+          echo "APPLE_ASC_ISSUER_ID=$APPLE_ASC_ISSUER_ID" >> "$GITHUB_ENV"
+          echo "APPLE_TEAM_ID=$APPLE_TEAM_ID" >> "$GITHUB_ENV"
+          mkdir -p "$HOME/.private_keys"
+          cp "$RUNNER_TEMP/AuthKey_$APPLE_ASC_KEY_ID.p8" "$HOME/.private_keys/AuthKey_$APPLE_ASC_KEY_ID.p8"
+
+      - name: Archive and export signed IPA
+        working-directory: native/ios
+        run: |
+          xcodebuild -project App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/MeowWork.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$APPLE_ASC_KEY_PATH" \
+            -authenticationKeyID "$APPLE_ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$APPLE_ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CURRENT_PROJECT_VERSION="$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" CODE_SIGN_STYLE=Automatic \
+            archive
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>$APPLE_TEAM_ID</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/MeowWork.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$APPLE_ASC_KEY_PATH" \
+            -authenticationKeyID "$APPLE_ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$APPLE_ASC_ISSUER_ID"
+
+      - name: Upload signed IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meow-work-app-store-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build to App Store Connect for TestFlight
+        env:
+          APPLE_ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
+          APPLE_ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
+        run: |
+          IPA_PATH="$(find "$RUNNER_TEMP/export" -name '*.ipa' -print -quit)"
+          test -n "$IPA_PATH"
+          xcrun altool --upload-app --type ios --file "$IPA_PATH" \
+            --apiKey "$APPLE_ASC_KEY_ID" --apiIssuer "$APPLE_ASC_ISSUER_ID"

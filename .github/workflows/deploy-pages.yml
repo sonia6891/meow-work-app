@@ -82,6 +82,8 @@ jobs:
         run: node tests/full-data-pressure.test.cjs
       - name: Google, LINE, Free access, logout and mobile layout tests
         run: node tests/browser-account-v117.cjs
+      - name: Native Google and LINE OAuth callback configuration
+        run: node tests/native-oauth-config.test.cjs
       - name: Verify live LINE provider redirect and scopes
         run: |
           set -euo pipefail

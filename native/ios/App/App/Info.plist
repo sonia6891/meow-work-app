@@ -74,5 +74,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.lumilab.meowwork.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.lumilab.meowwork</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

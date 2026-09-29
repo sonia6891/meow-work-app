@@ -8,6 +8,16 @@ Deno.serve(async(req)=>{
   if(req.method==="OPTIONS") return new Response("ok",{headers:cors});
   const appleAppId=String(Deno.env.get("APPLE_APP_ID")||"").trim();
   const appleBundleId=String(Deno.env.get("APPLE_BUNDLE_ID")||"com.lumilab.meowwork").trim();
+  const playPackageName=String(Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")||"").trim();
+  let playCredentialsConfigured=false;
+  try{
+    let account:any=JSON.parse(String(Deno.env.get("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON")||"{}"));
+    if(typeof account==="string")account=JSON.parse(account);
+    if(account?.default&&typeof account.default==="string")account=JSON.parse(account.default);
+    playCredentialsConfigured=!!account?.client_email&&!!account?.private_key;
+  }catch{}
+  const playNotificationsConfigured=!!String(Deno.env.get("GOOGLE_PLAY_RTDN_AUDIENCE")||"").trim()
+    &&!!String(Deno.env.get("GOOGLE_PLAY_RTDN_SERVICE_ACCOUNT_EMAIL")||"").trim();
   return new Response(JSON.stringify({
     configured:true,
     provider:"app_store_play",
@@ -25,6 +35,13 @@ Deno.serve(async(req)=>{
       app_id_configured:/^\d+$/.test(appleAppId),
       production_server_verification_ready:/^\d+$/.test(appleAppId)&&appleBundleId==="com.lumilab.meowwork",
       server_notifications_path:"/functions/v1/app-store-notifications-v2"
+    },
+    android:{
+      package_name:playPackageName,
+      credentials_configured:playCredentialsConfigured,
+      notifications_configured:playNotificationsConfigured,
+      production_server_verification_ready:playPackageName==="com.lumilab.meowwork"&&playCredentialsConfigured&&playNotificationsConfigured,
+      server_notifications_path:"/functions/v1/google-play-rtdn"
     }
   }),{headers:cors});
 });
