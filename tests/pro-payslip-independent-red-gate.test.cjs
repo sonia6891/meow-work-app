@@ -41,7 +41,9 @@ assert(edge.includes('recoverExtraItemsFromRows'), 'independent extra row redisc
 assert(edge.includes('.slice(0, 16)'), 'extra row rediscovery must inspect enough unclaimed candidate rows');
 assert(edge.includes('名稱待確認（讀到：'), 'uncertain extra-row amounts must remain visible for human label confirmation');
 assert(edge.includes('rowAmount'), 'extra row rediscovery must bind labels to candidate row amounts');
-assert(edge.includes('t1 === t2') && edge.includes('t1 === c1'), 'subsidy label must retain exact two-read transcription and class match');
+assert(edge.includes('best.rs.length >= 2') && edge.includes('2/3 高信心逐字共識'), 'subsidy and extra labels must use multi-pass transcription consensus');
+assert(edge.includes('safeTranscript'), 'unseen payroll labels require repeated high-confidence literal transcription');
+assert(edge.includes('.slice(0, 8)'), 'all recovered extra rows must be eligible for exact-label verification');
 
 assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax','dedHealth'])"), 'tax, performance and health insurance must be forced into field crops');
 assert(html.includes("PAYSLIP_BLIND_BENCHMARK_KEY"), 'blind benchmark mode must be available');
