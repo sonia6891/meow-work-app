@@ -91,6 +91,33 @@ def case_values(rng,idx):
 def label_for(rng,key):
     return rng.choice(FIELD_ALIASES[key])
 
+def rotate_bbox(bb,angle):
+    if not angle:return bb
+    a=math.radians(angle);c=math.cos(a);si=math.sin(a);cx,cy=W/2,H/2
+    pts=[]
+    for x,y in ((bb[0],bb[1]),(bb[2],bb[1]),(bb[2],bb[3]),(bb[0],bb[3])):
+        dx,dy=x-cx,y-cy
+        # PIL positive angle rotates counter-clockwise in image coordinates.
+        nx=c*dx+si*dy+cx; ny=-si*dx+c*dy+cy
+        pts.append((nx,ny))
+    xs=[p[0] for p in pts];ys=[p[1] for p in pts]
+    return [max(0,min(xs)),max(0,min(ys)),min(W,max(xs)),min(H,max(ys))]
+
+def save_critical_crops(im,field_boxes,out_dir,idx):
+    crops={}
+    crop_dir=out_dir/"crops";crop_dir.mkdir(exist_ok=True)
+    for key in ("dedHealth","dedTax","performance"):
+        bb=field_boxes.get(key)
+        if not bb:continue
+        x0,y0,x1,y1=bb
+        pad_x=max(20,(x1-x0)*1.1);pad_y=max(16,(y1-y0)*1.0)
+        rect=(max(0,int(x0-pad_x)),max(0,int(y0-pad_y)),min(W,int(x1+pad_x)),min(H,int(y1+pad_y)))
+        crop=im.crop(rect)
+        crop=crop.resize((max(220,crop.width*3),max(100,crop.height*3)),Image.Resampling.LANCZOS)
+        p=crop_dir/f"{idx:05d}_{key}.png";crop.save(p,"PNG",optimize=True)
+        crops[key]=str(p)
+    return crops
+
 def render(idx,out_dir):
     rng=random.Random(934871+idx*7919)
     split="tune" if idx<4000 else "holdout"
@@ -229,14 +256,17 @@ def render(idx,out_dir):
     angle=rng.choice([0,0,0,-2,-1,1,2] if split=="tune" else [-3,-2,2,3,0])
     if angle:
         im=im.rotate(angle,Image.Resampling.BICUBIC,expand=False,fillcolor=bg)
+        field_boxes={k:rotate_bbox(bb,angle) for k,bb in field_boxes.items()}
+        for x in extra_boxes:x["bbox"]=rotate_bbox(x["bbox"],angle)
 
+    critical_crops=save_critical_crops(im,field_boxes,out_dir,idx)
     path=out_dir/f"payslip_{idx:05d}.jpg"
     quality=rng.choice([72,78,84,90,94] if split=="tune" else [58,66,74,82,90])
     im.save(path,"JPEG",quality=quality,optimize=True)
     gt={k:v for k,v in vals.items() if k!="extras"}
     return {
       "id":idx,"split":split,"family":family,"image":str(path),
-      "ground_truth":gt,"field_boxes":field_boxes,"extras":extra_boxes,
+      "ground_truth":gt,"field_boxes":field_boxes,"extras":extra_boxes,"critical_crops":critical_crops,
       "quality":{"jpeg":quality,"angle":angle,"severity":severity}
     }
 
