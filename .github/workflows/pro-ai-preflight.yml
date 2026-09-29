@@ -38,6 +38,8 @@ jobs:
         run: node tests/pro-ai-v125.cjs
       - name: Independent Pro payslip fail-closed regression gate
         run: node tests/pro-payslip-independent-red-gate.test.cjs
+      - name: Pro payslip Accuracy V2 — 50,000 deterministic cases
+        run: node tests/pro-payslip-accuracy-v2.test.cjs
       - name: Secret leak guard
         run: |
           if grep -R --line-number --exclude-dir=.git -E 'sk-[A-Za-z0-9_-]{20,}' index.html supabase docs tests; then
