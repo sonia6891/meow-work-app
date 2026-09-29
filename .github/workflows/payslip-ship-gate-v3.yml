@@ -11,6 +11,24 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: payslip-vision-ship-v3
+  cancel-in-progress: true
+
+  contract:
+    name: V3.1 numeric rescue contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify benchmark and production numeric rescue alignment
+        run: |
+          grep -Fq 'numericObservations' benchmarks/payslip/vision_benchmark.swift
+          grep -Fq 'candidateLimit: 3' benchmarks/payslip/vision_benchmark.swift
+          grep -Fq 'let isPayslipNumericPass = purpose == "payslip-numeric"' native/ios-sources/ViewController.swift
+          grep -Fq 'request.minimumTextHeight = isPayslipNumericPass ? 0.0015 : (isPayslip ? 0.0025 : 0.008)' native/ios-sources/ViewController.swift
+          grep -Fq "purpose:'payslip-numeric'" index.html
+          grep -Fq 'function fusePayslipVisionNumericData' index.html
+
 jobs:
   holdout:
     name: V3 unseen-layout shard ${{ matrix.shard }}
@@ -57,7 +75,7 @@ jobs:
 
   gate:
     name: V3 Vision shipping floor
-    needs: holdout
+    needs: [contract, holdout]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
