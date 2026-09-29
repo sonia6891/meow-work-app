@@ -73,4 +73,8 @@ const repeated=fuse({text:'',words:[]},{words:[
 assert.strictEqual(repeated.words.filter(x=>x.text==='1200').length,2,'same amount on different payroll rows must not be collapsed');
 
 assert(html.includes('score-=Math.min(.10,Math.max(0,Number(a.candidateRank)||0)*.04)'),'lower-ranked Vision alternatives must lose geometry ties while remaining available');
+assert(html.includes("physicalKey=line.index+'|'"),'numeric alternatives from one physical cell must share a physical key');
+assert(html.includes('payslipAmountIsUsed(used,a)'),'field matching must reject all alternates from an already-consumed physical cell');
+assert(html.includes('markPayslipAmountUsed(used,pair.amount)'),'choosing one candidate must lock the whole physical cell');
+assert(html.includes('physicalKey===group'),'table matching must remove sibling alternatives from the same physical cell');
 console.log('PASS payslip V3.1 numeric rescue fusion behavior');

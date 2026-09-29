@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v272-payroll-ranked-numeric-rescue">
+<meta name="meow-ui-build" content="v273-payroll-physical-cell-lock">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -8998,7 +8998,8 @@ function extractSpatialAmounts(line){
     const nearby=words.slice(Math.max(0,startIndex-4),Math.min(words.length,endIndex+5)).filter((_,idx)=>idx<startIndex||idx>endIndex).map(x=>normalizeOcrText(x.text)).join('');
     const quantityLike=/(時數|工時|小時|時薪|天數|日數|班數|倍率|倍數|費率|單價|提繳率|自提率|HOUR|HOURS|HRS|DAY|DAYS|RATE)/.test(nearby);
     const moneyHint=/(金額|應發|實發|應扣|扣款|合計|小計|薪資|工資|津貼|加給|獎金|保費|福利金|所得稅|加班費)/.test(nearby);
-    amounts.push({id,value:info.value,rateLike:info.rateLike,percent:info.percent,hasDecimal:info.hasDecimal,quantityLike,moneyHint,bbox,confidence,candidateRank:Math.max(0,Number(candidateRank)||0),lineIndex:line.index,text,stitched});
+    const physicalKey=line.index+'|'+Math.round(bbox.x0)+'|'+Math.round(bbox.y0)+'|'+Math.round(bbox.x1)+'|'+Math.round(bbox.y1);
+    amounts.push({id,value:info.value,rateLike:info.rateLike,percent:info.percent,hasDecimal:info.hasDecimal,quantityLike,moneyHint,bbox,confidence,candidateRank:Math.max(0,Number(candidateRank)||0),physicalKey,lineIndex:line.index,text,stitched});
   };
   words.forEach((w,i)=>{
     const info=numericTokenInfo(w.text);if(!info)return;
@@ -9027,6 +9028,14 @@ function extractSpatialAmounts(line){
   }
   return amounts;
 }
+function payslipAmountIsUsed(used,a){
+  return !!(a&&(used.has(a.id)||(a.physicalKey&&used.has('box:'+a.physicalKey))));
+}
+function markPayslipAmountUsed(used,a){
+  if(!a)return;
+  used.add(a.id);
+  if(a.physicalKey)used.add('box:'+a.physicalKey);
+}
 function lineLabelBox(line,hit){
   const seg=line.segments.find(s=>hit.start>=s.start&&hit.start<s.end)||line.segments.find(s=>s.start>=hit.start&&s.start<hit.end);
   if(seg)return seg.word.bbox;
@@ -9042,7 +9051,7 @@ function findSpatialAmountForHit(hit,lines,width,height,used){
   const candidates=[];
   lines.forEach(l=>{
     l.amounts.forEach(a=>{
-      if(used.has(a.id)||!plausibleAmountForField(def,a))return;
+      if(payslipAmountIsUsed(used,a)||!plausibleAmountForField(def,a))return;
       const dx=(a.bbox.cx-label.cx)/Math.max(1,width),ady=Math.abs(a.bbox.cy-label.cy)/Math.max(1,height);
       const sameRow=Math.abs(a.bbox.cy-label.cy)<=Math.max(label.h,a.bbox.h)*.9;
       const sameColumn=Math.abs(dx)<=.09,lineDist=Math.abs(l.index-hit.lineIndex);
@@ -9133,7 +9142,7 @@ function pairTableRowsByColumns(lines,width,height,used,byKey,labelAnchors,varia
     const sortedHits=[...hits].filter(h=>fieldAllowedInSection(h.def,sectionForLabel(h.labelBox,sectionMarkers,width,height))).sort((a,b)=>a.labelBox.cx-b.labelBox.cx);if(sortedHits.length<2)return;
     let bestRow=null,bestScore=-1;
     for(let step=1;step<=4&&i+step<lines.length;step++){
-      const amountLine=lines[i+step],amounts=amountLine.amounts.filter(a=>!used.has(a.id)).sort((a,b)=>a.bbox.cx-b.bbox.cx);
+      const amountLine=lines[i+step],amounts=amountLine.amounts.filter(a=>!payslipAmountIsUsed(used,a)).sort((a,b)=>a.bbox.cx-b.bbox.cx);
       if(amounts.length<Math.max(2,Math.floor(sortedHits.length*.6)))continue;
       let matched=0,dist=0;
       sortedHits.forEach(h=>{
@@ -9150,7 +9159,11 @@ function pairTableRowsByColumns(lines,width,height,used,byKey,labelAnchors,varia
       if(!labelAnchors[hit.def.key]||hit.score>labelAnchors[hit.def.key].score)labelAnchors[hit.def.key]={x:labelNorm.x,y:labelNorm.y,score:hit.score,term:hit.term};
       const choices=available.map((a,index)=>({a,index,d:Math.abs(a.bbox.cx-lb.cx)/Math.max(1,width)})).filter(x=>x.d<.15&&plausibleAmountForField(hit.def,x.a)).sort((a,b)=>a.d-b.d);
       if(!choices.length)return;
-      const chosen=choices[0];available.splice(chosen.index,1);used.add(chosen.a.id);
+      const chosen=choices[0],group=chosen.a.physicalKey;
+      for(let k=available.length-1;k>=0;k--){
+        if(k===chosen.index||(group&&available[k]&&available[k].physicalKey===group))available.splice(k,1);
+      }
+      markPayslipAmountUsed(used,chosen.a);
       const conf=Math.min(.99,hit.score*.56+(chosen.a.confidence/100)*.19+(1-Math.min(1,chosen.d/.15))*.25);
       const occ={key:hit.def.key,value:chosen.a.value,term:hit.term,confidence:conf,method:hit.exact?'表格欄位精確':'表格欄位模糊',variant:variant.name,
         labelNorm,amountNorm:{x:chosen.a.bbox.cx/width,y:chosen.a.bbox.cy/height,w:chosen.a.bbox.w/width,h:chosen.a.bbox.h/height},line:labelLine.text,lineIndex:labelLine.index};
@@ -9171,7 +9184,7 @@ function parseSpatialOcr(data,variant){
       if(!labelAnchors[hit.def.key]||hit.score>labelAnchors[hit.def.key].score)labelAnchors[hit.def.key]={x:labelNorm.x,y:labelNorm.y,score:hit.score,term:hit.term};
       const pair=findSpatialAmountForHit(hit,lines,width,height,used);
       if(!pair)return;
-      used.add(pair.amount.id);
+      markPayslipAmountUsed(used,pair.amount);
       const conf=Math.min(.99,hit.score*.58+(pair.amount.confidence/100)*.17+pair.proximity*.25);
       const occ={key:hit.def.key,value:pair.amount.value,term:hit.term,confidence:conf,method:hit.exact?'座標精確':'座標模糊',variant:variant.name,
         labelNorm,amountNorm:{x:pair.amount.bbox.cx/width,y:pair.amount.bbox.cy/height,w:pair.amount.bbox.w/width,h:pair.amount.bbox.h/height},line:line.text,lineIndex:line.index};
