@@ -12,16 +12,40 @@ const FIELD_KEYS = [
 
 // Fail closed when image reads disagree. Confidence alone cannot establish
 // which OCR result is true; unresolved values must go back for human review.
-function resolveCropReadConsensus(reads) {
+function resolveCropReadConsensus(reads, aiValue = null, aiConfidence = 0) {
   const amountAgree = (a, b) => Number.isFinite(Number(a)) && Number.isFinite(Number(b)) && Math.abs(Number(a) - Number(b)) <= 1;
-  const valid = reads.filter((r) => r && r.value !== null && r.value !== undefined && Number.isFinite(Number(r.value)));
-  if (valid.length < 2 || valid.some((r) => Number(r.confidence) < .82 || !amountAgree(r.value, valid[0].value))) {
+  const valid = reads.filter((r) => r && r.value !== null && r.value !== undefined && Number.isFinite(Number(r.value)) && Number(r.confidence) >= .55);
+  if (!valid.length) return { value: null, consensus: 0, confidence: .5, unanimous: false };
+  const groups = [];
+  for (const read of valid) {
+    let group = groups.find((g) => amountAgree(g.mean, read.value));
+    if (!group) { group = { mean: Number(read.value), items: [] }; groups.push(group); }
+    group.items.push(read);
+    group.mean = group.items.reduce((sum, x) => sum + Number(x.value), 0) / group.items.length;
+  }
+  const aiTrusted = Number.isFinite(Number(aiValue)) && Number(aiConfidence) >= .9;
+  for (const group of groups) {
+    group.cropVotes = group.items.length;
+    group.aiVote = aiTrusted && amountAgree(group.mean, aiValue) ? 1 : 0;
+    group.support = group.cropVotes + group.aiVote;
+    group.avgConfidence = group.items.reduce((sum, x) => sum + Number(x.confidence), 0) / group.items.length;
+  }
+  groups.sort((a, b) => b.support - a.support || b.cropVotes - a.cropVotes || b.avgConfidence - a.avgConfidence);
+  const winner = groups[0], runner = groups[1];
+  if (!winner || winner.cropVotes < 1 || winner.support < 2 || winner.avgConfidence < .78) {
     return { value: null, consensus: 0, confidence: .5, unanimous: false };
   }
-  const confidence = valid.reduce((sum, r) => sum + Number(r.confidence), 0) / valid.length;
-  if (confidence < .82) return { value: null, consensus: 0, confidence: .5, unanimous: false };
-  return { value: Math.round(valid.reduce((sum, r) => sum + Number(r.value), 0) / valid.length),
-    consensus: valid.length, confidence: Math.min(.99, confidence + .05), unanimous: true };
+  if (runner && runner.support >= winner.support) {
+    return { value: null, consensus: 0, confidence: .5, unanimous: false };
+  }
+  // A high-confidence whole-image read is an independent guardrail. If it
+  // explicitly disagrees with the crop winner, fail closed instead of filling
+  // the older/local OCR value.
+  if (aiTrusted && !amountAgree(winner.mean, aiValue)) {
+    return { value: null, consensus: 0, confidence: .5, unanimous: false };
+  }
+  const confidence = Math.min(.99, winner.avgConfidence + (winner.aiVote ? .06 : .03));
+  return { value: Math.round(winner.mean), consensus: winner.support, confidence, unanimous: true };
 }
 
 function json(body: unknown, status = 200) {
@@ -238,7 +262,7 @@ Deno.serve(async (req: Request) => {
     "extraItems 必須盡量保留薪資單原本的項目名稱，例如『眷屬健保補扣』『停車費』『工會費』『職務加給』『專案獎金』；不得擅自把可辨識的原始名稱改成不同語意的名稱；kind 只能是 income 或 deduction。",
     "已經能分類到標準 fields 的項目不要重複放進 extraItems；實發、應發合計、應扣合計、總額、小計、時數、天數、費率、倍率也不要放進 extraItems。",
     "雇主負擔或雇主提撥的項目不屬於員工實發加減，不得放入 extraItems。",
-    "extraItems 看不清楚名稱、金額或加扣方向時不要猜，寧可省略；confidence 低於 0.55 的項目不要輸出。"
+    "extraItems 若金額與加扣方向清楚但名稱看不清楚，不要刪掉整列；label 請填『名稱待確認』並降低 confidence。只有連金額或加扣方向都不清楚時才省略。"
   ].join("\n");
 
   const userText = "請從薪資單影像獨立抽取標準欄位。以下是 Apple Vision 產生的原始 OCR 文字，只作輔助；請以圖片證據為主。" +
@@ -423,7 +447,7 @@ Deno.serve(async (req: Request) => {
         { pass: 2, value: v2, confidence: c2, raw: second },
         { pass: 3, value: v3, confidence: c3, raw: third }
       ].filter((r: any) => r.value !== null && Number.isFinite(Number(r.value)));
-      const resolvedReads = resolveCropReadConsensus(reads);
+      const resolvedReads = resolveCropReadConsensus(reads, aiValue, aiConf);
       const consensus = resolvedReads.consensus;
       const strongConsensus = resolvedReads.unanimous;
       const chosen = resolvedReads.value;
@@ -480,7 +504,7 @@ Deno.serve(async (req: Request) => {
           alreadyKnown: knownAmounts.some((v: number) => Math.abs(v - Number(row.amount)) <= 1)
         }))
         .sort((a: any, b: any) => Number(a.alreadyKnown) - Number(b.alreadyKnown))
-        .slice(0, 10);
+        .slice(0, 16);
       if (!candidates.length) return [];
 
       const recoverySchema = {
@@ -546,15 +570,19 @@ Deno.serve(async (req: Request) => {
         const label = String(item?.label || "").replace(/\s+/g, "");
         const confidence = Math.max(0, Math.min(1, Number(item?.confidence) || 0));
         const matchesCandidate = candidates.some(({ row }: any) => Math.abs(Number(row.amount) - amount) <= 1);
-        if (!matchesCandidate || !label || confidence < .7 || standardLabel.test(label)) return false;
+        if (!matchesCandidate || !label || confidence < .5 || standardLabel.test(label)) return false;
         return true;
-      }).map((item: any) => ({
-        label: String(item.label || "").trim(),
-        amount: Number(item.rowAmount),
-        kind: item.kind === "deduction" ? "deduction" : "income",
-        confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0)),
-        evidence: String(item.evidence || "")
-      }));
+      }).map((item: any) => {
+        const rawLabel = String(item.label || "").trim();
+        const confidence = Math.max(0, Math.min(1, Number(item.confidence) || 0));
+        return {
+          label: confidence >= .75 ? rawLabel : "名稱待確認（讀到：" + rawLabel + "）",
+          amount: Number(item.rowAmount),
+          kind: item.kind === "deduction" ? "deduction" : "income",
+          confidence,
+          evidence: String(item.evidence || "")
+        };
+      });
     }
 
     let extraItems = Array.isArray(parsed?.extraItems) ? parsed.extraItems : [];
