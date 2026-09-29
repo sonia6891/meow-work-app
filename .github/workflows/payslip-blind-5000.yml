@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: payslip-blind-5000-main
+  cancel-in-progress: true
+
 jobs:
   apple-vision:
     name: Apple Vision blind shard ${{ matrix.shard }}

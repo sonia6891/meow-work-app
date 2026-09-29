@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: payslip-locked-holdout-v2-main
+  cancel-in-progress: true
+
 jobs:
   holdout:
     name: Locked holdout V2 shard ${{ matrix.shard }}
