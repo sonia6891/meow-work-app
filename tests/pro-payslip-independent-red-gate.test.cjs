@@ -7,7 +7,7 @@ const match = edge.match(/function resolveCropReadConsensus\(reads, aiValue = nu
 assert(match, 'production crop consensus function missing');
 const resolveCropReadConsensus = new Function('reads','aiValue','aiConfidence', match[1]);
 
-const read = (value, confidence = .95) => ({ value, confidence });
+const read = (value, confidence = .95, source = 'field') => ({ value, confidence, source });
 const cases = [
   ['tax 97 unanimous', [read(97), read(97), read(97)], 97, .98, 97],
   ['performance 1300 unanimous', [read(1300), read(1300), read(1300)], 1300, .98, 1300],
@@ -20,7 +20,11 @@ const cases = [
   ['crop majority may not override conflicting high-confidence whole-image read', [read(97), read(15), read(15)], 97, .98, null],
   ['three wrong crops may not override conflicting whole-image read', [read(15), read(15), read(15)], 97, .98, null],
   ['single wrong crop vs whole-image read stays unresolved', [read(15), read(null), read(null)], 97, .98, null],
-  ['without a trusted whole-image read, two crop votes may resolve', [read(97), read(97), read(15)], null, 0, 97]
+  ['without a trusted whole-image read, two crop votes may resolve', [read(97), read(97), read(15)], null, 0, 97],
+  ['health 859 beats recurring 959 when two digit micro-reads and one field read agree',
+    [read(959,.96,'field'),read(859,.9,'field'),read(859,.96,'digit'),read(859,.97,'digit')],959,.97,859],
+  ['health stays unresolved if only digit micro-reads disagree with all contextual reads',
+    [read(959,.96,'field'),read(959,.95,'field'),read(859,.96,'digit'),read(859,.97,'digit')],959,.97,null]
 ];
 
 for (const [name, reads, aiValue, aiConfidence, expected] of cases) {
@@ -29,21 +33,28 @@ for (const [name, reads, aiValue, aiConfidence, expected] of cases) {
   if (expected === null) assert.strictEqual(result.unanimous, false, name + ' must fail closed');
 }
 
-assert(edge.includes('key === "performance" || key === "dedTax"'), 'tax and performance must always be reread');
+assert(edge.includes('key === "performance" || key === "dedTax" || key === "dedHealth"'), 'tax, performance and health must always be reread');
+assert(edge.includes('digitOnlyRead'), 'critical payroll digits require an independent amount-only verifier');
+assert(edge.includes('group.digitVotes * 2'), 'digit-only reads must carry independent weight');
+assert(edge.includes('key === "dedHealth" || key === "dedTax" || key === "performance"'), 'health/tax/performance must receive digit audit');
 assert(edge.includes('recoverExtraItemsFromRows'), 'independent extra row rediscovery must remain wired');
 assert(edge.includes('.slice(0, 16)'), 'extra row rediscovery must inspect enough unclaimed candidate rows');
 assert(edge.includes('名稱待確認（讀到：'), 'uncertain extra-row amounts must remain visible for human label confirmation');
 assert(edge.includes('rowAmount'), 'extra row rediscovery must bind labels to candidate row amounts');
 assert(edge.includes('t1 === t2') && edge.includes('t1 === c1'), 'subsidy label must retain exact two-read transcription and class match');
 
-assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax'])"), 'tax and performance must be forced into field crops');
+assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax','dedHealth'])"), 'tax, performance and health insurance must be forced into field crops');
+assert(html.includes("PAYSLIP_BLIND_BENCHMARK_KEY"), 'blind benchmark mode must be available');
+assert(html.includes("if(payslipBlindBenchmarkMode())return run"), 'blind benchmark must disable layout memory');
+assert(html.includes("if(PAYSLIP_CRITICAL_KEYS.has(key))return"), 'critical fields must never be synthesized from layout memory');
 assert(html.includes("if(key==='dedTax')return"), 'whole-image tax evidence must be recognized');
 assert(html.includes("if(key==='performance')return"), 'whole-image performance evidence must be recognized');
 assert(html.includes('payslipFieldCropDataUrl'), 'field crops must include label/amount geometry');
+assert(html.includes('payslipAmountOnlyCropDataUrl'), 'critical fields need amount-only micro-crops');
 assert(html.includes('mergedAmounts=new Map()'), 'money candidates must merge across OCR variants');
 assert(html.includes('payslipScanEpoch'), 'rerun/clear generation guard missing');
 assert(html.includes('resetPayslipScan(false,false)'), 'a new scan must reset UI without invalidating itself');
 assert(html.includes("item.confidence<.45"), 'uncertain recovered extra rows must not be silently discarded');
-assert(html.includes('v269-payroll-race-crop-fix'), 'test must target the new visible build');
+assert(html.includes('v270-payroll-digit-blind-gate'), 'test must target the new visible build');
 
 console.log('PASS independent Pro payslip red gate:', cases.length, 'consensus cases plus rerun/crop/extra-row wiring checks');
