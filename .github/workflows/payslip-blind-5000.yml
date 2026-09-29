@@ -1,0 +1,107 @@
+name: Payslip blind benchmark 5000
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - benchmarks/payslip/**
+      - .github/workflows/payslip-blind-5000.yml
+
+permissions:
+  contents: read
+
+jobs:
+  apple-vision:
+    name: Apple Vision blind shard ${{ matrix.shard }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark renderer
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Generate 1,000 unseen/tune documents for this shard
+        run: |
+          START=$(( ${{ matrix.shard }} * 1000 ))
+          mkdir -p "/tmp/payslip-${{ matrix.shard }}"
+          python benchmarks/payslip/generate_corpus.py \
+            --start "$START" --count 1000 --out "/tmp/payslip-${{ matrix.shard }}"
+      - name: Build Apple Vision OCR runner
+        run: |
+          swiftc -O benchmarks/payslip/vision_benchmark.swift \
+            -framework Vision -framework AppKit \
+            -o /tmp/vision_benchmark
+      - name: Run Apple Vision OCR on all 1,000 documents and critical micro-crops
+        run: |
+          /tmp/vision_benchmark \
+            --manifest "/tmp/payslip-${{ matrix.shard }}/manifest.jsonl" \
+            --out "/tmp/payslip-${{ matrix.shard }}/vision.jsonl"
+      - name: Score against hidden-by-pipeline ground truth
+        run: |
+          python benchmarks/payslip/evaluate_vision.py \
+            --manifest "/tmp/payslip-${{ matrix.shard }}/manifest.jsonl" \
+            --vision "/tmp/payslip-${{ matrix.shard }}/vision.jsonl" \
+            --out "/tmp/payslip-${{ matrix.shard }}/summary.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payslip-vision-shard-${{ matrix.shard }}
+          path: /tmp/payslip-${{ matrix.shard }}/summary.json
+          if-no-files-found: error
+          retention-days: 14
+
+  merge:
+    name: Merge 5,000-case blind benchmark
+    needs: apple-vision
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: payslip-vision-shard-*
+          path: /tmp/results
+      - name: Merge weighted metrics
+        run: |
+          python - <<'PY'
+          import json,glob,collections,pathlib
+          files=glob.glob('/tmp/results/**/summary.json',recursive=True)
+          assert len(files)==5, files
+          fields=collections.defaultdict(lambda:[0,0])
+          micros=collections.defaultdict(lambda:[0,0])
+          extras=[0,0,0]
+          split_cases=collections.Counter()
+          conf=collections.Counter()
+          for p in files:
+              d=json.load(open(p))
+              for split,s in d['splits'].items():
+                  split_cases[split]+=s['cases']
+                  for k,c in s['field_counts'].items():
+                      fields[(split,k)][0]+=c['correct'];fields[(split,k)][1]+=c['total']
+                  for k,c in s['micro_counts'].items():
+                      micros[(split,k)][0]+=c['correct'];micros[(split,k)][1]+=c['total']
+                  extras[0]+=s['extra_amount_correct'];extras[1]+=s['extra_label_correct'];extras[2]+=s['extra_total']
+              for x in d.get('top_confusions',[]):conf[(x['field'],x['expected'],x['read'])]+=x['count']
+          out={'cases':dict(split_cases),'splits':{},'top_confusions':[]}
+          for split in ('tune','holdout'):
+              fc={k:{'correct':v[0],'total':v[1],'accuracy':(v[0]/v[1] if v[1] else None)}
+                  for (sp,k),v in fields.items() if sp==split}
+              mc={k:{'correct':v[0],'total':v[1],'accuracy':(v[0]/v[1] if v[1] else None)}
+                  for (sp,k),v in micros.items() if sp==split}
+              total=sum(v['total'] for v in fc.values());correct=sum(v['correct'] for v in fc.values())
+              out['splits'][split]={'field_counts':fc,'overall_field_accuracy':correct/total if total else 0,'critical_microcrop':mc}
+          out['extra_amount_recall_all']=extras[0]/extras[2] if extras[2] else 0
+          out['extra_label_recall_all']=extras[1]/extras[2] if extras[2] else 0
+          out['extra_total_all']=extras[2]
+          out['top_confusions']=[{'field':k[0],'expected':k[1],'read':k[2],'count':n} for k,n in conf.most_common(40)]
+          pathlib.Path('/tmp/payslip-blind-5000-summary.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payslip-blind-5000-summary
+          path: /tmp/payslip-blind-5000-summary.json
+          retention-days: 30
