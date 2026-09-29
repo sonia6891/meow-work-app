@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v265-auth-stability">
+<meta name="meow-ui-build" content="v266-natural-itinerary">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -6054,11 +6054,11 @@ html.dark .holiday-tag{
       <button type="button" class="active" id="attendanceTabEvents" role="tab" aria-selected="true">行程</button>
       <button type="button" id="attendanceTabTodos" role="tab" aria-selected="false">待辦事項 <span id="todoOpenCount">0</span></button>
     </div>
-    <div class="ref-attendance-list-head hidden"><div><b id="refAttendanceListTitle">今天的安排</b><span id="refAttendanceCount"></span></div><button type="button" id="refItineraryAllBtn">查看全部 ›</button></div>
+    <div class="ref-attendance-list-head hidden"><div><b id="refAttendanceListTitle">近期行程</b><span id="refAttendanceCount"></span></div><button type="button" id="refItineraryAllBtn">查看全部 ›</button></div>
     <div class="itinerary-upcoming-list hidden" id="itineraryUpcomingList"></div>
     <div class="v219-itinerary-board">
       <section class="v219-board-card v219-today-card">
-        <div class="v219-board-title"><b>▣ 今天的安排</b><span id="v219TodayDate"></span></div>
+        <div class="v219-board-title"><b>▣ 近期行程</b><span id="v219TodayDate"></span></div>
         <button type="button" class="v219-card-add" id="v219QuickEvent" aria-label="新增行程">＋</button>
         <div id="v219TodayList" class="v219-timeline"></div>
         <button type="button" id="v219ViewAllEvents" class="v219-board-link">查看完整行程 ›</button>
@@ -8386,7 +8386,7 @@ function eventMinutes(value){
 function eventsOverlap(a,b){
   if(!a||!b||a.date!==b.date)return false;
   const as=eventMinutes(a.start),ae=eventMinutes(a.end),bs=eventMinutes(b.start),be=eventMinutes(b.end);
-  if(as===null||ae===null||bs===null||be===null)return true;
+  if(as===null||ae===null||bs===null||be===null)return false;
   return as<be&&bs<ae;
 }
 function eventTimeLabel(e){
@@ -8403,7 +8403,7 @@ function eventConflictDetails(event,ignoreId,eventPool){
   if(!event||!event.date)return[];
   const details=[];
   const dt=new Date(event.date+'T00:00:00');
-  if(!Number.isNaN(dt.getTime())&&scheduleForDate(dt)==='work'&&!isLeaveRecorded(event.date)){
+  if((event.start||event.end)&&!Number.isNaN(dt.getTime())&&scheduleForDate(dt)==='work'&&!isLeaveRecorded(event.date)){
     const override=state.scheduleOverrides&&state.scheduleOverrides[event.date];details.push({type:'work',title:(override&&override.shiftName||threeShiftForDate(dt)?.label||state.schedule.shiftName||'A班')+' 上班日',detail:'這一天依目前班表需要上班'});
   }
   const pool=Array.isArray(eventPool)?eventPool:itineraryEvents();
@@ -8552,7 +8552,7 @@ function renderAttendance(){
   renderV219ItineraryBoard();
   const openTodos=todoItems().filter(t=>!t.completed).length;
   $('todoOpenCount').textContent=String(openTodos);
-  if($('refAttendanceListTitle'))$('refAttendanceListTitle').textContent=eventsActive?'今天的安排':'待辦清單';
+  if($('refAttendanceListTitle'))$('refAttendanceListTitle').textContent=eventsActive?'近期行程':'待辦清單';
   if($('refAttendanceCount'))$('refAttendanceCount').textContent=eventsActive?'近期行程':openTodos+' 項未完成';
   if($('refItineraryAllBtn'))$('refItineraryAllBtn').textContent=eventsActive
     ?(itineraryShowAll?'近期行程':'查看全部')+' ›'
@@ -8625,13 +8625,15 @@ function openEvent(date,id){
 function buildItineraryCandidate(){
   const date=$('eventDate').value,start=$('eventStart').value,end=$('eventEnd').value,note=$('eventNote').value.trim();
   if(!date){alert('請選擇日期。');$('eventDate').focus();return null}
-  if(!start||!end){alert('請把開始與結束時間都選好。');(!start?$('eventStart'):$('eventEnd')).focus();return null}
-  const sm=eventMinutes(start),em=eventMinutes(end);
-  if(sm===null||em===null||em<=sm){alert('結束時間要晚於開始時間。');$('eventEnd').focus();return null}
+  if(end&&!start){alert('若要填結束時間，請先填開始時間。');$('eventStart').focus();return null}
+  const sm=start?eventMinutes(start):null,em=end?eventMinutes(end):null;
+  if(start&&sm===null){alert('開始時間格式不正確。');$('eventStart').focus();return null}
+  if(end&&em===null){alert('結束時間格式不正確。');$('eventEnd').focus();return null}
+  if(start&&end&&em<=sm){alert('結束時間要晚於開始時間。');$('eventEnd').focus();return null}
   if(!note){alert('請填寫行程備註。');$('eventNote').focus();return null}
   const id=editingEventId||('ev-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6));
   const prev=(state.personalEvents||{})[id]||{};
-  return{id,date,start,end,title:note,note,kind:'event',occupiesTime:true,reminder:$('eventReminder').value||'none',createdAt:prev.createdAt||new Date().toISOString()};
+  return{id,date,start,end,title:note,note,kind:'event',occupiesTime:!!(start||end),reminder:$('eventReminder').value||'none',createdAt:prev.createdAt||new Date().toISOString()};
 }
 function commitItineraryEvent(candidate){
   if(!candidate)return;
@@ -10990,13 +10992,14 @@ function renderV219ScheduleDay(){
 function renderV219ItineraryBoard(){
   if(!$('v219TodayList'))return;
   const allEvents=itineraryEvents(),eventsByDate=groupItineraryEventsByDate(allEvents),allTodos=todoItems();
-  const now=new Date(),today=iso(now),todayEvents=(eventsByDate.get(today)||[]).slice().sort((a,b)=>String(a.start||'').localeCompare(String(b.start||'')));
-  if($('v219TodayDate'))$('v219TodayDate').textContent=(now.getMonth()+1)+'月'+now.getDate()+'日';
-  const rows=[];
-  const shift=v219ScheduleShiftLabel(today);
-  if(scheduleForDate(now)==='work')rows.push({time:'08:00',title:shift+' 上班',sub:'08:00 - 17:00'});
-  todayEvents.forEach(e=>rows.push({time:e.start||'—',title:e.title||e.note||'行程',sub:eventTimeLabel(e)}));
-  $('v219TodayList').innerHTML=(rows.length?rows:[{time:'—',title:'今天沒有安排',sub:'可以好好休息一下'}]).map(r=>'<div class="v219-timeline-row"><time>'+escapeHtml(r.time)+'</time><i class="v219-timeline-dot"></i><div class="v219-timeline-content"><b>'+escapeHtml(r.title)+'</b><small>'+escapeHtml(r.sub)+'</small></div></div>').join('');
+  const now=new Date(),today=iso(now);
+  const upcomingEvents=allEvents.filter(e=>String(e&&e.date||'')>=today).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.start||'').localeCompare(String(b.start||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  if($('v219TodayDate'))$('v219TodayDate').textContent=upcomingEvents.length?('共 '+upcomingEvents.length+' 筆'):'';
+  const rows=upcomingEvents.map(e=>{
+    const dt=new Date(e.date+'T00:00:00'),meta=itineraryDateMeta(e.date),dateLabel=Number.isNaN(dt.getTime())?String(e.date||''):(dt.getMonth()+1)+'/'+dt.getDate();
+    return{time:e.start?(dateLabel+' '+e.start):dateLabel,title:e.title||e.note||'行程',sub:e.start?eventTimeLabel(e):meta.label};
+  });
+  $('v219TodayList').innerHTML=(rows.length?rows:[{time:'—',title:'目前沒有已交代的行程',sub:'有安排時會依日期顯示在這裡'}]).map(r=>'<div class="v219-timeline-row"><time>'+escapeHtml(r.time)+'</time><i class="v219-timeline-dot"></i><div class="v219-timeline-content"><b>'+escapeHtml(r.title)+'</b><small>'+escapeHtml(r.sub)+'</small></div></div>').join('');
 
   allTodos.sort((a,b)=>{
     if(Boolean(a.completed)!==Boolean(b.completed))return a.completed?1:-1;
@@ -11493,11 +11496,27 @@ function meowAssistantMutationDates(raw){
     const base=meowAssistantMonthStart(current);add(make(base.getFullYear(),m[1],m[2]));
   }
   const now=new Date();
-  if(/前天/.test(t)){const d=new Date(now);d.setDate(d.getDate()-2);add(iso(d))}
+  if(/大前天/.test(t)){const d=new Date(now);d.setDate(d.getDate()-3);add(iso(d))}
+  else if(/前天/.test(t)){const d=new Date(now);d.setDate(d.getDate()-2);add(iso(d))}
   else if(/昨天|昨日/.test(t)){const d=new Date(now);d.setDate(d.getDate()-1);add(iso(d))}
+  else if(/大後天/.test(t)){const d=new Date(now);d.setDate(d.getDate()+3);add(iso(d))}
   else if(/後天/.test(t)){const d=new Date(now);d.setDate(d.getDate()+2);add(iso(d))}
-  else if(/明天|明日/.test(t)){const d=new Date(now);d.setDate(d.getDate()+1);add(iso(d))}
-  else if(/今天|今日/.test(t))add(iso(now));
+  else if(/明天|明日|明早|明晚|明晨/.test(t)){const d=new Date(now);d.setDate(d.getDate()+1);add(iso(d))}
+  else if(/今天|今日|今早|今晚/.test(t))add(iso(now));
+  const weekday=t.match(/(上上|上|這|本|下下|下)?(?:個)?(?:週|星期|禮拜)([日天一二三四五六])/);
+  if(weekday){
+    const target={日:0,天:0,一:1,二:2,三:3,四:4,五:5,六:6}[weekday[2]];
+    const prefix=weekday[1]||'';
+    if(prefix){
+      const offset={上上:-14,上:-7,這:0,本:0,下:7,下下:14}[prefix]||0;
+      const monday=new Date(now),day=monday.getDay();
+      monday.setDate(monday.getDate()+(day===0?-6:1-day)+offset);
+      const d=new Date(monday);d.setDate(monday.getDate()+((target+6)%7));add(iso(d));
+    }else{
+      const d=new Date(now),delta=(target-now.getDay()+7)%7;
+      d.setDate(d.getDate()+delta);add(iso(d));
+    }
+  }
   const month=meowAssistantContextDate(t,current);
   meowAssistantExtractDays(t).forEach(day=>add(meowAssistantDate(month,day)));
   return dates;
@@ -11541,35 +11560,59 @@ function meowAssistantActionTitle(raw,kind){
     .replace(/(?:\d{4}年)?\d{1,2}月\d{1,2}(?:號|日)?/g,' ')
     .replace(/(?<!\d)\d{1,2}[\/-]\d{1,2}(?!\d)/g,' ')
     .replace(/\d{1,2}\s*[號日]/g,' ')
-    .replace(/今天|今日|明天|明日|後天|昨天|昨日|前天/g,' ')
+    .replace(/大前天|大後天|今天|今日|明天|明日|明早|明晚|明晨|後天|昨天|昨日|前天|今早|今晚/g,' ')
+    .replace(/(?:上上|上|這|本|下下|下)?(?:個)?(?:週|星期|禮拜)[日天一二三四五六]/g,' ')
     .replace(/(?:凌晨|早上|上午|中午|下午|傍晚|晚上)?\s*\d{1,2}\s*(?:點|時)(?:\d{1,2}\s*分|半)?/g,' ')
     .replace(/(?<!\d)(?:[01]?\d|2[0-3]):[0-5]\d(?!\d)/g,' ')
     .replace(/(?:到|至|~|～)/g,' ')
     .replace(/前\s*(?:3|1)\s*(?:天|小時)\s*(?:提醒我|提醒)?|前三天\s*(?:提醒我|提醒)?|前一天\s*(?:提醒我|提醒)?|前一小時\s*(?:提醒我|提醒)?/g,' ')
-    .replace(/請幫我|麻煩幫我|幫我|我要|我想要|我想|請|麻煩/g,' ')
+    .replace(/請幫我|麻煩幫我|幫我記得|提醒我|別忘了|記得|幫我|我要|我想要|我想|請|麻煩/g,' ')
     .replace(/新增|增加|建立|加一個|加個|記一個|排一個|安排|取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了/g,' ')
     .replace(kind==='todo'?/(?:待辦事項|代辦事項|待辦|代辦|TODO)/ig:/(?:行程|活動|約會|EVENT)/ig,' ')
     .replace(/一個|一項/g,' ')
     .replace(/[：:、]/g,' ')
     .replace(/\s+/g,' ').trim()
+    .replace(/^(?:我會去|我要去|我會|我得去|我得|我需要|我必須|我要|要去|會去|得去|需要|必須|打算|預計|準備|我)\s*/,'')
     .replace(/^的\s*|\s*的$/g,'').trim();
   return t.slice(0,80);
 }
+function meowAssistantImplicitPersonalIntent(raw){
+  const t=normalizeMeowAssistantText(raw);
+  if(!t)return null;
+  if(/[?？]/.test(t)||/(嗎|嘛|呢|是不是|要不要|可不可以|能不能|是否|哪天|哪一天|哪裡|哪儿|去哪裡|去哪儿|幾點|何時|什麼時候|什麼|怎么|怎麼)/.test(t))return null;
+  if(/(班表|排班|輪班|上班|下班|加班|請假|休假|特休|年假|病假|事假|生理假|婚假|喪假|產假|育嬰|薪資|薪水|工資|對帳|津貼|扣款|發薪)/.test(t))return null;
+  const dates=meowAssistantMutationDates(t),times=meowAssistantTimes(t);
+  const eventLike=/(去|看醫生|看診|回診|牙醫|門診|聚餐|吃飯|約會|見面|開會|會議|上課|健身|運動|剪頭髮|做頭髮|看電影|復健|面試|旅行|出遊|出差|拜訪|接人|送人|接小孩|接家人|接朋友|看展|健康檢查|打預防針|參加|報到|回娘家|回老家|去醫院|去診所|去學校|去銀行|去機場)/.test(t);
+  const todoLike=/(繳(?:費|款|房租|電費|水費|信用卡)|付款|買|採買|採購|領(?:包裹|貨|藥)|取貨|拿包裹|打電話|回電話|回覆|回信|寄(?:信|件|包裹)|整理|提交|繳交|申請|填(?:表|資料)|處理|完成|報稅|倒垃圾|洗衣服|吃藥|補貨|訂票|預約掛號)/.test(t);
+  const commitment=/(我要|我會|我得|我需要|我必須|要去|會去|得去|打算|預計|準備|約了|有約|安排了|記得|別忘了|提醒我)/.test(t);
+  const remove=/(取消|改天|不去了|不要去|不用去|不看了|不做了|不用了|不要了|刪掉|刪除|拿掉|移除|撤銷)/.test(t);
+  if(remove&&dates.length&&(eventLike||todoLike))return{kind:todoLike&&!eventLike?'todo':'event',action:'remove',dates,times};
+  if(eventLike&&(dates.length||times.length)&&(commitment||dates.length))return{kind:'event',action:'add',dates,times};
+  if(todoLike&&(dates.length||times.length||/(記得|別忘了|提醒我)/.test(t)))return{kind:'todo',action:'add',dates,times};
+  return null;
+}
 function meowAssistantEventTodoOperation(raw){
   const t=normalizeMeowAssistantText(raw);
-  const todo=/(待辦事項|代辦事項|待辦|代辦|\bTODO\b)/i.test(t);
-  const event=/(行程|活動|約會|\bEVENT\b)/i.test(t);
-  if(todo===event)return null;
-  const token=todo?'(?:待辦事項|代辦事項|待辦|代辦|TODO)':'(?:行程|活動|約會|EVENT)';
-  const noCancel=new RegExp('(?:不要|不用|別|不必|沒有|沒|未)(?:再|要)?\\s*(?:取消|刪除|刪掉|拿掉|移除|撤銷).{0,18}'+token,'i')
-    .test(t)||new RegExp(token+'.{0,18}(?:不要|不用|別|不必|沒有|沒|未)(?:再|要)?\\s*(?:取消|刪除|刪掉|拿掉|移除|撤銷)','i').test(t);
-  const doubleNegative=new RegExp('(?:不是|並非)\\s*(?:沒有|沒|未).{0,12}(?:新增|增加|建立|安排).{0,12}'+token,'i').test(t);
-  if(noCancel||doubleNegative){
-    const kind=todo?'todo':'event',dates=meowAssistantMutationDates(t),title=meowAssistantActionTitle(t,kind);
-    return{ok:true,type:'personalNoChange',personalKind:kind,dates,title,raw:t};
+  let todo=/(待辦事項|代辦事項|待辦|代辦|\bTODO\b)/i.test(t);
+  let event=/(行程|活動|約會|\bEVENT\b)/i.test(t);
+  let implicit=null;
+  if(todo===event){
+    implicit=meowAssistantImplicitPersonalIntent(t);
+    if(!implicit)return null;
+    todo=implicit.kind==='todo';event=implicit.kind==='event';
   }
-  const add=/(新增|增加|建立|加一個|加個|記一個|排一個|安排)/.test(t);
-  const remove=/(取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了)/.test(t);
+  const token=todo?'(?:待辦事項|代辦事項|待辦|代辦|TODO)':'(?:行程|活動|約會|EVENT)';
+  if(!implicit){
+    const noCancel=new RegExp('(?:不要|不用|別|不必|沒有|沒|未)(?:再|要)?\\s*(?:取消|刪除|刪掉|拿掉|移除|撤銷).{0,18}'+token,'i')
+      .test(t)||new RegExp(token+'.{0,18}(?:不要|不用|別|不必|沒有|沒|未)(?:再|要)?\\s*(?:取消|刪除|刪掉|拿掉|移除|撤銷)','i').test(t);
+    const doubleNegative=new RegExp('(?:不是|並非)\\s*(?:沒有|沒|未).{0,12}(?:新增|增加|建立|安排).{0,12}'+token,'i').test(t);
+    if(noCancel||doubleNegative){
+      const kind=todo?'todo':'event',dates=meowAssistantMutationDates(t),title=meowAssistantActionTitle(t,kind);
+      return{ok:true,type:'personalNoChange',personalKind:kind,dates,title,raw:t};
+    }
+  }
+  const add=implicit?implicit.action==='add':/(新增|增加|建立|加一個|加個|記一個|排一個|安排)/.test(t);
+  const remove=implicit?implicit.action==='remove':/(取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了)/.test(t);
   if(add===remove)return null;
   const kind=todo?'todo':'event',dates=meowAssistantMutationDates(t),times=meowAssistantTimes(t),title=meowAssistantActionTitle(t,kind);
   const base={ok:true,type:add?(todo?'addTodo':'addEvent'):(todo?'removeTodo':'removeEvent'),dates,title,raw:t};

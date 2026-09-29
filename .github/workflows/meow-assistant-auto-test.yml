@@ -42,6 +42,8 @@ jobs:
         run: node tests/meow-assistant-negation-12690.test.cjs
       - name: Leave / itinerary / todo natural-language corpus — 20,000+ cases
         run: node tests/meow-assistant-natural-actions-20000.test.cjs
+      - name: Implicit itinerary / todo spoken-language corpus — 10,000+ cases
+        run: node tests/meow-assistant-implicit-plans-10000.test.cjs
       - name: Action execution / undo / ambiguity safety
         run: node tests/meow-assistant-action-execution.test.cjs
 
