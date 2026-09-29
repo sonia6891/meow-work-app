@@ -554,6 +554,9 @@ Deno.serve(async (req: Request) => {
       const roughGap = actualNet === null ? 0 : Math.abs(actualNet - (roughIncome - roughDeduction));
       const mathSuggestsMissing = actualNet !== null && own("base") && recognizedCount >= 6 &&
         roughGap > Math.max(5, Math.min(20, Math.abs(actualNet) * .0004));
+      const knownAmounts = Object.values(f)
+        .map((v: any) => Number(v))
+        .filter((v: number) => Number.isFinite(v) && v >= 0);
       const hasUnassignedCandidate = rowCrops.some((row: any) =>
         Number.isFinite(Number(row?.amount)) &&
         !knownAmounts.some((v: number) => Math.abs(v - Number(row.amount)) <= 1)

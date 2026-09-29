@@ -9026,7 +9026,7 @@ function extractSpatialAmounts(line){
   }
   return amounts;
 }
-function lineLabelBox(line,hit){function lineLabelBox(line,hit){
+function lineLabelBox(line,hit){
   const seg=line.segments.find(s=>hit.start>=s.start&&hit.start<s.end)||line.segments.find(s=>s.start>=hit.start&&s.start<hit.end);
   if(seg)return seg.word.bbox;
   return{x0:line.x0,y0:line.y0,x1:line.x1,y1:line.y1,cx:(line.x0+line.x1)/2,cy:line.cy,w:line.x1-line.x0,h:line.y1-line.y0};
@@ -9785,7 +9785,7 @@ function payslipAmountOnlyCropDataUrl(img,amountNorm,mode='medium'){
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(img,sx,sy,Math.min(sw,img.width-sx),Math.min(sh,img.height-sy),0,0,canvas.width,canvas.height);
   return canvas.toDataURL('image/png');
 }
-async function buildPayslipRowCrops(variants,candidates){async function buildPayslipRowCrops(variants,candidates){
+async function buildPayslipRowCrops(variants,candidates){
   const list=(Array.isArray(candidates)?candidates:[])
     .filter(a=>a&&a.norm&&Number.isFinite(Number(a.value))&&!a.rateLike&&!a.quantityLike&&Number(a.value)>=20&&Number(a.value)<=200000);
   if(!list.length||!variants||!variants[0])return[];
