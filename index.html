@@ -9677,6 +9677,24 @@ function visionWordsToOcrData(result){
   const lines=groupOcrWordsIntoLines(words).map(line=>line.words.map(w=>w.text).join(' '));
   return{text:lines.join('\n'),words};
 }
+function fusePayslipVisionNumericData(baseData,numericData){
+  const baseWords=Array.isArray(baseData&&baseData.words)?baseData.words.slice():[];
+  const numericWords=Array.isArray(numericData&&numericData.words)?numericData.words:[];
+  numericWords.forEach(raw=>{
+    const digits=String(raw&&raw.text||'').replace(/[^0-9]/g,'');
+    if(!digits||digits.length>9)return;
+    const candidate=Object.assign({},raw,{text:digits,lineKey:''});
+    const bb=candidate.bbox||{},cx=(Number(bb.x0)+Number(bb.x1))/2,cy=(Number(bb.y0)+Number(bb.y1))/2;
+    const duplicate=baseWords.some(existing=>{
+      const eb=existing&&existing.bbox||{},et=String(existing&&existing.text||'').replace(/[^0-9]/g,'');
+      if(et!==digits)return false;
+      const ex=(Number(eb.x0)+Number(eb.x1))/2,ey=(Number(eb.y0)+Number(eb.y1))/2;
+      return Math.abs(ex-cx)<=3&&Math.abs(ey-cy)<=3;
+    });
+    if(!duplicate)baseWords.push(candidate);
+  });
+  return{text:String(baseData&&baseData.text||''),words:baseWords};
+}
 function payslipAiEvidenceSupportsField(key,evidence){
   const t=normalizeOcrText(evidence||'');
   if(key==='dedAttendance')return /(考勤|缺勤|曠職|遲到|早退|請假|病假|事假).*(扣款|扣除|扣薪|減項)?/.test(t);
@@ -9889,7 +9907,14 @@ async function runPayslipOcr(file){
         setPayslipScanStage(2,'正在解析薪資單內容…',20+Math.round((currentPass/variants.length)*38));
         const imageDataUrl=await blobDataUrl(variant.image);
         const vision=await nativeVision.recognize({imageDataUrl,purpose:'payslip'});if(stale())return;
-        const data=visionWordsToOcrData(vision);
+        let data=visionWordsToOcrData(vision);
+        // V3.1 numeric rescue: run an English-only low-threshold pass on the
+        // original and high-contrast variants, then fuse its amount candidates
+        // into the spatial OCR without polluting the base text/label parser.
+        if(currentPass<2){
+          const numericVision=await nativeVision.recognize({imageDataUrl,purpose:'payslip-numeric'});if(stale())return;
+          data=fusePayslipVisionNumericData(data,visionWordsToOcrData(numericVision));
+        }
         runs.push(parseSingleOcrRun(data,variant));
         // One additional label-focused pass on the original image uses language
         // correction/custom payroll words. Numeric passes stay literal.

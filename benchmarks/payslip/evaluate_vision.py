@@ -90,22 +90,28 @@ def main():
     confusions={split:Counter() for split in ("tune","holdout")}
 
     for cid,m in manifest.items():
-        v=vision.get(cid,{"observations":[],"digitCrops":{}})
+        v=vision.get(cid,{"observations":[],"numericObservations":[],"digitCrops":{}})
         split=m["split"];st=stats[split];st["cases"]+=1
         obs=v.get("observations",[])
+        numeric_obs=v.get("numericObservations",[]) or []
         gt=m["ground_truth"];boxes=m["field_boxes"]
         for key in ALL_FIELDS:
             if key not in boxes or key not in gt: continue
             target=int(gt[key]);st["field_total"][key]+=1
             nearby=near_observations(obs,boxes[key],limit=8)
+            numeric_nearby=near_observations(numeric_obs,boxes[key],limit=6)
             seen=[]
             ok=False
-            for o in nearby:
+            for o in nearby+numeric_nearby:
                 ds=digits(o.get("text",""));seen+=ds
                 if target in ds:ok=True;break
-            stitched=stitched_numeric_candidates(nearby)
+            stitched=stitched_numeric_candidates(nearby)+stitched_numeric_candidates(numeric_nearby)
             seen+=stitched
             if target in stitched: ok=True
+            crop_info=(v.get("digitCrops") or {}).get(key) or {}
+            crop_digits=digits(crop_info.get("text",""))
+            seen+=crop_digits
+            if target in crop_digits: ok=True
             if ok:st["fields"][key]+=1
             elif key in CRITICAL:
                 for x in seen[:6]:
@@ -124,10 +130,12 @@ def main():
         for extra in m.get("extras",[]):
             st["extras_total"]+=1
             nearby=near_observations(obs,extra["bbox"],limit=8)
+            numeric_nearby=near_observations(numeric_obs,extra["bbox"],limit=6)
             target=int(extra["amount"]);label=norm_label(extra["label"])
             amount_candidates=[]
-            for o in nearby: amount_candidates+=digits(o.get("text",""))
+            for o in nearby+numeric_nearby: amount_candidates+=digits(o.get("text",""))
             amount_candidates+=stitched_numeric_candidates(nearby)
+            amount_candidates+=stitched_numeric_candidates(numeric_nearby)
             amount_ok=target in amount_candidates
             label_candidates=row_text_candidates(label_obs,extra["bbox"])
             label_ok=any(label and label in candidate for candidate in label_candidates)

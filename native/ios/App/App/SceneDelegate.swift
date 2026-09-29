@@ -417,11 +417,12 @@ public class MeowScheduleVisionPlugin: CAPPlugin, CAPBridgedPlugin {
             request.recognitionLevel = .accurate
             let isPayslip = purpose.hasPrefix("payslip")
             let isPayslipLabelPass = purpose == "payslip-label"
-            // Numeric payroll passes stay literal. The dedicated label pass may use
-            // language correction plus a payroll vocabulary to recover Chinese labels.
+            let isPayslipNumericPass = purpose == "payslip-numeric"
+            // Numeric payroll passes stay literal and use English-only recognition so
+            // Vision does not spend its candidate budget trying to language-correct money.
             request.usesLanguageCorrection = isPayslipLabelPass
-            request.recognitionLanguages = ["zh-Hant", "en-US"]
-            request.minimumTextHeight = isPayslip ? 0.0025 : 0.008
+            request.recognitionLanguages = isPayslipNumericPass ? ["en-US"] : ["zh-Hant", "en-US"]
+            request.minimumTextHeight = isPayslipNumericPass ? 0.0015 : (isPayslip ? 0.0025 : 0.008)
             if isPayslipLabelPass {
                 request.customWords = [
                     "底薪","本薪","基本薪資","輪班津貼","夜班津貼","伙食津貼","餐費補助",
@@ -438,44 +439,64 @@ public class MeowScheduleVisionPlugin: CAPPlugin, CAPBridgedPlugin {
 
                 var words: [[String: Any]] = []
                 for observation in request.results ?? [] {
-                    guard let candidate = observation.topCandidates(1).first else { continue }
-                    let text = candidate.string.trimmingCharacters(in: .whitespacesAndNewlines)
-                    guard !text.isEmpty else { continue }
+                    let candidateLimit = isPayslipNumericPass ? 3 : 1
+                    for (candidateRank, candidate) in observation.topCandidates(candidateLimit).enumerated() {
+                        let text = candidate.string.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !text.isEmpty else { continue }
 
-                    let regex = try? NSRegularExpression(pattern: #"[^\s\t,，;；|｜]+"#)
-                    let matches = regex?.matches(
-                        in: text,
-                        range: NSRange(text.startIndex..<text.endIndex, in: text)
-                    ) ?? []
+                        if isPayslipNumericPass {
+                            let normalized = text.filter { $0.isNumber }
+                            guard !normalized.isEmpty, normalized.count <= 9 else { continue }
+                            let box = observation.boundingBox
+                            words.append([
+                                "text": normalized,
+                                "confidence": Double(candidate.confidence),
+                                "candidateRank": candidateRank,
+                                "x": Double(box.origin.x),
+                                "y": Double(box.origin.y),
+                                "width": Double(box.size.width),
+                                "height": Double(box.size.height)
+                            ])
+                            continue
+                        }
 
-                    var addedWord = false
-                    for match in matches {
-                        guard let stringRange = Range(match.range, in: text) else { continue }
-                        let token = String(text[stringRange]).trimmingCharacters(in: .whitespacesAndNewlines)
-                        guard !token.isEmpty else { continue }
-                        guard let box = try? candidate.boundingBox(for: stringRange) else { continue }
+                        let regex = try? NSRegularExpression(pattern: #"[^\s\t,，;；|｜]+"#)
+                        let matches = regex?.matches(
+                            in: text,
+                            range: NSRange(text.startIndex..<text.endIndex, in: text)
+                        ) ?? []
 
-                        words.append([
-                            "text": token,
-                            "confidence": Double(candidate.confidence),
-                            "x": Double(box.boundingBox.origin.x),
-                            "y": Double(box.boundingBox.origin.y),
-                            "width": Double(box.boundingBox.size.width),
-                            "height": Double(box.boundingBox.size.height)
-                        ])
-                        addedWord = true
-                    }
+                        var addedWord = false
+                        for match in matches {
+                            guard let stringRange = Range(match.range, in: text) else { continue }
+                            let token = String(text[stringRange]).trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !token.isEmpty else { continue }
+                            guard let box = try? candidate.boundingBox(for: stringRange) else { continue }
 
-                    if !addedWord {
-                        let box = observation.boundingBox
-                        words.append([
-                            "text": text,
-                            "confidence": Double(candidate.confidence),
-                            "x": Double(box.origin.x),
-                            "y": Double(box.origin.y),
-                            "width": Double(box.size.width),
-                            "height": Double(box.size.height)
-                        ])
+                            words.append([
+                                "text": token,
+                                "confidence": Double(candidate.confidence),
+                                "candidateRank": candidateRank,
+                                "x": Double(box.boundingBox.origin.x),
+                                "y": Double(box.boundingBox.origin.y),
+                                "width": Double(box.boundingBox.size.width),
+                                "height": Double(box.boundingBox.size.height)
+                            ])
+                            addedWord = true
+                        }
+
+                        if !addedWord {
+                            let box = observation.boundingBox
+                            words.append([
+                                "text": text,
+                                "confidence": Double(candidate.confidence),
+                                "candidateRank": candidateRank,
+                                "x": Double(box.origin.x),
+                                "y": Double(box.origin.y),
+                                "width": Double(box.size.width),
+                                "height": Double(box.size.height)
+                            ])
+                        }
                     }
                 }
 

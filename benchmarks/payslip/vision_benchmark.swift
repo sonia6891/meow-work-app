@@ -11,6 +11,7 @@ struct CaseOut: Codable {
     let id: Int
     let split: String
     let observations: [ObservationOut]
+    let numericObservations: [ObservationOut]
     let labelObservations: [ObservationOut]
     let digitCrops: [String: [String: AnyCodable]]
 }
@@ -43,7 +44,7 @@ func loadCGImage(_ path: String) -> CGImage? {
     return image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
 }
 
-func recognize(_ cg: CGImage, languages: [String], minimumTextHeight: Float, languageCorrection: Bool = false, customWords: [String] = []) throws -> [ObservationOut] {
+func recognize(_ cg: CGImage, languages: [String], minimumTextHeight: Float, languageCorrection: Bool = false, customWords: [String] = [], candidateLimit: Int = 1) throws -> [ObservationOut] {
     let req = VNRecognizeTextRequest()
     req.recognitionLevel = .accurate
     req.usesLanguageCorrection = languageCorrection
@@ -53,15 +54,21 @@ func recognize(_ cg: CGImage, languages: [String], minimumTextHeight: Float, lan
     let handler = VNImageRequestHandler(cgImage: cg, orientation: .up, options: [:])
     try handler.perform([req])
     let w = Double(cg.width), h = Double(cg.height)
-    return (req.results ?? []).compactMap { obs in
-        guard let cand = obs.topCandidates(1).first else { return nil }
+    var out: [ObservationOut] = []
+    for obs in req.results ?? [] {
         let b = obs.boundingBox
         let x0 = Double(b.minX) * w
         let x1 = Double(b.maxX) * w
         let y0 = (1.0 - Double(b.maxY)) * h
         let y1 = (1.0 - Double(b.minY)) * h
-        return ObservationOut(text: cand.string, confidence: cand.confidence, bbox: [x0,y0,x1,y1])
+        var seen = Set<String>()
+        for cand in obs.topCandidates(max(1, candidateLimit)) {
+            let text = cand.string.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !text.isEmpty, seen.insert(text).inserted else { continue }
+            out.append(ObservationOut(text: text, confidence: cand.confidence, bbox: [x0,y0,x1,y1]))
+        }
     }
+    return out
 }
 
 func pureDigitText(_ text: String) -> String {
@@ -105,7 +112,9 @@ func recognizeDigits(_ path: String) -> [String: AnyCodable] {
         return ["text": AnyCodable(""), "confidence": AnyCodable(0.0)]
     }
     do {
-        let obs = try recognize(cg, languages: ["en-US"], minimumTextHeight: 0.01)
+        let primary = try recognize(cg, languages: ["en-US"], minimumTextHeight: 0.006, candidateLimit: 3)
+        let fine = try recognize(cg, languages: ["en-US"], minimumTextHeight: 0.0015, candidateLimit: 3)
+        let obs = primary + fine
         let stitched = stitchedDigitCandidates(obs)
         let text = (obs.map(\.text) + stitched).joined(separator: " ")
         let conf = obs.map { Double($0.confidence) }.max() ?? 0.0
@@ -145,9 +154,11 @@ for line in data.split(separator: "\n") {
           let imagePath = obj["image"] as? String,
           let cg = loadCGImage(imagePath) else { continue }
     let observations: [ObservationOut]
+    let numericObservations: [ObservationOut]
     let labelObservations: [ObservationOut]
     do {
         observations = try recognize(cg, languages: ["zh-Hant","en-US"], minimumTextHeight: 0.0025)
+        numericObservations = try recognize(cg, languages: ["en-US"], minimumTextHeight: 0.0015, candidateLimit: 3)
         labelObservations = try recognize(cg, languages: ["zh-Hant","en-US"], minimumTextHeight: 0.0025, languageCorrection: true, customWords: payrollWords)
     } catch {
         continue
@@ -156,7 +167,7 @@ for line in data.split(separator: "\n") {
     if let crops = obj["critical_crops"] as? [String:String] {
         for (key,path) in crops { digitCrops[key] = recognizeDigits(path) }
     }
-    let result = CaseOut(id:id, split:split, observations:observations, labelObservations:labelObservations, digitCrops:digitCrops)
+    let result = CaseOut(id:id, split:split, observations:observations, numericObservations:numericObservations, labelObservations:labelObservations, digitCrops:digitCrops)
     let enc = try encoder.encode(result)
     handle.write(enc); handle.write(Data([0x0A]))
     processed += 1

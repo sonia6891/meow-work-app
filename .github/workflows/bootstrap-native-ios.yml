@@ -159,8 +159,11 @@ jobs:
           grep -q 'registerPluginInstance(MeowScheduleVisionPlugin())' ios/App/App/SceneDelegate.swift
           grep -q 'let isPayslip = purpose.hasPrefix("payslip")' ios/App/App/SceneDelegate.swift
           grep -q 'let isPayslipLabelPass = purpose == "payslip-label"' ios/App/App/SceneDelegate.swift
+          grep -Fq 'let isPayslipNumericPass = purpose == "payslip-numeric"' ios/App/App/SceneDelegate.swift
           grep -q 'request.usesLanguageCorrection = isPayslipLabelPass' ios/App/App/SceneDelegate.swift
-          grep -q 'request.minimumTextHeight = isPayslip ? 0.0025 : 0.008' ios/App/App/SceneDelegate.swift
+          grep -Fq 'request.recognitionLanguages = isPayslipNumericPass ? ["en-US"] : ["zh-Hant", "en-US"]' ios/App/App/SceneDelegate.swift
+          grep -Fq 'request.minimumTextHeight = isPayslipNumericPass ? 0.0015 : (isPayslip ? 0.0025 : 0.008)' ios/App/App/SceneDelegate.swift
+          grep -Fq 'let candidateLimit = isPayslipNumericPass ? 3 : 1' ios/App/App/SceneDelegate.swift
           grep -q 'request.customWords = [' ios/App/App/SceneDelegate.swift
           grep -q 'MeowSpeechPlugin' ios/App/App/SceneDelegate.swift
           grep -q 'import Speech' ios/App/App/SceneDelegate.swift

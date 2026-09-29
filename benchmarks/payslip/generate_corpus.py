@@ -106,7 +106,7 @@ def rotate_bbox(bb,angle):
 def save_critical_crops(im,field_boxes,out_dir,idx):
     crops={}
     crop_dir=out_dir/"crops";crop_dir.mkdir(exist_ok=True)
-    for key in ("dedHealth","dedTax","performance"):
+    for key in ("dedHealth","dedTax","performance","actualNet"):
         bb=field_boxes.get(key)
         if not bb:continue
         x0,y0,x1,y1=bb
