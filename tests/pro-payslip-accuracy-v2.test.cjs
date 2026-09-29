@@ -63,8 +63,13 @@ for(const n of ['assessPayslipImageQuality','imageQuality.blocked','buildPayslip
 for(const n of ['fieldCropRead','fieldRechecks','錯誤的自信答案比待確認更糟'])assert(edge.includes(n),'edge missing '+n);
 assert(swift.includes('request.recognitionLevel = .accurate'));
 assert(swift.includes('request.usesLanguageCorrection = isPayslipLabelPass'),'numeric pass must remain literal while label pass may use language correction');
-assert(swift.includes('request.minimumTextHeight = isPayslip ? 0.0025 : 0.008'),'payslip Vision must keep the low text-height threshold');
+assert(swift.includes('let isPayslipNumericPass = purpose == "payslip-numeric"'),'dedicated payroll numeric Vision pass is required');
+assert(swift.includes('request.recognitionLanguages = isPayslipNumericPass ? ["en-US"] : ["zh-Hant", "en-US"]'),'numeric pass must reserve Vision candidates for literal money digits');
+assert(swift.includes('request.minimumTextHeight = isPayslipNumericPass ? 0.0015 : (isPayslip ? 0.0025 : 0.008)'),'numeric rescue must use a lower text-height threshold without weakening the normal payslip pass');
+assert(swift.includes('let candidateLimit = isPayslipNumericPass ? 3 : 1'),'numeric rescue must retain multiple Vision candidates');
 assert(swift.includes('request.customWords = ['),'label-focused Vision pass must carry payroll vocabulary');
+assert(html.includes("purpose:'payslip-numeric'"),'client must request the dedicated numeric rescue pass');
+assert(html.includes('function fusePayslipVisionNumericData'),'numeric rescue candidates must be fused into spatial OCR');
 assert(html.includes('function payslipNumericFragmentText'),'split numeric fragments must be stitchable before payroll field arbitration');
 assert(html.includes("payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'tight')"),'critical amount audit must include tight crop');
 assert(html.includes("payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'medium')"),'critical amount audit must include medium crop');
