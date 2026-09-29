@@ -12,7 +12,7 @@ def digits(s):
 def center(bb):
     return ((bb[0]+bb[2])/2,(bb[1]+bb[3])/2)
 
-def near_observations(observations,bb):
+def near_observations(observations,bb,limit=8):
     cx,cy=center(bb)
     ranked=[]
     for o in observations:
@@ -22,10 +22,61 @@ def near_observations(observations,bb):
         d=math.hypot(dx,dy)
         overlap=max(0,min(bb[2],ob[2])-max(bb[0],ob[0]))*max(0,min(bb[3],ob[3])-max(bb[1],ob[1]))
         ranked.append((0 if overlap>0 else 1,d,-overlap,o))
-    return [x[-1] for x in sorted(ranked)[:5]]
+    return [x[-1] for x in sorted(ranked)[:limit]]
 
 def norm_label(s):
     return re.sub(r"[\s,，.。:：;；()（）_\-/]","",str(s)).upper()
+
+def pure_digits(text):
+    t=re.sub(r"[\s,，,]","",str(text))
+    return t if t.isdigit() else ""
+
+def stitched_numeric_candidates(observations):
+    numeric=[]
+    for o in observations:
+        d=pure_digits(o.get("text",""))
+        if not d: continue
+        bb=o.get("bbox") or [0,0,0,0]
+        numeric.append((bb,d))
+    numeric.sort(key=lambda x:(round(((x[0][1]+x[0][3])/2)/8),x[0][0]))
+    out=[]
+    for i in range(len(numeric)):
+        combined=numeric[i][1]
+        box=list(numeric[i][0])
+        out.append(int(combined))
+        for j in range(i+1,min(len(numeric),i+3)):
+            nb,nd=numeric[j]
+            h1=max(1,box[3]-box[1]);h2=max(1,nb[3]-nb[1])
+            overlap=max(0,min(box[3],nb[3])-max(box[1],nb[1]))
+            gap=nb[0]-box[2]
+            avg=(h1+h2)/2
+            if overlap<min(h1,h2)*.45 or gap<(-avg*.18) or gap>max(14,avg*.9):
+                break
+            combined+=nd
+            if len(combined)>8: break
+            out.append(int(combined))
+            box=[min(box[0],nb[0]),min(box[1],nb[1]),max(box[2],nb[2]),max(box[3],nb[3])]
+    return out
+
+def row_text_candidates(observations,bb):
+    if not observations:return []
+    h=max(20,bb[3]-bb[1]); cy=(bb[1]+bb[3])/2
+    row=[]
+    for o in observations:
+        ob=o.get("bbox") or [0,0,0,0]
+        oy=(ob[1]+ob[3])/2
+        overlap=max(0,min(bb[3]+h*1.2,ob[3])-max(bb[1]-h*1.2,ob[1]))
+        if abs(oy-cy)<=max(60,h*2.2) or overlap>0:
+            row.append(o)
+    row=sorted(row,key=lambda o:(o.get("bbox") or [0,0,0,0])[0])
+    texts=[norm_label(o.get("text","")) for o in row if norm_label(o.get("text",""))]
+    out=set(texts)
+    for i in range(len(texts)):
+        acc=""
+        for j in range(i,min(len(texts),i+5)):
+            acc+=texts[j]
+            if acc: out.add(acc)
+    return list(out)
 
 def main():
     ap=argparse.ArgumentParser()
@@ -46,15 +97,18 @@ def main():
         for key in ALL_FIELDS:
             if key not in boxes or key not in gt: continue
             target=int(gt[key]);st["field_total"][key]+=1
-            nearby=near_observations(obs,boxes[key])
+            nearby=near_observations(obs,boxes[key],limit=8)
             seen=[]
             ok=False
             for o in nearby:
                 ds=digits(o.get("text",""));seen+=ds
                 if target in ds:ok=True;break
+            stitched=stitched_numeric_candidates(nearby)
+            seen+=stitched
+            if target in stitched: ok=True
             if ok:st["fields"][key]+=1
             elif key in CRITICAL:
-                for x in seen[:4]:
+                for x in seen[:6]:
                     confusions[split][(key,target,x)]+=1
 
         for key in CRITICAL:
@@ -66,12 +120,17 @@ def main():
             elif ds:
                 confusions[split][(key,int(gt[key]),ds[0])]+=1
 
+        label_obs=v.get("labelObservations",[]) or obs
         for extra in m.get("extras",[]):
             st["extras_total"]+=1
-            nearby=near_observations(obs,extra["bbox"])
+            nearby=near_observations(obs,extra["bbox"],limit=8)
             target=int(extra["amount"]);label=norm_label(extra["label"])
-            amount_ok=any(target in digits(o.get("text","")) for o in nearby)
-            label_ok=any(label and label in norm_label(o.get("text","")) for o in nearby)
+            amount_candidates=[]
+            for o in nearby: amount_candidates+=digits(o.get("text",""))
+            amount_candidates+=stitched_numeric_candidates(nearby)
+            amount_ok=target in amount_candidates
+            label_candidates=row_text_candidates(label_obs,extra["bbox"])
+            label_ok=any(label and label in candidate for candidate in label_candidates)
             st["extras_amount_ok"]+=int(amount_ok)
             st["extras_label_ok"]+=int(label_ok)
 
