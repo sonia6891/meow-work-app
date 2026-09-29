@@ -7372,12 +7372,34 @@ async function recheckSignedOutEvent(){
   if(probe!==authSignOutProbe||explicitSignOutPending)return;
   await handleSignedOut(false);
 }
+async function retryRememberedAuthSession(){
+  if(authUser||explicitSignOutPending)return false;
+  const remembered=readLocalString(LAST_AUTH_USER_KEY);
+  if(!remembered||localOwner!==remembered)return false;
+  try{
+    const client=await getAuthClient();
+    const {data,error}=await client.auth.getSession();
+    if(error||!data||!data.session||!data.session.user)return false;
+    authSignOutProbe++;
+    await handleSignedIn(data.session.user,data.session);
+    return true;
+  }catch(e){return false}
+}
 async function initAuth(){
   const callbackIssue=readOAuthCallbackError();
+  const remembered=readLocalString(LAST_AUTH_USER_KEY);
+  const rememberedWorkspace=!!(remembered&&localOwner===remembered);
+  // A known local workspace is usable immediately. Auth/cloud confirmation happens
+  // in the background so a slow token restore cannot flash or replace the current UI.
+  if(rememberedWorkspace){
+    document.documentElement.classList.remove('auth-needs-login');
+    document.documentElement.classList.remove('auth-booting');
+    if($('welcomeDialog').open&&!welcomeManual)finishWelcome();
+    applyTheme();render();setAccountStatus('正在確認登入狀態…');
+  }
   try{
     const client=await getAuthClient();
     let data=null,error=null;
-    const remembered=readLocalString(LAST_AUTH_USER_KEY);
     for(let attempt=0;attempt<3;attempt++){
       const result=await client.auth.getSession();
       data=result.data;error=result.error;
@@ -7421,8 +7443,7 @@ async function initAuth(){
       },0);
     });
   }catch(e){
-    const remembered=readLocalString(LAST_AUTH_USER_KEY);
-    if(remembered&&localOwner===remembered){
+    if(rememberedWorkspace){
       await preserveLocalWorkspaceAfterAuthLoss('本機資料可使用・登入服務重新連線中');
     }else{
       setAccountStatus('登入服務暫時無法連線');
@@ -7532,8 +7553,8 @@ async function initWelcome(){
   $('keepLocalVersion').onclick=()=>{if(pendingCloud&&canCloudSync()&&confirm('用本機版本更新雲端？原雲端版本會保留在備份歷史內。'))void saveAccountState(true,true)};
 }
 window.addEventListener('offline' ,()=>{if(canCloudSync())setCloudStatus('離線・變更尚未上傳')});
-window.addEventListener('online',()=>{if(authUser){cloudReady=false;void loadEntitlement()}});
-setInterval(()=>{if(authUser)void loadEntitlement()},60000);
+window.addEventListener('online',()=>{if(authUser){cloudReady=false;void loadEntitlement()}else void retryRememberedAuthSession()});
+setInterval(()=>{if(authUser)void loadEntitlement();else void retryRememberedAuthSession()},60000);
 
 async function signInWithGoogle(){
   try{
@@ -13976,7 +13997,7 @@ initWelcome();
 initAuth();
 loadBillingConfig();
 window.addEventListener('load',()=>{void initStoreTransactionListener();void loadNativeStoreProducts()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&authUser&&!DEV_TESTING_ENABLED)loadEntitlement()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden||DEV_TESTING_ENABLED)return;if(authUser)void loadEntitlement();else void retryRememberedAuthSession()});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
     try{
