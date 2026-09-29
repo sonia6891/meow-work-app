@@ -55,10 +55,12 @@ assert(html.includes('payslipFieldCropDataUrl'), 'field crops must include label
 assert(html.includes('payslipAmountOnlyCropDataUrl'), 'critical fields need amount-only micro-crops');
 assert(html.includes('candidateRank:Math.max(0,Math.min(9'), 'Vision numeric candidate rank must survive conversion');
 assert(html.includes('score-=Math.min(.10,Math.max(0,Number(a.candidateRank)||0)*.04)'), 'lower-ranked numeric candidates must lose geometry ties');
+assert(html.includes('payslipAmountIsUsed(used,a)'), 'physical payroll cell alternatives must be consumed as one cell');
+assert(html.includes('markPayslipAmountUsed(used,pair.amount)'), 'selected amount must lock sibling Vision alternatives');
 assert(html.includes('mergedAmounts=new Map()'), 'money candidates must merge across OCR variants');
 assert(html.includes('payslipScanEpoch'), 'rerun/clear generation guard missing');
 assert(html.includes('resetPayslipScan(false,false)'), 'a new scan must reset UI without invalidating itself');
 assert(html.includes("item.confidence<.45"), 'uncertain recovered extra rows must not be silently discarded');
-assert(html.includes('v272-payroll-ranked-numeric-rescue'), 'test must target the actualNet rescue build');
+assert(html.includes('v273-payroll-physical-cell-lock'), 'test must target the actualNet rescue build');
 
 console.log('PASS independent Pro payslip red gate:', cases.length, 'consensus cases plus rerun/crop/extra-row wiring checks');
