@@ -11598,7 +11598,7 @@ function meowAssistantImplicitPersonalIntent(raw){
   const todoCancellationTask=/(取消(?:訂閱|會員|服務|自動續訂|預約))/.test(t);
   const remove=/(取消|改天|不去了|不要去|不用去|不看了|不做了|不用了|不要了|刪掉|刪除|拿掉|移除|撤銷)/.test(t)&&!todoCancellationTask;
   const completed=/(已經|已|剛剛|剛才|剛|之前).{0,12}(?:做完|完成|買了|買完|繳了|付了|寄了|領了|取了|拿了|回覆了|回了|打了|整理了|提交了|申請了|處理了|洗了|倒了|吃了|修了|預約了)|(?:做完|完成了|買完了|繳完了|付完了|寄完了|領完了|取完了|回覆完了|處理好了|辦好了)/.test(t);
-  const directTodo=/^(?:買|採買|採購|下單|訂購|補貨|繳|付|付款|匯款|轉帳|領|領取|取貨|取件|寄|寄件|回覆|回信|聯絡|打電話|整理|提交|繳交|申請|填|處理|完成|準備|修改|檢查|核對|列印|掃描|影印|簽名|上傳|下載|備份|報稅|報帳|請款|倒垃圾|洗衣|曬衣|收衣|洗碗|掃地|拖地|打掃|澆花|餵|清貓砂|換床單|煮飯|備餐|吃藥|量血壓|量體重|量血糖|加油|充電|保養|送修|修理|維修|續約|續費|取消訂閱|更新|安裝|訂票|訂位|預約|寫|讀|複習|練習|繳作業|帶)/.test(t);
+  const directTodo=/^(?:買|採買|採購|下單|訂購|補貨|繳|付|付款|匯款|轉帳|儲值|領|領取|取貨|取件|拿|寄|寄件|退貨|退件|換貨|回覆|回信|回電話|聯絡|打電話|傳訊息|傳LINE|追蹤|催款|催件|整理|提交|繳交|申請|填|處理|完成|準備|修改|檢查|核對|列印|掃描|影印|簽名|簽文件|上傳|下載|備份|報稅|報帳|請款|倒垃圾|洗衣|曬衣|收衣|洗碗|掃地|拖地|打掃|澆花|餵|清貓砂|清冰箱|換床單|換濾芯|換電池|煮飯|備餐|吃藥|補充|量血壓|量體重|量血糖|加油|充電|幫(?:手機|行動電源)充電|保養|送修|修理|維修|續約|續費|取消訂閱|更新|安裝|訂票|訂位|預約|寫|讀|複習|練習|繳作業|帶)/.test(t);
   if(completed&&!reminderCommand)return null;
   if(remove&&(eventLike||todoLike))return{kind:todoLike&&!eventLike?'todo':'event',action:'remove',dates,times};
   if(todoLike&&todoDominant&&(commitment||dates.length||times.length||directTodo))return{kind:'todo',action:'add',dates,times};
