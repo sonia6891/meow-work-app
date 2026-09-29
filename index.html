@@ -10994,8 +10994,9 @@ function renderV219ItineraryBoard(){
   const allEvents=itineraryEvents(),eventsByDate=groupItineraryEventsByDate(allEvents),allTodos=todoItems();
   const now=new Date(),today=iso(now);
   const upcomingEvents=allEvents.filter(e=>String(e&&e.date||'')>=today).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.start||'').localeCompare(String(b.start||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  const visibleUpcomingEvents=upcomingEvents.slice(0,12);
   if($('v219TodayDate'))$('v219TodayDate').textContent=upcomingEvents.length?('共 '+upcomingEvents.length+' 筆'):'';
-  const rows=upcomingEvents.map(e=>{
+  const rows=visibleUpcomingEvents.map(e=>{
     const dt=new Date(e.date+'T00:00:00'),meta=itineraryDateMeta(e.date),dateLabel=Number.isNaN(dt.getTime())?String(e.date||''):(dt.getMonth()+1)+'/'+dt.getDate();
     return{time:e.start?(dateLabel+' '+e.start):dateLabel,title:e.title||e.note||'行程',sub:e.start?eventTimeLabel(e):meta.label};
   });
