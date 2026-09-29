@@ -173,6 +173,16 @@ Deno.serve(async (req: Request) => {
     y: Number(row?.y) || 0,
     images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 2)
   })).filter((row: any) => Number.isFinite(row.amount) && row.images.length);
+  const fieldCrops = (Array.isArray(body?.fieldCrops) ? body.fieldCrops : []).slice(0, 8).map((row: any) => ({
+    key: String(row?.key || ""),
+    currentAmount: row?.currentAmount === null || row?.currentAmount === undefined ? null : Number(row.currentAmount),
+    currentConfidence: Math.max(0, Math.min(1, Number(row?.currentConfidence) || 0)),
+    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 2)
+  })).filter((row: any) => (FIELD_KEYS as readonly string[]).includes(row.key) && row.images.length);
+  const imageQuality = body?.imageQuality && typeof body.imageQuality === "object"
+    ? { score: Math.max(0, Math.min(100, Number(body.imageQuality.score) || 0)),
+        warnings: Array.isArray(body.imageQuality.warnings) ? body.imageQuality.warnings.slice(0, 6).map(String) : [] }
+    : null;
   if (!/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(imageDataUrl)) {
     return json({ ok: false, code: "INVALID_IMAGE" }, 400);
   }
@@ -217,7 +227,9 @@ Deno.serve(async (req: Request) => {
     "extraItems 看不清楚名稱、金額或加扣方向時不要猜，寧可省略；confidence 低於 0.55 的項目不要輸出。"
   ].join("\n");
 
-  const userText = "請從薪資單影像獨立抽取標準欄位。以下是 Apple Vision 產生的原始 OCR 文字，只作輔助；請以圖片證據為主。\n\n【OCR 原文】\n" + (ocrText || "（無）");
+  const userText = "請從薪資單影像獨立抽取標準欄位。以下是 Apple Vision 產生的原始 OCR 文字，只作輔助；請以圖片證據為主。" +
+    (imageQuality ? "\n【影像品質】" + imageQuality.score + "/100；" + (imageQuality.warnings.join("、") || "未偵測到明顯問題") : "") +
+    "\n\n【OCR 原文】\n" + (ocrText || "（無）");
 
   const requestBody = {
     model: "gpt-5.6",
@@ -295,6 +307,111 @@ Deno.serve(async (req: Request) => {
         p_input_tokens: inTok, p_output_tokens: outTok
       }).catch(() => null);
       return json({ ok: false, code: "ANALYSIS_OUTPUT_INVALID", usage: quota }, 502);
+    }
+
+    const fieldRechecks: Record<string, any> = {};
+    const criticalFieldKeys = new Set([
+      "actualNet","base","shiftAllowance","otPay",
+      "dedLabor","dedHealth","dedAttendance","dedHealthExtra","dedPension"
+    ]);
+
+    async function fieldCropRead(crop: any, pass: number) {
+      const key = String(crop.key || "");
+      const cropSchema = {
+        type: "object",
+        additionalProperties: false,
+        required: ["amount", "label", "confidence", "evidence"],
+        properties: {
+          amount: nullableNumber,
+          label: nullableString,
+          confidence: { type: "number", minimum: 0, maximum: 1 },
+          evidence: nullableString
+        }
+      };
+      const content: any[] = [{
+        type: "input_text",
+        text: "這是薪資單中「" + (FIELD_DESCRIPTIONS[key] || key) +
+          "」附近的局部影像。請先逐字確認欄名，再讀與欄名同列或同欄配對的金額。如果不是這個欄位或金額看不清楚，amount 必須填 null。"
+      }];
+      for (const image of crop.images || []) content.push({ type: "input_image", image_url: image, detail: "original" });
+      const body2 = {
+        model: "gpt-5.6",
+        store: false,
+        reasoning: { effort: pass === 1 ? "low" : "high" },
+        max_output_tokens: 360,
+        instructions: [
+          "你是台灣薪資單局部欄位的逐字複核員。",
+          "只根據局部影像；不要使用第一判讀的數字作為答案提示。",
+          "先確認欄名，再確認與欄名同列或同欄的金額。時數、天數、費率、倍率不是金額。",
+          "禁止依薪資常識補數字或猜欄名。",
+          "看不清楚就填 null；錯誤的自信答案比待確認更糟。",
+          "員工扣款與雇主負擔必須分開。"
+        ].join("\n"),
+        input: [{ role: "user", content }],
+        text: { format: { type: "json_schema", name: "payslip_field_recheck_" + pass, strict: true, schema: cropSchema } }
+      };
+      const res2 = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + openaiKey, "Content-Type": "application/json" },
+        body: JSON.stringify(body2),
+        signal: AbortSignal.timeout(30_000)
+      });
+      const p2 = await res2.json().catch(() => null);
+      inTok += Number(p2?.usage?.input_tokens || 0);
+      outTok += Number(p2?.usage?.output_tokens || 0);
+      if (!res2.ok) return null;
+      try { return JSON.parse(outputText(p2)); } catch (_) { return null; }
+    }
+
+    const amountAgree = (a: any, b: any) =>
+      Number.isFinite(Number(a)) && Number.isFinite(Number(b)) && Math.abs(Number(a) - Number(b)) <= 1;
+
+    for (const crop of fieldCrops) {
+      const key = String(crop.key || "");
+      const aiValue = parsed?.fields?.[key] === null || parsed?.fields?.[key] === undefined ? null : Number(parsed.fields[key]);
+      const aiConf = Math.max(0, Math.min(1, Number(parsed?.confidence?.[key]) || 0));
+      const clientValue = crop.currentAmount === null || !Number.isFinite(Number(crop.currentAmount)) ? null : Number(crop.currentAmount);
+      const clientConf = Math.max(0, Math.min(1, Number(crop.currentConfidence) || 0));
+      const sourcesDisagree = aiValue !== null && clientValue !== null && !amountAgree(aiValue, clientValue);
+      const shouldRecheck = sourcesDisagree || aiValue === null || clientValue === null ||
+        aiConf < .9 || clientConf < .9 ||
+        (criticalFieldKeys.has(key) && Math.min(aiConf || 0, clientConf || 0) < .95);
+      if (!shouldRecheck) continue;
+
+      const first = await fieldCropRead(crop, 1);
+      const v1 = first?.amount === null || first?.amount === undefined ? null : Number(first.amount);
+      const c1 = Math.max(0, Math.min(1, Number(first?.confidence) || 0));
+      const firstMatchesBoth = v1 !== null &&
+        (aiValue === null || amountAgree(v1, aiValue)) &&
+        (clientValue === null || amountAgree(v1, clientValue));
+      let second: any = null;
+      if (!firstMatchesBoth || c1 < .9 || sourcesDisagree ||
+          aiValue === null || clientValue === null || criticalFieldKeys.has(key)) {
+        second = await fieldCropRead(crop, 2);
+      }
+      const v2 = second?.amount === null || second?.amount === undefined ? null : Number(second.amount);
+      const c2 = Math.max(0, Math.min(1, Number(second?.confidence) || 0));
+      const twoAgree = v1 !== null && v2 !== null && amountAgree(v1, v2) && c1 >= .84 && c2 >= .84;
+      const chosen = twoAgree ? Math.round((Number(v1) + Number(v2)) / 2) : (v1 !== null && c1 >= .9 ? v1 : null);
+      const chosenConf = twoAgree ? Math.min(.99, Math.min(c1, c2) + .05) : c1;
+      let status = "conflict";
+      if (chosen !== null) {
+        const agreesAI = aiValue !== null && amountAgree(chosen, aiValue);
+        const agreesClient = clientValue !== null && amountAgree(chosen, clientValue);
+        if (agreesAI && agreesClient) status = "agree";
+        else if (agreesAI && !agreesClient) status = twoAgree ? "resolved_ai" : "conflict";
+        else if (!agreesAI && agreesClient) status = twoAgree ? "resolved_client" : "conflict";
+        else if ((aiValue === null || clientValue === null) && twoAgree) status = "filled";
+        else if (twoAgree) status = "corrected";
+      }
+      fieldRechecks[key] = {
+        value: chosen,
+        confidence: chosen === null ? Math.min(c1 || .5, c2 || .5, .55) : chosenConf,
+        consensus: twoAgree ? 2 : (chosen !== null ? 1 : 0),
+        status,
+        label: String((twoAgree ? second?.label : first?.label) || first?.label || ""),
+        evidence: String((twoAgree ? second?.evidence : first?.evidence) || first?.evidence || "")
+      };
     }
 
     // Separate exact text transcription from semantic classification for ambiguous
@@ -471,6 +588,7 @@ Deno.serve(async (req: Request) => {
       confidence: parsed.confidence,
       evidence: parsed.evidence,
       extraItems: Array.isArray(parsed.extraItems) ? parsed.extraItems : [],
+      fieldRechecks,
       notes: parsed.notes,
       usage: quota
     });

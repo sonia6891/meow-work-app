@@ -25,6 +25,8 @@ jobs:
         run: node tests/ui-v129.test.cjs
       - name: v156 cloud sync hardening checks
         run: node tests/cloud-sync-v156.test.cjs
+      - name: Pro payslip Accuracy V2 — 50,000 cases
+        run: node tests/pro-payslip-accuracy-v2.test.cjs
       - name: Meow Assistant core regression
         run: node tests/meow-assistant-round2-100.test.cjs
       - name: Meow Assistant OpenAI NLU integration contract

@@ -43,16 +43,20 @@ assert(html.includes('公司薪資單實發'), 'reconciliation must use actual p
 assert(html.includes('id="itemizedConclusion"'), 'local reconciliation conclusion missing');
 assert(html.includes('少發 '), 'underpayment line-item status missing');
 assert(html.includes('多扣 '), 'over-deduction line-item status missing');
-assert(html.includes("num(payslipOcrResult.__confidence?.[key])<.72"), 'low-confidence OCR fields must require review');
-assert(html.includes("num(payslipOcrResult.__confidence?.[key])>=.85"), 'high-confidence OCR count missing');
+assert(html.includes("num(payslipOcrResult.__confidence?.[key])<.85"), 'low-confidence OCR fields must require review');
+assert(html.includes("num(payslipOcrResult.__confidence?.[key])>=.9"), 'high-confidence OCR count missing');
 for (const label of ['勞退自提','福利金','勞保費','健保費','輪班／夜班津貼','加班費','實發金額']) {
   assert(html.includes(label), 'payroll synonym/field coverage missing: '+label);
 }
 assert(html.includes('rateLike||quantityLike'), 'rates/hours must be excluded from payroll money candidates');
 assert(html.includes('preprocessPayslipVariants'), 'payroll image preprocessing helper missing');
+assert(html.includes('assessPayslipImageQuality'), 'payroll image quality gate missing');
+assert(html.includes('payslipMathAudit'), 'payroll math audit missing');
+assert(html.includes('applyPayslipArbitration'), 'payroll multi-source arbitration missing');
+assert(html.includes('buildPayslipFieldCrops'), 'low-confidence field crop recheck missing');
 assert(html.includes("name:'原圖增強'") && html.includes("name:'高對比'") && html.includes("name:'二值化'"), 'three-pass payroll image preprocessing missing');
 
-assert(html.includes("meow-work-payslip-format-memory-v3"), 'stale payroll format memory must be invalidated after deduction mapping changes');
+assert(html.includes("meow-work-payslip-format-memory-v4"), 'stale payroll format memory must be invalidated after deduction mapping changes');
 assert(html.includes(".replace(/考前扣款/g,'考勤扣款')"), 'attendance OCR confusion normalization missing');
 assert(html.includes(".replace(/建保/g,'健保')"), 'health insurance OCR confusion normalization missing');
 assert(html.includes("criticalDeduction=['dedAttendance','dedLabor','dedHealth','dedHealthExtra','dedPension']"), 'critical deductions must not be silently filled from stale format memory');
@@ -66,6 +70,10 @@ assert(payslipEdge.includes('function exactLabelRead'), 'amount-anchored exact-l
 assert(payslipEdge.includes('rowCrops'), 'server must accept amount-anchored row crops');
 assert(html.includes('buildPayslipRowCrops'), 'client must build amount-anchored row crops');
 assert(html.includes("rowCrops=await buildPayslipRowCrops"), 'client must send row crops during payslip verification');
+assert(html.includes('fieldCrops=await buildPayslipFieldCrops'), 'client must send low-confidence field crops');
+assert(payslipEdge.includes('fieldCropRead'), 'server targeted field recheck missing');
+assert(payslipEdge.includes('fieldRechecks'), 'server targeted recheck output missing');
+assert(payslipEdge.includes('錯誤的自信答案比待確認更糟'), 'server must prefer uncertainty over guessing');
 assert(payslipEdge.includes('逐字抄寫員') && payslipEdge.includes('禁止依語意猜字'), 'exact-label recheck must be image-transcription focused rather than semantic guessing');
 assert(payslipEdge.includes('名稱待確認（兩次逐字判讀不一致）'), 'ambiguous payroll labels must not be forced');
 assert(payslipEdge.includes('trustedKnown = exactAgreement && choiceAgreement'), 'exact label and semantic choice must both agree before auto-labeling');

@@ -158,7 +158,8 @@ jobs:
           grep -q 'VNRecognizeTextRequest' ios/App/App/SceneDelegate.swift
           grep -q 'registerPluginInstance(MeowScheduleVisionPlugin())' ios/App/App/SceneDelegate.swift
           grep -q 'purpose == "payslip"' ios/App/App/SceneDelegate.swift
-          grep -q 'request.usesLanguageCorrection = purpose == "payslip"' ios/App/App/SceneDelegate.swift
+          grep -q 'request.usesLanguageCorrection = false' ios/App/App/SceneDelegate.swift
+          grep -q 'request.minimumTextHeight = purpose == "payslip" ? 0.0025 : 0.008' ios/App/App/SceneDelegate.swift
           grep -q 'MeowSpeechPlugin' ios/App/App/SceneDelegate.swift
           grep -q 'import Speech' ios/App/App/SceneDelegate.swift
           grep -q 'SFSpeechRecognizer' ios/App/App/SceneDelegate.swift

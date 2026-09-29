@@ -415,9 +415,10 @@ public class MeowScheduleVisionPlugin: CAPPlugin, CAPBridgedPlugin {
             let purpose = call.getString("purpose") ?? "schedule"
             let request = VNRecognizeTextRequest()
             request.recognitionLevel = .accurate
-            request.usesLanguageCorrection = purpose == "payslip"
+            // Payroll needs literal field names. Chinese recognition should avoid semantic correction.
+            request.usesLanguageCorrection = false
             request.recognitionLanguages = ["zh-Hant", "en-US"]
-            request.minimumTextHeight = purpose == "payslip" ? 0.004 : 0.008
+            request.minimumTextHeight = purpose == "payslip" ? 0.0025 : 0.008
 
             do {
                 let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
