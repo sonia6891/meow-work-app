@@ -9313,7 +9313,7 @@ function payslipMathAudit(values,extraItems=[],expected={}){
   const income=sum(incomeKeys)+extraIncome,deductions=sum(deductionKeys)+extraDeduction,recognizedNet=income-deductions,actualNet=own('actualNet')?Number(values.actualNet):null;
   const recognizedCount=[...incomeKeys,...deductionKeys].filter(own).length,expectedActive=[...incomeKeys,...deductionKeys].filter(k=>Number(expected&&expected[k])>0);
   const coverage=expectedActive.length?expectedActive.filter(own).length/expectedActive.length:Math.min(1,recognizedCount/10),comparable=actualNet!==null&&own('base')&&(recognizedCount>=7||coverage>=.72);
-  const tolerance=actualNet===null?0:Math.max(120,Math.abs(actualNet)*.008),mismatch=comparable?actualNet-recognizedNet:null,mathOk=!comparable||Math.abs(mismatch)<=tolerance,digitShiftKeys=[];
+  const tolerance=actualNet===null?0:Math.max(2,Math.min(10,Math.abs(actualNet)*.0002)),mismatch=comparable?actualNet-recognizedNet:null,mathOk=!comparable||Math.abs(mismatch)<=tolerance,digitShiftKeys=[];
   [...incomeKeys,...deductionKeys,'actualNet'].forEach(k=>{if(!own(k))return;const exp=Number(expected&&expected[k]);if(!Number.isFinite(exp)||exp<100)return;const r=Number(values[k])/exp;if((r>=8.5&&r<=11.5)||(r>=.085&&r<=.115))digitShiftKeys.push(k)});
   return{income,deductions,extraIncome,extraDeduction,recognizedNet,actualNet,recognizedCount,coverage,comparable,tolerance,mismatch,mathOk,digitShiftKeys};
 }
