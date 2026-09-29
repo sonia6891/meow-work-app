@@ -542,7 +542,7 @@ Deno.serve(async (req: Request) => {
     // Two independent image-only reads must agree before we normalize a standard field.
     async function recoverExtraItemsFromRows() {
       const compactOcr = String(ocrText || "").replace(/\s+/g, "");
-      const extraHint = /(餐費補助|伙食補助|膳食補助|餐補|誤餐費|補助|補貼|工會費|停車費|專案獎金|特殊津貼|特殊加給)/.test(compactOcr);
+      const extraHint = /(餐費補助|伙食補助|膳食補助|餐補|誤餐費|補助|補貼|工會費|停車費|團保費|代扣款|宿舍費|制服費|專案獎金|特殊津貼|特殊加給|職務加給)/.test(compactOcr);
       const f = parsed?.fields && typeof parsed.fields === "object" ? parsed.fields : {};
       const incomeKeys = ["base","shiftAllowance","meal","performance","transport","otherIncome","otPay"];
       const deductionKeys = ["dedLabor","dedHealth","dedWelfare","dedPension","dedAttendance","dedTax","dedHealthExtra","dedOther"];
@@ -554,11 +554,14 @@ Deno.serve(async (req: Request) => {
       const roughGap = actualNet === null ? 0 : Math.abs(actualNet - (roughIncome - roughDeduction));
       const mathSuggestsMissing = actualNet !== null && own("base") && recognizedCount >= 6 &&
         roughGap > Math.max(5, Math.min(20, Math.abs(actualNet) * .0004));
-      if (!extraHint && !mathSuggestsMissing) return [];
+      const hasUnassignedCandidate = rowCrops.some((row: any) =>
+        Number.isFinite(Number(row?.amount)) &&
+        !knownAmounts.some((v: number) => Math.abs(v - Number(row.amount)) <= 1)
+      );
+      // Do not depend only on OCR keywords: a misspelled/unknown extra label is
+      // exactly the case this recovery pass is supposed to catch.
+      if (!extraHint && !mathSuggestsMissing && !hasUnassignedCandidate) return [];
 
-      const knownAmounts = Object.values(f)
-        .map((v: any) => Number(v))
-        .filter((v: number) => Number.isFinite(v) && v >= 0);
       const candidates = rowCrops
         .filter((row: any) => Number.isFinite(Number(row?.amount)) && Array.isArray(row?.images) && row.images.length)
         .map((row: any) => ({
@@ -668,14 +671,15 @@ Deno.serve(async (req: Request) => {
       parsed?.fields?.meal !== undefined &&
       Number(parsed?.confidence?.meal || 0) >= .78;
 
-    const ambiguousIncomeIndexes = extraItems
+    const ambiguousExtraIndexes = extraItems
       .map((item: any, index: number) => ({ item, index }))
       .filter(({ item }: any) => {
-        if (item?.kind !== "income") return false;
         const label = String(item?.label || "").replace(/\s+/g, "");
-        return /(補助|補貼|津貼|加給|餐費|伙食|膳食|醫療|營運)/.test(label);
+        const confidence = Math.max(0, Math.min(1, Number(item?.confidence) || 0));
+        return confidence < .9 ||
+          /(補助|補貼|津貼|加給|餐費|伙食|膳食|醫療|營運|工會|停車|團保|代扣|宿舍|制服|獎金|誤餐)/.test(label);
       })
-      .slice(0, 3);
+      .slice(0, 4);
 
     async function exactLabelRead(amount: number, pass: number) {
       const exactLabelSchema = {
@@ -686,7 +690,7 @@ Deno.serve(async (req: Request) => {
           transcription: { type: "string", minLength: 1, maxLength: 20 },
           choice: {
             type: "string",
-            enum: ["伙食津貼", "餐費補助", "伙食補助", "膳食補助", "醫療補助", "交通補助", "其他或不確定"]
+            enum: ["伙食津貼", "餐費補助", "伙食補助", "膳食補助", "醫療補助", "交通補助", "工會費", "停車費", "團保費", "代扣款", "宿舍費", "制服費", "專案獎金", "特殊津貼", "職務加給", "誤餐費", "其他或不確定"]
           },
           confidence: { type: "number", minimum: 0, maximum: 1 },
           evidence: nullableString
@@ -758,7 +762,7 @@ Deno.serve(async (req: Request) => {
       catch (_) { return null; }
     }
 
-    for (const { item, index } of ambiguousIncomeIndexes) {
+    for (const { item, index } of ambiguousExtraIndexes) {
       const amount = Number(item?.amount);
       if (!Number.isFinite(amount) || amount < 0) continue;
 
@@ -779,13 +783,16 @@ Deno.serve(async (req: Request) => {
         const cf2 = Math.max(0, Math.min(1, Number(second.confidence) || 0));
         const exactAgreement = t1 && t2 && t1 === t2 && cf1 >= .78 && cf2 >= .78;
         const choiceAgreement = c1 === c2 && c1 !== "其他或不確定" && cf1 >= .82 && cf2 >= .82;
-        const knownChoices = new Set(["伙食津貼","餐費補助","伙食補助","膳食補助","醫療補助","交通補助"]);
+        const knownChoices = new Set(["伙食津貼","餐費補助","伙食補助","膳食補助","醫療補助","交通補助","工會費","停車費","團保費","代扣款","宿舍費","制服費","專案獎金","特殊津貼","職務加給","誤餐費"]);
         const trustedKnown = exactAgreement && choiceAgreement && t1 === c1 && knownChoices.has(c1);
 
         if (trustedKnown) {
           const resolved = c1;
           item.label = resolved;
           item.confidence = Math.min(.99, Math.max(cf1, cf2));
+          const deductionChoices = new Set(["工會費","停車費","團保費","代扣款","宿舍費","制服費"]);
+          if (deductionChoices.has(resolved)) item.kind = "deduction";
+          else if (resolved !== "伙食津貼") item.kind = "income";
 
           if (resolved === "餐費補助") {
             // Keep it as a separate extra income item. It is NOT 伙食津貼.
@@ -810,7 +817,7 @@ Deno.serve(async (req: Request) => {
             : "名稱待確認（兩次逐字判讀不一致）";
           item.confidence = Math.min(cf1 || .5, cf2 || .5, .5);
           parsed.notes = Array.isArray(parsed.notes) ? parsed.notes : [];
-          parsed.notes.push("金額 " + Math.round(amount).toLocaleString("zh-TW") + " 的補助項目未達到兩次逐字辨讀完全一致且分類一致的門檻，因此未自動命名。");
+          parsed.notes.push("金額 " + Math.round(amount).toLocaleString("zh-TW") + " 的額外項目未達到兩次逐字辨讀完全一致且分類一致的門檻，因此未自動命名。");
         }
       } catch (_) {
         item.label = "名稱待確認";

@@ -1,0 +1,107 @@
+name: Payslip locked holdout V2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - benchmarks/payslip/**
+      - .github/workflows/payslip-locked-holdout-v2.yml
+
+permissions:
+  contents: read
+
+jobs:
+  holdout:
+    name: Locked holdout V2 shard ${{ matrix.shard }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install renderer
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Generate 200 fresh locked documents
+        run: |
+          START=$(( 8000 + ${{ matrix.shard }} * 200 ))
+          OUT="/tmp/holdout-v2-${{ matrix.shard }}"
+          mkdir -p "$OUT"
+          python benchmarks/payslip/generate_corpus.py --start "$START" --count 200 --out "$OUT"
+      - name: Build Apple Vision runner
+        run: |
+          swiftc -O benchmarks/payslip/vision_benchmark.swift -framework Vision -framework AppKit -o /tmp/vision_benchmark
+      - name: OCR and score
+        run: |
+          OUT="/tmp/holdout-v2-${{ matrix.shard }}"
+          /tmp/vision_benchmark --manifest "$OUT/manifest.jsonl" --out "$OUT/vision.jsonl"
+          python benchmarks/payslip/evaluate_vision.py --manifest "$OUT/manifest.jsonl" --vision "$OUT/vision.jsonl" --out "$OUT/summary.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payslip-holdout-v2-${{ matrix.shard }}
+          path: /tmp/holdout-v2-${{ matrix.shard }}/summary.json
+          if-no-files-found: error
+          retention-days: 14
+
+  gate:
+    name: Locked holdout V2 gate
+    needs: holdout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: payslip-holdout-v2-*
+          path: /tmp/results
+      - name: Merge holdout only and enforce non-regression floor
+        run: |
+          python - <<'PY'
+          import json,glob,collections,pathlib
+          files=glob.glob('/tmp/results/**/summary.json',recursive=True)
+          assert len(files)==5, files
+          fields=collections.defaultdict(lambda:[0,0]);micros=collections.defaultdict(lambda:[0,0])
+          extras=[0,0,0];conf=collections.Counter();cases=0
+          for p in files:
+              d=json.load(open(p)); s=d['splits']['holdout']
+              assert d['splits']['tune']['cases']==0
+              cases+=s['cases']
+              for k,c in s['field_counts'].items():
+                  fields[k][0]+=c['correct'];fields[k][1]+=c['total']
+              for k,c in s['micro_counts'].items():
+                  micros[k][0]+=c['correct'];micros[k][1]+=c['total']
+              extras[0]+=s['extra_amount_correct'];extras[1]+=s['extra_label_correct'];extras[2]+=s['extra_total']
+              for x in d.get('top_confusions_by_split',{}).get('holdout',[]):
+                  conf[(x['field'],x['expected'],x['read'])]+=x['count']
+          assert cases==1000, cases
+          fc={k:{'correct':v[0],'total':v[1],'accuracy':v[0]/v[1] if v[1] else None} for k,v in fields.items()}
+          mc={k:{'correct':v[0],'total':v[1],'accuracy':v[0]/v[1] if v[1] else None} for k,v in micros.items()}
+          total=sum(v['total'] for v in fc.values());correct=sum(v['correct'] for v in fc.values())
+          out={
+            'cases':cases,
+            'overall_field_accuracy':correct/total,
+            'field_counts':fc,
+            'critical_microcrop':mc,
+            'extra_amount_recall':extras[0]/extras[2] if extras[2] else 0,
+            'extra_label_recall':extras[1]/extras[2] if extras[2] else 0,
+            'extra_total':extras[2],
+            'top_confusions':[{'field':k[0],'expected':k[1],'read':k[2],'count':n} for k,n in conf.most_common(40)]
+          }
+          pathlib.Path('/tmp/payslip-locked-holdout-v2.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          assert out['overall_field_accuracy'] >= .93, out['overall_field_accuracy']
+          assert fc['dedHealth']['accuracy'] >= .96, fc['dedHealth']
+          assert fc['dedTax']['accuracy'] >= .98, fc['dedTax']
+          assert fc['performance']['accuracy'] >= .93, fc['performance']
+          assert mc['dedHealth']['accuracy'] >= .88, mc['dedHealth']
+          assert mc['dedTax']['accuracy'] >= .88, mc['dedTax']
+          assert mc['performance']['accuracy'] >= .85, mc['performance']
+          assert out['extra_amount_recall'] >= .95, out['extra_amount_recall']
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payslip-locked-holdout-v2-summary
+          path: /tmp/payslip-locked-holdout-v2.json
+          retention-days: 30

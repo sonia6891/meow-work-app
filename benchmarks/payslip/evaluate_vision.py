@@ -36,7 +36,7 @@ def main():
     manifest={r["id"]:r for r in (json.loads(x) for x in Path(args.manifest).read_text(encoding="utf-8").splitlines() if x.strip())}
     vision={r["id"]:r for r in (json.loads(x) for x in Path(args.vision).read_text(encoding="utf-8").splitlines() if x.strip())}
     stats={split:{"cases":0,"fields":Counter(),"field_total":Counter(),"micro":Counter(),"micro_total":Counter(),"extras_amount_ok":0,"extras_label_ok":0,"extras_total":0} for split in ("tune","holdout")}
-    confusions=Counter()
+    confusions={split:Counter() for split in ("tune","holdout")}
 
     for cid,m in manifest.items():
         v=vision.get(cid,{"observations":[],"digitCrops":{}})
@@ -55,7 +55,7 @@ def main():
             if ok:st["fields"][key]+=1
             elif key in CRITICAL:
                 for x in seen[:4]:
-                    confusions[(key,target,x)]+=1
+                    confusions[split][(key,target,x)]+=1
 
         for key in CRITICAL:
             if key not in gt:continue
@@ -64,7 +64,7 @@ def main():
             ds=digits(info.get("text",""))
             if int(gt[key]) in ds:st["micro"][key]+=1
             elif ds:
-                confusions[(key,int(gt[key]),ds[0])]+=1
+                confusions[split][(key,int(gt[key]),ds[0])]+=1
 
         for extra in m.get("extras",[]):
             st["extras_total"]+=1
@@ -93,7 +93,10 @@ def main():
             "extra_label_correct":st["extras_label_ok"],
             "extra_total":st["extras_total"]
         }
-    out["top_confusions"]=[{"field":k[0],"expected":k[1],"read":k[2],"count":n} for k,n in confusions.most_common(30)]
+    out["top_confusions_by_split"]={
+        split:[{"field":k[0],"expected":k[1],"read":k[2],"count":n} for k,n in confusions[split].most_common(30)]
+        for split in ("tune","holdout")
+    }
     Path(args.out).write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps(out,ensure_ascii=False,indent=2))
 

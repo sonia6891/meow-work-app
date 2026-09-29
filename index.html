@@ -8982,18 +8982,51 @@ function plausibleAmountForField(def,amount){
   if(def.kind==='deduction')return v>=1;
   return v>=1;
 }
+function payslipNumericFragmentText(text){
+  const compact=normalizeOcrDigits(text).replace(/[$NT＄元圓\s]/gi,'').trim();
+  if(!compact||!/^[0-9][0-9,]*$/.test(compact))return'';
+  return compact.replace(/,/g,'');
+}
+function payslipUnionBox(a,b){
+  const x0=Math.min(a.x0,b.x0),y0=Math.min(a.y0,b.y0),x1=Math.max(a.x1,b.x1),y1=Math.max(a.y1,b.y1);
+  return{x0,y0,x1,y1,cx:(x0+x1)/2,cy:(y0+y1)/2,w:x1-x0,h:y1-y0};
+}
 function extractSpatialAmounts(line){
-  const amounts=[];
-  line.words.forEach((w,i)=>{
-    const info=numericTokenInfo(w.text);if(!info)return;
-    const nearby=line.words.slice(Math.max(0,i-4),Math.min(line.words.length,i+5)).filter(x=>x!==w).map(x=>normalizeOcrText(x.text)).join('');
+  const amounts=[],words=Array.isArray(line.words)?line.words:[];
+  const addAmount=(info,bbox,confidence,id,text,startIndex,endIndex,stitched=false)=>{
+    if(!info||!bbox)return;
+    const nearby=words.slice(Math.max(0,startIndex-4),Math.min(words.length,endIndex+5)).filter((_,idx)=>idx<startIndex||idx>endIndex).map(x=>normalizeOcrText(x.text)).join('');
     const quantityLike=/(時數|工時|小時|時薪|天數|日數|班數|倍率|倍數|費率|單價|提繳率|自提率|HOUR|HOURS|HRS|DAY|DAYS|RATE)/.test(nearby);
     const moneyHint=/(金額|應發|實發|應扣|扣款|合計|小計|薪資|工資|津貼|加給|獎金|保費|福利金|所得稅|加班費)/.test(nearby);
-    amounts.push({id:line.index+'-'+i,value:info.value,rateLike:info.rateLike,percent:info.percent,hasDecimal:info.hasDecimal,quantityLike,moneyHint,bbox:w.bbox,confidence:w.confidence,lineIndex:line.index,text:w.text});
+    amounts.push({id,value:info.value,rateLike:info.rateLike,percent:info.percent,hasDecimal:info.hasDecimal,quantityLike,moneyHint,bbox,confidence,lineIndex:line.index,text,stitched});
+  };
+  words.forEach((w,i)=>{
+    const info=numericTokenInfo(w.text);if(!info)return;
+    addAmount(info,w.bbox,w.confidence,line.index+'-'+i,w.text,i,i,false);
   });
+  // Vision sometimes splits one printed amount into adjacent numeric fragments
+  // (e.g. "1" + "188", "3" + "200"). Keep the originals, but also add a
+  // geometry-gated stitched candidate so the parser can recover the full amount.
+  for(let i=0;i<words.length-1;i++){
+    const firstDigits=payslipNumericFragmentText(words[i].text);if(!firstDigits)continue;
+    let combined=firstDigits,box=words[i].bbox,confidence=Number(words[i].confidence)||0;
+    for(let j=i+1;j<Math.min(words.length,i+3);j++){
+      const nextDigits=payslipNumericFragmentText(words[j].text);if(!nextDigits)break;
+      const nextBox=words[j].bbox,gap=nextBox.x0-box.x1;
+      const overlapY=Math.max(0,Math.min(box.y1,nextBox.y1)-Math.max(box.y0,nextBox.y0));
+      const minH=Math.max(1,Math.min(box.h,nextBox.h)),avgH=Math.max(1,(box.h+nextBox.h)/2);
+      if(overlapY<minH*.55||gap<(-avgH*.18)||gap>Math.max(10,avgH*.72))break;
+      combined+=nextDigits;
+      if(combined.length>8)break;
+      box=payslipUnionBox(box,nextBox);
+      confidence=Math.min(confidence,Number(words[j].confidence)||0);
+      const info=numericTokenInfo(combined);
+      if(info)addAmount(info,box,confidence,line.index+'-'+i+'-'+j+'-joined',combined,i,j,true);
+    }
+  }
   return amounts;
 }
-function lineLabelBox(line,hit){
+function lineLabelBox(line,hit){function lineLabelBox(line,hit){
   const seg=line.segments.find(s=>hit.start>=s.start&&hit.start<s.end)||line.segments.find(s=>s.start>=hit.start&&s.start<hit.end);
   if(seg)return seg.word.bbox;
   return{x0:line.x0,y0:line.y0,x1:line.x1,y1:line.y1,cx:(line.x0+line.x1)/2,cy:line.cy,w:line.x1-line.x0,h:line.y1-line.y0};
@@ -9115,7 +9148,7 @@ function pairTableRowsByColumns(lines,width,height,used,byKey,labelAnchors,varia
       const chosen=choices[0];available.splice(chosen.index,1);used.add(chosen.a.id);
       const conf=Math.min(.99,hit.score*.56+(chosen.a.confidence/100)*.19+(1-Math.min(1,chosen.d/.15))*.25);
       const occ={key:hit.def.key,value:chosen.a.value,term:hit.term,confidence:conf,method:hit.exact?'表格欄位精確':'表格欄位模糊',variant:variant.name,
-        labelNorm,amountNorm:{x:chosen.a.bbox.cx/width,y:chosen.a.bbox.cy/height},line:labelLine.text,lineIndex:labelLine.index};
+        labelNorm,amountNorm:{x:chosen.a.bbox.cx/width,y:chosen.a.bbox.cy/height,w:chosen.a.bbox.w/width,h:chosen.a.bbox.h/height},line:labelLine.text,lineIndex:labelLine.index};
       (byKey[hit.def.key]||(byKey[hit.def.key]=[])).push(occ);
     });
   });
@@ -9136,13 +9169,13 @@ function parseSpatialOcr(data,variant){
       used.add(pair.amount.id);
       const conf=Math.min(.99,hit.score*.58+(pair.amount.confidence/100)*.17+pair.proximity*.25);
       const occ={key:hit.def.key,value:pair.amount.value,term:hit.term,confidence:conf,method:hit.exact?'座標精確':'座標模糊',variant:variant.name,
-        labelNorm,amountNorm:{x:pair.amount.bbox.cx/width,y:pair.amount.bbox.cy/height},line:line.text,lineIndex:line.index};
+        labelNorm,amountNorm:{x:pair.amount.bbox.cx/width,y:pair.amount.bbox.cy/height,w:pair.amount.bbox.w/width,h:pair.amount.bbox.h/height},line:line.text,lineIndex:line.index};
       (byKey[hit.def.key]||(byKey[hit.def.key]=[])).push(occ);
     });
   });
   const fields={};
   PAYSLIP_OCR_FIELDS.forEach(def=>{const v=consolidateOccurrences(def,byKey[def.key]||[]);if(v)fields[def.key]=v});
-  const allAmounts=lines.flatMap(l=>l.amounts.map(a=>Object.assign({},a,{norm:{x:a.bbox.cx/width,y:a.bbox.cy/height}})));
+  const allAmounts=lines.flatMap(l=>l.amounts.map(a=>Object.assign({},a,{norm:{x:a.bbox.cx/width,y:a.bbox.cy/height,w:a.bbox.w/width,h:a.bbox.h/height}})));
   const amountPattern=allAmounts.filter(a=>!a.rateLike&&!a.quantityLike).slice(0,50).map(a=>({x:a.norm.x,y:a.norm.y}));
   return{fields,labelAnchors,allAmounts,amountPattern,sectionMarkers,lines,words,width,height,aspect:width/height,text:(data&&data.text)||'',variant:variant.name};
 }
@@ -9732,17 +9765,27 @@ function payslipFieldCropDataUrl(img,labelNorm,amountNorm){
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(img,sx,sy,Math.min(sw,img.width-sx),Math.min(sh,img.height-sy),0,0,canvas.width,canvas.height);
   return canvas.toDataURL('image/jpeg',.94);
 }
-function payslipAmountOnlyCropDataUrl(img,amountNorm){
+function payslipAmountOnlyCropDataUrl(img,amountNorm,mode='medium'){
   if(!amountNorm||!Number.isFinite(Number(amountNorm.x))||!Number.isFinite(Number(amountNorm.y)))return null;
   const ax=Math.max(0,Math.min(1,Number(amountNorm.x))),ay=Math.max(0,Math.min(1,Number(amountNorm.y)));
-  const halfW=.09,halfH=.035,x0=Math.max(0,ax-halfW),x1=Math.min(1,ax+halfW),y0=Math.max(0,ay-halfH),y1=Math.min(1,ay+halfH);
+  const bw=Math.max(.012,Math.min(.18,Number(amountNorm.w)||.045));
+  const bh=Math.max(.012,Math.min(.09,Number(amountNorm.h)||.028));
+  const preset=mode==='tight'
+    ?{left:.55,right:.45,y:.55,minLeft:.018,minRight:.014}
+    :mode==='wide'
+      ?{left:1.55,right:1.05,y:1.05,minLeft:.055,minRight:.035}
+      :{left:1.0,right:.72,y:.78,minLeft:.036,minRight:.024};
+  // Intentionally leave more room on the left: the dominant benchmark error was
+  // losing the leading digit (3200 -> 200, 1188 -> 188/1).
+  const leftPad=Math.max(preset.minLeft,bw*preset.left),rightPad=Math.max(preset.minRight,bw*preset.right),vPad=Math.max(.014,bh*preset.y);
+  const x0=Math.max(0,ax-bw/2-leftPad),x1=Math.min(1,ax+bw/2+rightPad),y0=Math.max(0,ay-bh/2-vPad),y1=Math.min(1,ay+bh/2+vPad);
   const sx=Math.round(x0*img.width),sy=Math.round(y0*img.height),sw=Math.max(40,Math.round((x1-x0)*img.width)),sh=Math.max(28,Math.round((y1-y0)*img.height));
-  const scale=Math.max(2.2,Math.min(5.2,1100/Math.max(1,sw)));
+  const scale=Math.max(2.0,Math.min(5.2,1100/Math.max(1,sw)));
   const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(sw*scale));canvas.height=Math.max(1,Math.round(sh*scale));
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;ctx.drawImage(img,sx,sy,Math.min(sw,img.width-sx),Math.min(sh,img.height-sy),0,0,canvas.width,canvas.height);
   return canvas.toDataURL('image/png');
 }
-async function buildPayslipRowCrops(variants,candidates){
+async function buildPayslipRowCrops(variants,candidates){async function buildPayslipRowCrops(variants,candidates){
   const list=(Array.isArray(candidates)?candidates:[])
     .filter(a=>a&&a.norm&&Number.isFinite(Number(a.value))&&!a.rateLike&&!a.quantityLike&&Number(a.value)>=20&&Number(a.value)<=200000);
   if(!list.length||!variants||!variants[0])return[];
@@ -9789,9 +9832,9 @@ async function buildPayslipFieldCrops(variants,result){
       binary?payslipFieldCropDataUrl(binary,x.labelAnchor,x.amountAnchor):null
     ].filter(Boolean),
     amountImages:x.amountAnchor?[
-      payslipAmountOnlyCropDataUrl(original,x.amountAnchor),
-      contrast?payslipAmountOnlyCropDataUrl(contrast,x.amountAnchor):null,
-      binary?payslipAmountOnlyCropDataUrl(binary,x.amountAnchor):null
+      payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'tight'),
+      payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'medium'),
+      contrast?payslipAmountOnlyCropDataUrl(contrast,x.amountAnchor,'wide'):payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'wide')
     ].filter(Boolean):[]
   }));
 }
@@ -9846,6 +9889,13 @@ async function runPayslipOcr(file){
         const vision=await nativeVision.recognize({imageDataUrl,purpose:'payslip'});if(stale())return;
         const data=visionWordsToOcrData(vision);
         runs.push(parseSingleOcrRun(data,variant));
+        // One additional label-focused pass on the original image uses language
+        // correction/custom payroll words. Numeric passes stay literal.
+        if(currentPass===0){
+          const labelVision=await nativeVision.recognize({imageDataUrl,purpose:'payslip-label'});if(stale())return;
+          const labelData=visionWordsToOcrData(labelVision);
+          runs.push(parseSingleOcrRun(labelData,Object.assign({},variant,{name:(variant.name||'original')+'-labels'})));
+        }
       }
     }else{
       if(!window.Tesseract)throw new Error('本機 OCR 元件尚未載入，請確認網路後重新整理。');

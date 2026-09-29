@@ -415,10 +415,22 @@ public class MeowScheduleVisionPlugin: CAPPlugin, CAPBridgedPlugin {
             let purpose = call.getString("purpose") ?? "schedule"
             let request = VNRecognizeTextRequest()
             request.recognitionLevel = .accurate
-            // Payroll needs literal field names. Chinese recognition should avoid semantic correction.
-            request.usesLanguageCorrection = false
+            let isPayslip = purpose.hasPrefix("payslip")
+            let isPayslipLabelPass = purpose == "payslip-label"
+            // Numeric payroll passes stay literal. The dedicated label pass may use
+            // language correction plus a payroll vocabulary to recover Chinese labels.
+            request.usesLanguageCorrection = isPayslipLabelPass
             request.recognitionLanguages = ["zh-Hant", "en-US"]
-            request.minimumTextHeight = purpose == "payslip" ? 0.0025 : 0.008
+            request.minimumTextHeight = isPayslip ? 0.0025 : 0.008
+            if isPayslipLabelPass {
+                request.customWords = [
+                    "底薪","本薪","基本薪資","輪班津貼","夜班津貼","伙食津貼","餐費補助",
+                    "表現津貼","績效獎金","績效津貼","交通津貼","加班費","勞保費","健保費",
+                    "全民健保費","福利金","勞退自提","考勤扣款","所得稅","薪資所得稅",
+                    "健保補扣","補充保費","實發金額","實領金額","淨額","工會費","停車費",
+                    "團保費","代扣款","宿舍費","制服費","專案獎金","特殊津貼","職務加給","誤餐費"
+                ]
+            }
 
             do {
                 let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])

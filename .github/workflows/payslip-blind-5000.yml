@@ -64,7 +64,7 @@ jobs:
         with:
           pattern: payslip-vision-shard-*
           path: /tmp/results
-      - name: Merge weighted metrics
+      - name: Merge weighted metrics without mixing tune and holdout
         run: |
           python - <<'PY'
           import json,glob,collections,pathlib
@@ -72,9 +72,9 @@ jobs:
           assert len(files)==5, files
           fields=collections.defaultdict(lambda:[0,0])
           micros=collections.defaultdict(lambda:[0,0])
-          extras=[0,0,0]
+          extras=collections.defaultdict(lambda:[0,0,0])
           split_cases=collections.Counter()
-          conf=collections.Counter()
+          conf={sp:collections.Counter() for sp in ('tune','holdout')}
           for p in files:
               d=json.load(open(p))
               for split,s in d['splits'].items():
@@ -83,20 +83,32 @@ jobs:
                       fields[(split,k)][0]+=c['correct'];fields[(split,k)][1]+=c['total']
                   for k,c in s['micro_counts'].items():
                       micros[(split,k)][0]+=c['correct'];micros[(split,k)][1]+=c['total']
-                  extras[0]+=s['extra_amount_correct'];extras[1]+=s['extra_label_correct'];extras[2]+=s['extra_total']
-              for x in d.get('top_confusions',[]):conf[(x['field'],x['expected'],x['read'])]+=x['count']
-          out={'cases':dict(split_cases),'splits':{},'top_confusions':[]}
+                  extras[split][0]+=s['extra_amount_correct']
+                  extras[split][1]+=s['extra_label_correct']
+                  extras[split][2]+=s['extra_total']
+              for split,items in d.get('top_confusions_by_split',{}).items():
+                  if split not in conf: continue
+                  for x in items:
+                      conf[split][(x['field'],x['expected'],x['read'])]+=x['count']
+          out={'cases':dict(split_cases),'splits':{}}
           for split in ('tune','holdout'):
               fc={k:{'correct':v[0],'total':v[1],'accuracy':(v[0]/v[1] if v[1] else None)}
                   for (sp,k),v in fields.items() if sp==split}
               mc={k:{'correct':v[0],'total':v[1],'accuracy':(v[0]/v[1] if v[1] else None)}
                   for (sp,k),v in micros.items() if sp==split}
               total=sum(v['total'] for v in fc.values());correct=sum(v['correct'] for v in fc.values())
-              out['splits'][split]={'field_counts':fc,'overall_field_accuracy':correct/total if total else 0,'critical_microcrop':mc}
-          out['extra_amount_recall_all']=extras[0]/extras[2] if extras[2] else 0
-          out['extra_label_recall_all']=extras[1]/extras[2] if extras[2] else 0
-          out['extra_total_all']=extras[2]
-          out['top_confusions']=[{'field':k[0],'expected':k[1],'read':k[2],'count':n} for k,n in conf.most_common(40)]
+              e=extras[split]
+              out['splits'][split]={
+                  'field_counts':fc,
+                  'overall_field_accuracy':correct/total if total else 0,
+                  'critical_microcrop':mc,
+                  'extra_amount_recall':e[0]/e[2] if e[2] else 0,
+                  'extra_label_recall':e[1]/e[2] if e[2] else 0,
+                  'extra_amount_correct':e[0],
+                  'extra_label_correct':e[1],
+                  'extra_total':e[2],
+                  'top_confusions':[{'field':k[0],'expected':k[1],'read':k[2],'count':n} for k,n in conf[split].most_common(40)]
+              }
           pathlib.Path('/tmp/payslip-blind-5000-summary.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
           print(json.dumps(out,ensure_ascii=False,indent=2))
           PY

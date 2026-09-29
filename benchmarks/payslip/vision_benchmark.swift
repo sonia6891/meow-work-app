@@ -62,13 +62,50 @@ func recognize(_ cg: CGImage, languages: [String], minimumTextHeight: Float) thr
     }
 }
 
+func pureDigitText(_ text: String) -> String {
+    let compact = text.filter { !$0.isWhitespace }
+    guard !compact.isEmpty,
+          compact.allSatisfy({ $0.isNumber || $0 == "," }) else { return "" }
+    return compact.replacingOccurrences(of: ",", with: "")
+}
+
+func stitchedDigitCandidates(_ obs: [ObservationOut]) -> [String] {
+    let numeric = obs.compactMap { o -> (ObservationOut, String)? in
+        let d = pureDigitText(o.text)
+        return d.isEmpty ? nil : (o, d)
+    }.sorted {
+        if abs($0.0.bbox[1] - $1.0.bbox[1]) > 8 { return $0.0.bbox[1] < $1.0.bbox[1] }
+        return $0.0.bbox[0] < $1.0.bbox[0]
+    }
+    var out: [String] = []
+    guard numeric.count > 1 else { return out }
+    for i in 0..<(numeric.count - 1) {
+        var combined = numeric[i].1
+        var box = numeric[i].0.bbox
+        for j in (i + 1)..<min(numeric.count, i + 3) {
+            let next = numeric[j]
+            let h1 = max(1.0, box[3] - box[1]), h2 = max(1.0, next.0.bbox[3] - next.0.bbox[1])
+            let overlapY = max(0.0, min(box[3], next.0.bbox[3]) - max(box[1], next.0.bbox[1]))
+            let avgH = (h1 + h2) / 2.0
+            let gap = next.0.bbox[0] - box[2]
+            if overlapY < min(h1, h2) * 0.55 || gap < -avgH * 0.18 || gap > max(10.0, avgH * 0.72) { break }
+            combined += next.1
+            if combined.count > 8 { break }
+            out.append(combined)
+            box = [min(box[0],next.0.bbox[0]),min(box[1],next.0.bbox[1]),max(box[2],next.0.bbox[2]),max(box[3],next.0.bbox[3])]
+        }
+    }
+    return out
+}
+
 func recognizeDigits(_ path: String) -> [String: AnyCodable] {
     guard let cg = loadCGImage(path) else {
         return ["text": AnyCodable(""), "confidence": AnyCodable(0.0)]
     }
     do {
         let obs = try recognize(cg, languages: ["en-US"], minimumTextHeight: 0.01)
-        let text = obs.map(\.text).joined(separator: " ")
+        let stitched = stitchedDigitCandidates(obs)
+        let text = (obs.map(\.text) + stitched).joined(separator: " ")
         let conf = obs.map { Double($0.confidence) }.max() ?? 0.0
         return ["text": AnyCodable(text), "confidence": AnyCodable(conf)]
     } catch {
