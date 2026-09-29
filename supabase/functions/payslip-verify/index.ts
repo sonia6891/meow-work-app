@@ -213,7 +213,7 @@ Deno.serve(async (req: Request) => {
     amount: Number(row?.amount),
     x: Number(row?.x) || 0,
     y: Number(row?.y) || 0,
-    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 2)
+    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 3)
   })).filter((row: any) => Number.isFinite(row.amount) && row.images.length);
   const fieldCrops = (Array.isArray(body?.fieldCrops) ? body.fieldCrops : []).slice(0, 12).map((row: any) => ({
     key: String(row?.key || ""),
@@ -682,7 +682,7 @@ Deno.serve(async (req: Request) => {
         return confidence < .9 ||
           /(補助|補貼|津貼|加給|餐費|伙食|膳食|醫療|營運|工會|停車|團保|代扣|宿舍|制服|獎金|誤餐)/.test(label);
       })
-      .slice(0, 4);
+      .slice(0, 8);
 
     async function exactLabelRead(amount: number, pass: number) {
       const exactLabelSchema = {
@@ -717,7 +717,7 @@ Deno.serve(async (req: Request) => {
       const body = {
         model: "gpt-5.6",
         store: false,
-        reasoning: { effort: pass === 1 ? "low" : "medium" },
+        reasoning: { effort: pass === 1 ? "low" : pass === 2 ? "medium" : "high" },
         max_output_tokens: 420,
         instructions: [
           "你是薪資單『逐字抄寫員』，不是薪資分類器。",
@@ -778,49 +778,104 @@ Deno.serve(async (req: Request) => {
           continue;
         }
 
-        const t1 = String(first.transcription || "").replace(/\s+/g, "");
-        const t2 = String(second.transcription || "").replace(/\s+/g, "");
-        const c1 = String(first.choice || "");
-        const c2 = String(second.choice || "");
-        const cf1 = Math.max(0, Math.min(1, Number(first.confidence) || 0));
-        const cf2 = Math.max(0, Math.min(1, Number(second.confidence) || 0));
-        const exactAgreement = t1 && t2 && t1 === t2 && cf1 >= .78 && cf2 >= .78;
-        const choiceAgreement = c1 === c2 && c1 !== "其他或不確定" && cf1 >= .82 && cf2 >= .82;
+        const normalizeRead = (r: any) => ({
+          t: String(r?.transcription || "").replace(/\s+/g, ""),
+          c: String(r?.choice || ""),
+          cf: Math.max(0, Math.min(1, Number(r?.confidence) || 0))
+        });
+        const r1 = normalizeRead(first), r2 = normalizeRead(second);
+        const firstTwoKnownAgree = r1.t && r1.t === r2.t && r1.c === r2.c &&
+          r1.c !== "其他或不確定" && r1.t === r1.c && Math.min(r1.cf, r2.cf) >= .86;
+
+        let third: any = null;
+        // Known labels that already agree twice can resolve immediately. Unknown
+        // transcriptions or any disagreement get a third image transformation.
+        if (!firstTwoKnownAgree) third = await exactLabelRead(amount, 3);
+        const reads = [r1, r2, third ? normalizeRead(third) : null].filter(Boolean) as any[];
+
         const knownChoices = new Set(["伙食津貼","餐費補助","伙食補助","膳食補助","醫療補助","交通補助","工會費","停車費","團保費","代扣款","宿舍費","制服費","專案獎金","特殊津貼","職務加給","誤餐費"]);
-        const trustedKnown = exactAgreement && choiceAgreement && t1 === c1 && knownChoices.has(c1);
+        const groups = new Map<string, any[]>();
+        for (const r of reads) {
+          const key = r.t + "|" + r.c;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key)!.push(r);
+        }
 
-        if (trustedKnown) {
-          const resolved = c1;
-          item.label = resolved;
-          item.confidence = Math.min(.99, Math.max(cf1, cf2));
-          const deductionChoices = new Set(["工會費","停車費","團保費","代扣款","宿舍費","制服費"]);
-          if (deductionChoices.has(resolved)) item.kind = "deduction";
-          else if (resolved !== "伙食津貼") item.kind = "income";
+        let resolved = "";
+        let resolvedKind: "income" | "deduction" | null = null;
+        let resolvedConfidence = 0;
+        let resolvedIsKnown = false;
 
-          if (resolved === "餐費補助") {
-            // Keep it as a separate extra income item. It is NOT 伙食津貼.
-            item.kind = "income";
+        for (const group of groups.values()) {
+          if (group.length < 2) continue;
+          const avg = group.reduce((sum: number, r: any) => sum + r.cf, 0) / group.length;
+          const g = group[0];
+          if (knownChoices.has(g.c) && g.t === g.c && avg >= .84 && group.every((r: any) => r.cf >= .78)) {
+            resolved = g.c;
+            resolvedConfidence = Math.min(.99, avg + .03);
+            resolvedIsKnown = true;
+            const deductionChoices = new Set(["工會費","停車費","團保費","代扣款","宿舍費","制服費"]);
+            resolvedKind = deductionChoices.has(resolved) ? "deduction" : "income";
+            break;
           }
+        }
 
-          if (!mealAlreadyReliable && resolved === "伙食津貼") {
+        if (!resolved) {
+          const transcriptGroups = new Map<string, any[]>();
+          for (const r of reads) {
+            if (!r.t || r.t === "名稱待確認") continue;
+            if (!transcriptGroups.has(r.t)) transcriptGroups.set(r.t, []);
+            transcriptGroups.get(r.t)!.push(r);
+          }
+          const ranked = [...transcriptGroups.entries()]
+            .map(([t, rs]) => ({
+              t, rs,
+              avg: rs.reduce((sum: number, r: any) => sum + r.cf, 0) / rs.length
+            }))
+            .sort((a, b) => b.rs.length - a.rs.length || b.avg - a.avg);
+          const best = ranked[0];
+          const safeTranscript = best && best.rs.length >= 2 && best.avg >= .9 &&
+            best.rs.every((r: any) => r.cf >= .84) &&
+            best.t.length >= 2 && best.t.length <= 20 &&
+            !/^(其他|不確定|名稱待確認)$/.test(best.t);
+          if (safeTranscript) {
+            resolved = best.t;
+            resolvedConfidence = Math.min(.94, best.avg);
+            resolvedKind = item?.kind === "deduction" ? "deduction" : "income";
+          }
+        }
+
+        if (resolved) {
+          item.label = resolved;
+          item.confidence = resolvedConfidence;
+          item.kind = resolvedKind || item.kind || "income";
+
+          if (resolvedIsKnown && !mealAlreadyReliable && resolved === "伙食津貼") {
             parsed.fields = parsed.fields || {};
             parsed.confidence = parsed.confidence || {};
             parsed.evidence = parsed.evidence || {};
             parsed.fields.meal = amount;
-            parsed.confidence.meal = Math.min(.99, Math.min(cf1, cf2));
+            parsed.confidence.meal = resolvedConfidence;
             parsed.evidence.meal = resolved + " " + Math.round(amount).toLocaleString("zh-TW");
             extraItems[index] = null;
-            parsed.notes = Array.isArray(parsed.notes) ? parsed.notes : [];
-            parsed.notes.push("補助項目已以金額定位並經兩次獨立影像逐字複核，確認為 " + resolved + "。");
+          } else if (resolved === "餐費補助") {
+            item.kind = "income";
           }
-        } else {
-          const sameUnknown = exactAgreement && t1 === t2 ? t1 : "";
-          item.label = sameUnknown
-            ? "名稱待確認（讀到：" + sameUnknown + "）"
-            : "名稱待確認（兩次逐字判讀不一致）";
-          item.confidence = Math.min(cf1 || .5, cf2 || .5, .5);
+
           parsed.notes = Array.isArray(parsed.notes) ? parsed.notes : [];
-          parsed.notes.push("金額 " + Math.round(amount).toLocaleString("zh-TW") + " 的額外項目未達到兩次逐字辨讀完全一致且分類一致的門檻，因此未自動命名。");
+          parsed.notes.push("金額 " + Math.round(amount).toLocaleString("zh-TW") +
+            " 的額外項目已經由獨立逐字影像判讀取得至少 2/3 一致結果：" + resolved + "。");
+        } else {
+          const tCounts = new Map<string, number>();
+          for (const r of reads) if (r.t) tCounts.set(r.t, (tCounts.get(r.t) || 0) + 1);
+          const bestText = [...tCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+          item.label = bestText
+            ? "名稱待確認（讀到：" + bestText + "）"
+            : "名稱待確認（三次逐字判讀未形成共識）";
+          item.confidence = Math.min(...reads.map((r: any) => r.cf || .5), .5);
+          parsed.notes = Array.isArray(parsed.notes) ? parsed.notes : [];
+          parsed.notes.push("金額 " + Math.round(amount).toLocaleString("zh-TW") +
+            " 的額外項目沒有達到 2/3 高信心逐字共識，因此未自動命名。");
         }
       } catch (_) {
         item.label = "名稱待確認";
