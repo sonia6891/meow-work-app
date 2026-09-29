@@ -6,6 +6,7 @@ on:
       - index.html
       - tests/pro-ai-v125.cjs
       - tests/pro-payslip-independent-red-gate.test.cjs
+      - tests/pro-payslip-accuracy-v2.test.cjs
       - native/ios-sources/ViewController.swift
       - supabase/functions/pro-ai/index.ts
       - supabase/functions/payslip-verify/index.ts
