@@ -26,6 +26,7 @@ function resolveCropReadConsensus(reads, aiValue = null, aiConfidence = 0) {
   const aiTrusted = Number.isFinite(Number(aiValue)) && Number(aiConfidence) >= .9;
   for (const group of groups) {
     group.cropVotes = group.items.length;
+    group.digitVotes = group.items.filter((x) => x && x.source === "digit").length;
     group.aiVote = aiTrusted && amountAgree(group.mean, aiValue) ? 1 : 0;
     group.support = group.cropVotes + group.aiVote;
     group.avgConfidence = group.items.reduce((sum, x) => sum + Number(x.confidence), 0) / group.items.length;
@@ -42,7 +43,8 @@ function resolveCropReadConsensus(reads, aiValue = null, aiConfidence = 0) {
   // explicitly disagrees with the crop winner, fail closed instead of filling
   // the older/local OCR value.
   if (aiTrusted && !amountAgree(winner.mean, aiValue)) {
-    return { value: null, consensus: 0, confidence: .5, unanimous: false };
+    const strongDigitOverride = winner.digitVotes >= 2 && winner.cropVotes >= 3 && winner.avgConfidence >= .85;
+    if (!strongDigitOverride) return { value: null, consensus: 0, confidence: .5, unanimous: false };
   }
   const confidence = Math.min(.99, winner.avgConfidence + (winner.aiVote ? .06 : .03));
   return { value: Math.round(winner.mean), consensus: winner.support, confidence, unanimous: true };
@@ -215,7 +217,8 @@ Deno.serve(async (req: Request) => {
     key: String(row?.key || ""),
     currentAmount: row?.currentAmount === null || row?.currentAmount === undefined ? null : Number(row.currentAmount),
     currentConfidence: Math.max(0, Math.min(1, Number(row?.currentConfidence) || 0)),
-    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 3)
+    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 3),
+    amountImages: (Array.isArray(row?.amountImages) ? row.amountImages : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 3)
   })).filter((row: any) => (FIELD_KEYS as readonly string[]).includes(row.key) && row.images.length);
   const imageQuality = body?.imageQuality && typeof body.imageQuality === "object"
     ? { score: Math.max(0, Math.min(100, Number(body.imageQuality.score) || 0)),
@@ -407,6 +410,51 @@ Deno.serve(async (req: Request) => {
       try { return JSON.parse(outputText(p2)); } catch (_) { return null; }
     }
 
+    async function digitOnlyRead(crop: any, pass: number) {
+      const imgs = Array.isArray(crop?.amountImages) ? crop.amountImages : [];
+      if (!imgs.length) return null;
+      const image = imgs[Math.min(pass - 1, imgs.length - 1)] || imgs[0];
+      if (!image) return null;
+      const digitSchema = {
+        type: "object",
+        additionalProperties: false,
+        required: ["amount", "digits", "confidence"],
+        properties: {
+          amount: nullableNumber,
+          digits: nullableString,
+          confidence: { type: "number", minimum: 0, maximum: 1 }
+        }
+      };
+      const body4 = {
+        model: "gpt-5.6",
+        store: false,
+        reasoning: { effort: pass === 1 ? "low" : "high" },
+        max_output_tokens: 160,
+        instructions: [
+          "你是純數字逐字辨識器。",
+          "圖片只是一個薪資金額格；不要推測欄位名稱、薪資常識或上下文。",
+          "只抄寫你實際看到的阿拉伯數字。特別仔細區分 8 與 9、3 與 8、5 與 6、1 與 7。",
+          "若任何一位數看不清楚，amount 必須填 null；不要用前一次答案補齊。"
+        ].join("\n"),
+        input: [{ role: "user", content: [
+          { type: "input_text", text: "逐字讀取這個金額格。不要參考任何既有 OCR 或薪資欄位答案。" },
+          { type: "input_image", image_url: image, detail: "original" }
+        ]}],
+        text: { format: { type: "json_schema", name: "payslip_digit_only_" + pass, strict: true, schema: digitSchema } }
+      };
+      const res4 = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + openaiKey, "Content-Type": "application/json" },
+        body: JSON.stringify(body4),
+        signal: AbortSignal.timeout(25_000)
+      });
+      const p4 = await res4.json().catch(() => null);
+      inTok += Number(p4?.usage?.input_tokens || 0);
+      outTok += Number(p4?.usage?.output_tokens || 0);
+      if (!res4.ok) return null;
+      try { return JSON.parse(outputText(p4)); } catch (_) { return null; }
+    }
+
     const amountAgree = (a: any, b: any) =>
       Number.isFinite(Number(a)) && Number.isFinite(Number(b)) && Math.abs(Number(a) - Number(b)) <= 1;
 
@@ -417,7 +465,7 @@ Deno.serve(async (req: Request) => {
       const clientValue = crop.currentAmount === null || !Number.isFinite(Number(crop.currentAmount)) ? null : Number(crop.currentAmount);
       const clientConf = Math.max(0, Math.min(1, Number(crop.currentConfidence) || 0));
       const sourcesDisagree = aiValue !== null && clientValue !== null && !amountAgree(aiValue, clientValue);
-      const forceRecheck = key === "performance" || key === "dedTax";
+      const forceRecheck = key === "performance" || key === "dedTax" || key === "dedHealth";
       const shouldRecheck = forceRecheck || sourcesDisagree || aiValue === null || clientValue === null ||
         aiConf < .9 || clientConf < .9 ||
         (criticalFieldKeys.has(key) && Math.min(aiConf || 0, clientConf || 0) < .95);
@@ -442,11 +490,22 @@ Deno.serve(async (req: Request) => {
       }
       const v3 = third?.amount === null || third?.amount === undefined ? null : Number(third.amount);
       const c3 = Math.max(0, Math.min(1, Number(third?.confidence) || 0));
-      const reads = [
-        { pass: 1, value: v1, confidence: c1, raw: first },
-        { pass: 2, value: v2, confidence: c2, raw: second },
-        { pass: 3, value: v3, confidence: c3, raw: third }
+      const reads: any[] = [
+        { pass: 1, value: v1, confidence: c1, raw: first, source: "field" },
+        { pass: 2, value: v2, confidence: c2, raw: second, source: "field" },
+        { pass: 3, value: v3, confidence: c3, raw: third, source: "field" }
       ].filter((r: any) => r.value !== null && Number.isFinite(Number(r.value)));
+
+      const digitAudit = key === "dedHealth" || key === "dedTax" || key === "performance";
+      if (digitAudit && Array.isArray(crop.amountImages) && crop.amountImages.length) {
+        const d1 = await digitOnlyRead(crop, 1);
+        const d2 = await digitOnlyRead(crop, crop.amountImages.length >= 3 ? 3 : 2);
+        for (const [idx, d] of [d1, d2].entries()) {
+          const dv = d?.amount === null || d?.amount === undefined ? null : Number(d.amount);
+          const dc = Math.max(0, Math.min(1, Number(d?.confidence) || 0));
+          if (dv !== null && Number.isFinite(dv)) reads.push({ pass: 11 + idx, value: dv, confidence: dc, raw: d, source: "digit" });
+        }
+      }
       const resolvedReads = resolveCropReadConsensus(reads, aiValue, aiConf);
       const consensus = resolvedReads.consensus;
       const strongConsensus = resolvedReads.unanimous;
@@ -470,7 +529,7 @@ Deno.serve(async (req: Request) => {
         status,
         label: String(bestRead?.raw?.label || ""),
         evidence: String(bestRead?.raw?.evidence || ""),
-        candidates: reads.map((r: any) => ({ pass: r.pass, value: r.value, confidence: r.confidence }))
+        candidates: reads.map((r: any) => ({ pass: r.pass, value: r.value, confidence: r.confidence, source: r.source || "field" }))
       };
     }
 
