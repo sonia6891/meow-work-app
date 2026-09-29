@@ -9802,13 +9802,15 @@ async function buildPayslipRowCrops(variants,candidates){
   }
   const original=await payslipBlobImage(variants[0].image);
   const contrast=variants[1]?await payslipBlobImage(variants[1].image):null;
+  const binary=variants[2]?await payslipBlobImage(variants[2].image):null;
   return selected.map(a=>({
     amount:num(a.value),
     x:Number(a.norm.x)||0,
     y:Number(a.norm.y)||0,
     images:[
       payslipRowCropDataUrl(original,a.norm.y),
-      contrast?payslipRowCropDataUrl(contrast,a.norm.y):null
+      contrast?payslipRowCropDataUrl(contrast,a.norm.y):null,
+      binary?payslipRowCropDataUrl(binary,a.norm.y):null
     ].filter(Boolean)
   }));
 }
