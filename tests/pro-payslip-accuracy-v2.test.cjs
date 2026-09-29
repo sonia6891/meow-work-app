@@ -50,11 +50,13 @@ for(let i=0;i<10000;i++){
   const wrongPerformance={...correct,performance:300};
   assert(!payslipMathAudit(wrongPerformance,extras,correct).mathOk,'300 must not be accepted when printed performance allowance is 1300');
 }
-assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax','dedHealth'])"),'tax, performance and health must always receive targeted crop recheck');
+assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['actualNet','performance','dedTax','dedHealth'])"),'actualNet, tax, performance and health must always receive targeted crop recheck');
 assert(html.includes("consensus>=2&&conf>=.9"),'two-pass-or-better targeted consensus must be able to override stale local OCR');
 assert(!html.includes("consensus>=2&&conf>=.92&&localConf<.82"),'high-confidence stale OCR must not block a stronger crop consensus');
-assert(edge.includes('forceRecheck = key === "performance" || key === "dedTax"'),'server must force tax/performance crop recheck');
+assert(edge.includes('forceRecheck = key === "actualNet" || key === "performance" || key === "dedTax"'),'server must force actualNet/tax/performance crop recheck');
 assert(edge.includes('let third: any = null'),'disagreeing first/second crop reads must trigger a third vote');
+assert(edge.includes('const digitAudit = key === "actualNet" || key === "dedHealth"'),'server must run amount-only digit audit for actualNet');
+assert(edge.includes('key === "actualNet" || key === "dedHealth" || key === "dedTax" || key === "performance")'),'actualNet must receive the third crop vote');
 assert(edge.includes('recoverExtraItemsFromRows'),'missing extra payroll rows must be recoverable independently of first-pass extraItems');
 assert(edge.includes('payslip_extra_row_recovery'),'dynamic extra-row image recovery contract missing');
 

@@ -467,7 +467,7 @@ Deno.serve(async (req: Request) => {
       const clientValue = crop.currentAmount === null || !Number.isFinite(Number(crop.currentAmount)) ? null : Number(crop.currentAmount);
       const clientConf = Math.max(0, Math.min(1, Number(crop.currentConfidence) || 0));
       const sourcesDisagree = aiValue !== null && clientValue !== null && !amountAgree(aiValue, clientValue);
-      const forceRecheck = key === "performance" || key === "dedTax" || key === "dedHealth";
+      const forceRecheck = key === "actualNet" || key === "performance" || key === "dedTax" || key === "dedHealth";
       const shouldRecheck = forceRecheck || sourcesDisagree || aiValue === null || clientValue === null ||
         aiConf < .9 || clientConf < .9 ||
         (criticalFieldKeys.has(key) && Math.min(aiConf || 0, clientConf || 0) < .95);
@@ -488,7 +488,7 @@ Deno.serve(async (req: Request) => {
       const c2 = Math.max(0, Math.min(1, Number(second?.confidence) || 0));
       let third: any = null;
       if ((v1 !== null && v2 !== null && !amountAgree(v1, v2)) ||
-          key === "dedHealth" || key === "dedTax" || key === "performance") {
+          key === "actualNet" || key === "dedHealth" || key === "dedTax" || key === "performance") {
         third = await fieldCropRead(crop, 3);
       }
       const v3 = third?.amount === null || third?.amount === undefined ? null : Number(third.amount);
@@ -499,7 +499,7 @@ Deno.serve(async (req: Request) => {
         { pass: 3, value: v3, confidence: c3, raw: third, source: "field" }
       ].filter((r: any) => r.value !== null && Number.isFinite(Number(r.value)));
 
-      const digitAudit = key === "dedHealth" || key === "dedTax" || key === "performance";
+      const digitAudit = key === "actualNet" || key === "dedHealth" || key === "dedTax" || key === "performance";
       if (digitAudit && Array.isArray(crop.amountImages) && crop.amountImages.length) {
         const d1 = await digitOnlyRead(crop, 1);
         const d2 = await digitOnlyRead(crop, crop.amountImages.length >= 3 ? 3 : 2);

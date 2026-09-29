@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v270-payroll-digit-blind-gate">
+<meta name="meow-ui-build" content="v271-payroll-actualnet-rescue">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -8735,7 +8735,7 @@ const PAYSLIP_OCR_FIELDS=[
   {key:'otherIncome',label:'其他收入',kind:'income',priority:5,minScore:.94,terms:['其他收入','其他津貼','其他加給','其他應發','其他獎金','應發其他','應發雜項','其他應發款','雜項收入'],mode:'sum'}
 ]
 const PAYSLIP_CRITICAL_KEYS=new Set(['actualNet','base','shiftAllowance','performance','otPay','dedLabor','dedHealth','dedAttendance','dedTax','dedHealthExtra','dedPension']);
-const PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax','dedHealth']);
+const PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['actualNet','performance','dedTax','dedHealth']);
 const PAYSLIP_BLIND_BENCHMARK_KEY='meow-work-payslip-blind-benchmark-v1';
 function payslipBlindBenchmarkMode(){try{return localStorage.getItem(PAYSLIP_BLIND_BENCHMARK_KEY)==='1'}catch(e){return false}}
 function setSalarySubTab(tab){
