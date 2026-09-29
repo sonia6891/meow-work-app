@@ -7067,13 +7067,6 @@ async function finishNativeOAuthCallback(client,url){
     if(error)throw error;
     if(data&&data.session&&data.session.user){try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(e){};await handleSignedIn(data.session.user,data.session);return true}
   }
-  const hash=new URLSearchParams(callback.hash.replace(/^#/,''));
-  const accessToken=hash.get('access_token'),refreshToken=hash.get('refresh_token');
-  if(accessToken&&refreshToken){
-    const {data,error}=await client.auth.setSession({access_token:accessToken,refresh_token:refreshToken});
-    if(error)throw error;
-    if(data&&data.session&&data.session.user){try{localStorage.removeItem(WELCOME_REAUTH_KEY)}catch(e){};await handleSignedIn(data.session.user,data.session);return true}
-  }
   showNativeOAuthError(provider,'登入回呼沒有包含有效授權碼');
   return true;
 }
