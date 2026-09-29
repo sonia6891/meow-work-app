@@ -173,11 +173,11 @@ Deno.serve(async (req: Request) => {
     y: Number(row?.y) || 0,
     images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 2)
   })).filter((row: any) => Number.isFinite(row.amount) && row.images.length);
-  const fieldCrops = (Array.isArray(body?.fieldCrops) ? body.fieldCrops : []).slice(0, 8).map((row: any) => ({
+  const fieldCrops = (Array.isArray(body?.fieldCrops) ? body.fieldCrops : []).slice(0, 12).map((row: any) => ({
     key: String(row?.key || ""),
     currentAmount: row?.currentAmount === null || row?.currentAmount === undefined ? null : Number(row.currentAmount),
     currentConfidence: Math.max(0, Math.min(1, Number(row?.currentConfidence) || 0)),
-    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 2)
+    images: (Array.isArray(row?.images) ? row.images : []).filter((v: any) => typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v)).slice(0, 3)
   })).filter((row: any) => (FIELD_KEYS as readonly string[]).includes(row.key) && row.images.length);
   const imageQuality = body?.imageQuality && typeof body.imageQuality === "object"
     ? { score: Math.max(0, Math.min(100, Number(body.imageQuality.score) || 0)),
@@ -311,8 +311,8 @@ Deno.serve(async (req: Request) => {
 
     const fieldRechecks: Record<string, any> = {};
     const criticalFieldKeys = new Set([
-      "actualNet","base","shiftAllowance","otPay",
-      "dedLabor","dedHealth","dedAttendance","dedHealthExtra","dedPension"
+      "actualNet","base","shiftAllowance","performance","otPay",
+      "dedLabor","dedHealth","dedAttendance","dedTax","dedHealthExtra","dedPension"
     ]);
 
     async function fieldCropRead(crop: any, pass: number) {
@@ -333,11 +333,17 @@ Deno.serve(async (req: Request) => {
         text: "這是薪資單中「" + (FIELD_DESCRIPTIONS[key] || key) +
           "」附近的局部影像。請先逐字確認欄名，再讀與欄名同列或同欄配對的金額。如果不是這個欄位或金額看不清楚，amount 必須填 null。"
       }];
-      for (const image of crop.images || []) content.push({ type: "input_image", image_url: image, detail: "original" });
+      const allImages = Array.isArray(crop.images) ? crop.images : [];
+      const passImages = pass === 1
+        ? allImages.slice(0, 1)
+        : pass === 2
+          ? [allImages[1] || allImages[0]].filter(Boolean)
+          : [allImages[2] || allImages[1] || allImages[0]].filter(Boolean);
+      for (const image of passImages) content.push({ type: "input_image", image_url: image, detail: "original" });
       const body2 = {
         model: "gpt-5.6",
         store: false,
-        reasoning: { effort: pass === 1 ? "low" : "high" },
+        reasoning: { effort: pass === 1 ? "low" : pass === 2 ? "medium" : "high" },
         max_output_tokens: 360,
         instructions: [
           "你是台灣薪資單局部欄位的逐字複核員。",
@@ -373,7 +379,8 @@ Deno.serve(async (req: Request) => {
       const clientValue = crop.currentAmount === null || !Number.isFinite(Number(crop.currentAmount)) ? null : Number(crop.currentAmount);
       const clientConf = Math.max(0, Math.min(1, Number(crop.currentConfidence) || 0));
       const sourcesDisagree = aiValue !== null && clientValue !== null && !amountAgree(aiValue, clientValue);
-      const shouldRecheck = sourcesDisagree || aiValue === null || clientValue === null ||
+      const forceRecheck = key === "performance" || key === "dedTax";
+      const shouldRecheck = forceRecheck || sourcesDisagree || aiValue === null || clientValue === null ||
         aiConf < .9 || clientConf < .9 ||
         (criticalFieldKeys.has(key) && Math.min(aiConf || 0, clientConf || 0) < .95);
       if (!shouldRecheck) continue;
@@ -391,26 +398,66 @@ Deno.serve(async (req: Request) => {
       }
       const v2 = second?.amount === null || second?.amount === undefined ? null : Number(second.amount);
       const c2 = Math.max(0, Math.min(1, Number(second?.confidence) || 0));
-      const twoAgree = v1 !== null && v2 !== null && amountAgree(v1, v2) && c1 >= .84 && c2 >= .84;
-      const chosen = twoAgree ? Math.round((Number(v1) + Number(v2)) / 2) : (v1 !== null && c1 >= .9 ? v1 : null);
-      const chosenConf = twoAgree ? Math.min(.99, Math.min(c1, c2) + .05) : c1;
+      let third: any = null;
+      if (v1 !== null && v2 !== null && !amountAgree(v1, v2)) {
+        third = await fieldCropRead(crop, 3);
+      }
+      const v3 = third?.amount === null || third?.amount === undefined ? null : Number(third.amount);
+      const c3 = Math.max(0, Math.min(1, Number(third?.confidence) || 0));
+      const reads = [
+        { pass: 1, value: v1, confidence: c1, raw: first },
+        { pass: 2, value: v2, confidence: c2, raw: second },
+        { pass: 3, value: v3, confidence: c3, raw: third }
+      ].filter((r: any) => r.value !== null && Number.isFinite(Number(r.value)) && r.confidence >= .55);
+      const groups: any[] = [];
+      for (const read of reads) {
+        const found = groups.find((g: any) => amountAgree(g.mean, read.value));
+        if (found) {
+          found.items.push(read);
+          found.mean = found.items.reduce((sum: number, x: any) => sum + Number(x.value), 0) / found.items.length;
+        } else {
+          groups.push({ mean: Number(read.value), items: [read] });
+        }
+      }
+      for (const group of groups) {
+        group.avgConfidence = group.items.reduce((sum: number, x: any) => sum + Number(x.confidence), 0) / group.items.length;
+        group.maxConfidence = Math.max(...group.items.map((x: any) => Number(x.confidence)));
+      }
+      groups.sort((a: any, b: any) =>
+        b.items.length - a.items.length ||
+        b.avgConfidence - a.avgConfidence ||
+        b.maxConfidence - a.maxConfidence
+      );
+      const winner = groups[0] || null;
+      const consensus = winner ? winner.items.length : 0;
+      const strongConsensus = !!winner && consensus >= 2 && winner.avgConfidence >= .82;
+      const singleTrusted = reads.length === 1 && firstMatchesBoth && c1 >= .9;
+      const chosen = strongConsensus
+        ? Math.round(Number(winner.mean))
+        : (singleTrusted ? Number(v1) : null);
+      const chosenConf = strongConsensus
+        ? Math.min(.99, winner.avgConfidence + .05)
+        : (singleTrusted ? c1 : Math.min(c1 || .5, c2 || .5, c3 || .5, .55));
       let status = "conflict";
       if (chosen !== null) {
         const agreesAI = aiValue !== null && amountAgree(chosen, aiValue);
         const agreesClient = clientValue !== null && amountAgree(chosen, clientValue);
         if (agreesAI && agreesClient) status = "agree";
-        else if (agreesAI && !agreesClient) status = twoAgree ? "resolved_ai" : "conflict";
-        else if (!agreesAI && agreesClient) status = twoAgree ? "resolved_client" : "conflict";
-        else if ((aiValue === null || clientValue === null) && twoAgree) status = "filled";
-        else if (twoAgree) status = "corrected";
+        else if (agreesAI && !agreesClient) status = strongConsensus ? "resolved_ai" : "conflict";
+        else if (!agreesAI && agreesClient) status = strongConsensus ? "resolved_client" : "conflict";
+        else if ((aiValue === null || clientValue === null) && strongConsensus) status = "filled";
+        else if (strongConsensus) status = "corrected";
       }
+      const bestRead = winner?.items?.slice().sort((a: any, b: any) => b.confidence - a.confidence)[0] ||
+        reads.slice().sort((a: any, b: any) => b.confidence - a.confidence)[0] || null;
       fieldRechecks[key] = {
         value: chosen,
-        confidence: chosen === null ? Math.min(c1 || .5, c2 || .5, .55) : chosenConf,
-        consensus: twoAgree ? 2 : (chosen !== null ? 1 : 0),
+        confidence: chosenConf,
+        consensus: chosen === null ? 0 : consensus,
         status,
-        label: String((twoAgree ? second?.label : first?.label) || first?.label || ""),
-        evidence: String((twoAgree ? second?.evidence : first?.evidence) || first?.evidence || "")
+        label: String(bestRead?.raw?.label || ""),
+        evidence: String(bestRead?.raw?.evidence || ""),
+        candidates: reads.map((r: any) => ({ pass: r.pass, value: r.value, confidence: r.confidence }))
       };
     }
 
@@ -418,7 +465,125 @@ Deno.serve(async (req: Request) => {
     // subsidy/allowance rows. The amount is used as a visual anchor so the model
     // must locate the exact row, then copy the printed label character-by-character.
     // Two independent image-only reads must agree before we normalize a standard field.
-    const extraItems = Array.isArray(parsed?.extraItems) ? parsed.extraItems : [];
+    async function recoverExtraItemsFromRows() {
+      const compactOcr = String(ocrText || "").replace(/\s+/g, "");
+      const extraHint = /(餐費補助|伙食補助|膳食補助|餐補|誤餐費|補助|補貼|工會費|停車費|專案獎金|特殊津貼|特殊加給)/.test(compactOcr);
+      const f = parsed?.fields && typeof parsed.fields === "object" ? parsed.fields : {};
+      const incomeKeys = ["base","shiftAllowance","meal","performance","transport","otherIncome","otPay"];
+      const deductionKeys = ["dedLabor","dedHealth","dedWelfare","dedPension","dedAttendance","dedTax","dedHealthExtra","dedOther"];
+      const own = (key: string) => f[key] !== null && f[key] !== undefined && Number.isFinite(Number(f[key]));
+      const recognizedCount = [...incomeKeys, ...deductionKeys].filter(own).length;
+      const roughIncome = incomeKeys.reduce((sum, key) => sum + (own(key) ? Number(f[key]) : 0), 0);
+      const roughDeduction = deductionKeys.reduce((sum, key) => sum + (own(key) ? Number(f[key]) : 0), 0);
+      const actualNet = own("actualNet") ? Number(f.actualNet) : null;
+      const roughGap = actualNet === null ? 0 : Math.abs(actualNet - (roughIncome - roughDeduction));
+      const mathSuggestsMissing = actualNet !== null && own("base") && recognizedCount >= 6 &&
+        roughGap > Math.max(120, Math.abs(actualNet) * .008);
+      if (!extraHint && !mathSuggestsMissing) return [];
+
+      const knownAmounts = Object.values(f)
+        .map((v: any) => Number(v))
+        .filter((v: number) => Number.isFinite(v) && v >= 0);
+      const candidates = rowCrops
+        .filter((row: any) => Number.isFinite(Number(row?.amount)) && Array.isArray(row?.images) && row.images.length)
+        .map((row: any) => ({
+          row,
+          alreadyKnown: knownAmounts.some((v: number) => Math.abs(v - Number(row.amount)) <= 1)
+        }))
+        .sort((a: any, b: any) => Number(a.alreadyKnown) - Number(b.alreadyKnown))
+        .slice(0, 10);
+      if (!candidates.length) return [];
+
+      const recoverySchema = {
+        type: "object",
+        additionalProperties: false,
+        required: ["items"],
+        properties: {
+          items: {
+            type: "array",
+            maxItems: 8,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["rowAmount","label","kind","confidence","evidence"],
+              properties: {
+                rowAmount: { type: "number", minimum: 0 },
+                label: { type: "string", minLength: 1, maxLength: 80 },
+                kind: { type: "string", enum: ["income","deduction"] },
+                confidence: { type: "number", minimum: 0, maximum: 1 },
+                evidence: nullableString
+              }
+            }
+          }
+        }
+      };
+      const content: any[] = [{
+        type: "input_text",
+        text: [
+          "以下是薪資單若干金額所在列的局部裁切圖。請主動尋找『系統標準欄位以外』、但會影響本期實發的額外加項或扣項。",
+          "標準欄位包含：底薪、本薪、輪班/夜班津貼、伙食津貼、表現/績效津貼、交通津貼、其他收入、加班費、勞保、健保、福利金、勞退自提、考勤扣款、所得稅、健保補扣、其他扣款、實發/實領。",
+          "特別注意：『餐費補助』不是『伙食津貼』，若圖片真的寫餐費補助，必須逐字輸出 label=餐費補助、kind=income。",
+          "不要輸出合計、小計、應發總額、應扣總額、實發、時數、天數、費率、倍率或雇主負擔。",
+          "rowAmount 必須填該裁切列提示的候選金額；看不清楚名稱或加扣方向就不要輸出。"
+        ].join("\n")
+      }];
+      candidates.forEach(({ row }: any, index: number) => {
+        content.push({ type: "input_text", text: "候選列 " + (index + 1) + "；候選金額 NT$" + Math.round(Number(row.amount)).toLocaleString("zh-TW") });
+        content.push({ type: "input_image", image_url: row.images[0], detail: "original" });
+      });
+      const res3 = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + openaiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gpt-5.6",
+          store: false,
+          reasoning: { effort: "medium" },
+          max_output_tokens: 900,
+          instructions: "你是台灣薪資單額外加扣項的逐列發現器。只根據局部影像逐字辨識，不得依常識自創項目。",
+          input: [{ role: "user", content }],
+          text: { format: { type: "json_schema", name: "payslip_extra_row_recovery", strict: true, schema: recoverySchema } }
+        }),
+        signal: AbortSignal.timeout(35_000)
+      });
+      const p3 = await res3.json().catch(() => null);
+      inTok += Number(p3?.usage?.input_tokens || 0);
+      outTok += Number(p3?.usage?.output_tokens || 0);
+      if (!res3.ok) return [];
+      let decoded: any = null;
+      try { decoded = JSON.parse(outputText(p3)); } catch (_) { return []; }
+      const standardLabel = /(實發|實領|淨額|入帳|應發|應扣|合計|小計|底薪|本薪|基本薪|輪班|夜班|伙食津貼|表現|績效|交通津貼|加班費|勞保|健保|福利金|勞退|考勤|所得稅|其他收入|其他扣款)/;
+      return (Array.isArray(decoded?.items) ? decoded.items : []).filter((item: any) => {
+        const amount = Number(item?.rowAmount);
+        const label = String(item?.label || "").replace(/\s+/g, "");
+        const confidence = Math.max(0, Math.min(1, Number(item?.confidence) || 0));
+        const matchesCandidate = candidates.some(({ row }: any) => Math.abs(Number(row.amount) - amount) <= 1);
+        if (!matchesCandidate || !label || confidence < .7 || standardLabel.test(label)) return false;
+        return true;
+      }).map((item: any) => ({
+        label: String(item.label || "").trim(),
+        amount: Number(item.rowAmount),
+        kind: item.kind === "deduction" ? "deduction" : "income",
+        confidence: Math.max(0, Math.min(1, Number(item.confidence) || 0)),
+        evidence: String(item.evidence || "")
+      }));
+    }
+
+    let extraItems = Array.isArray(parsed?.extraItems) ? parsed.extraItems : [];
+    try {
+      const recovered = await recoverExtraItemsFromRows();
+      const seenRecovered = new Set(extraItems.map((item: any) =>
+        String(item?.kind || "income") + "|" + String(item?.label || "").replace(/\s+/g, "") + "|" + Math.round(Number(item?.amount) || 0)
+      ));
+      for (const item of recovered) {
+        const key = String(item.kind) + "|" + String(item.label || "").replace(/\s+/g, "") + "|" + Math.round(Number(item.amount) || 0);
+        if (!seenRecovered.has(key)) {
+          extraItems.push(item);
+          seenRecovered.add(key);
+        }
+      }
+    } catch (_) {}
+    parsed.extraItems = extraItems;
+
     const mealAlreadyReliable =
       parsed?.fields?.meal !== null &&
       parsed?.fields?.meal !== undefined &&
