@@ -1,0 +1,121 @@
+name: Payslip Vision ship gate V3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - benchmarks/payslip/**
+      - .github/workflows/payslip-ship-gate-v3.yml
+
+permissions:
+  contents: read
+
+jobs:
+  holdout:
+    name: V3 unseen-layout shard ${{ matrix.shard }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install renderer
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Generate 200 structurally fresh holdout documents
+        run: |
+          START=$(( 12000 + ${{ matrix.shard }} * 200 ))
+          OUT="/tmp/payslip-v3-${{ matrix.shard }}"
+          mkdir -p "$OUT"
+          python benchmarks/payslip/generate_corpus.py --start "$START" --count 200 --out "$OUT"
+      - name: Build dual-pass Apple Vision runner
+        run: |
+          swiftc -O benchmarks/payslip/vision_benchmark.swift \
+            -framework Vision -framework AppKit \
+            -o /tmp/vision_benchmark
+      - name: Run literal and label-focused Vision passes
+        run: |
+          OUT="/tmp/payslip-v3-${{ matrix.shard }}"
+          /tmp/vision_benchmark --manifest "$OUT/manifest.jsonl" --out "$OUT/vision.jsonl"
+      - name: Score stitched digits and labels
+        run: |
+          OUT="/tmp/payslip-v3-${{ matrix.shard }}"
+          python benchmarks/payslip/evaluate_vision.py \
+            --manifest "$OUT/manifest.jsonl" \
+            --vision "$OUT/vision.jsonl" \
+            --out "$OUT/summary.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payslip-v3-shard-${{ matrix.shard }}
+          path: /tmp/payslip-v3-${{ matrix.shard }}/summary.json
+          if-no-files-found: error
+          retention-days: 14
+
+  gate:
+    name: V3 Vision shipping floor
+    needs: holdout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: payslip-v3-shard-*
+          path: /tmp/results
+      - name: Merge V3 and enforce shipping-quality Vision floor
+        run: |
+          python - <<'PY'
+          import json,glob,collections,pathlib
+          files=glob.glob('/tmp/results/**/summary.json',recursive=True)
+          assert len(files)==5, files
+          fields=collections.defaultdict(lambda:[0,0])
+          micros=collections.defaultdict(lambda:[0,0])
+          extras=[0,0,0]; cases=0; conf=collections.Counter()
+          for p in files:
+              d=json.load(open(p))
+              s=d['splits']['holdout']
+              cases+=s['cases']
+              for k,c in s['field_counts'].items():
+                  fields[k][0]+=c['correct']; fields[k][1]+=c['total']
+              for k,c in s['micro_counts'].items():
+                  micros[k][0]+=c['correct']; micros[k][1]+=c['total']
+              extras[0]+=s['extra_amount_correct']; extras[1]+=s['extra_label_correct']; extras[2]+=s['extra_total']
+              for x in d.get('top_confusions_by_split',{}).get('holdout',[]):
+                  conf[(x['field'],x['expected'],x['read'])]+=x['count']
+          assert cases==1000, cases
+          fc={k:{'correct':v[0],'total':v[1],'accuracy':v[0]/v[1] if v[1] else None} for k,v in fields.items()}
+          mc={k:{'correct':v[0],'total':v[1],'accuracy':v[0]/v[1] if v[1] else None} for k,v in micros.items()}
+          total=sum(v['total'] for v in fc.values()); correct=sum(v['correct'] for v in fc.values())
+          out={
+            'cases':cases,
+            'overall_field_accuracy':correct/total,
+            'field_counts':fc,
+            'critical_microcrop':mc,
+            'extra_amount_recall':extras[0]/extras[2] if extras[2] else 0,
+            'extra_label_recall':extras[1]/extras[2] if extras[2] else 0,
+            'extra_total':extras[2],
+            'top_confusions':[{'field':k[0],'expected':k[1],'read':k[2],'count':n} for k,n in conf.most_common(40)]
+          }
+          pathlib.Path('/tmp/payslip-vision-ship-gate-v3.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+
+          # Vision is only the first layer, but these floors ensure OpenAI is not
+          # being asked to rescue a weak OCR foundation.
+          assert out['overall_field_accuracy'] >= .97, out['overall_field_accuracy']
+          assert fc['dedHealth']['accuracy'] >= .99, fc['dedHealth']
+          assert fc['dedTax']['accuracy'] >= .995, fc['dedTax']
+          assert fc['performance']['accuracy'] >= .97, fc['performance']
+          assert fc['actualNet']['accuracy'] >= .96, fc['actualNet']
+          assert mc['dedHealth']['accuracy'] >= .95, mc['dedHealth']
+          assert mc['dedTax']['accuracy'] >= .95, mc['dedTax']
+          assert mc['performance']['accuracy'] >= .92, mc['performance']
+          assert out['extra_amount_recall'] >= .99, out['extra_amount_recall']
+          assert out['extra_label_recall'] >= .80, out['extra_label_recall']
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payslip-vision-ship-gate-v3-summary
+          path: /tmp/payslip-vision-ship-gate-v3.json
+          retention-days: 30
