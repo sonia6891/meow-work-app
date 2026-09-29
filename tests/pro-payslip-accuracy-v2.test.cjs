@@ -52,6 +52,7 @@ for(let i=0;i<10000;i++){
 }
 assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['actualNet','performance','dedTax','dedHealth'])"),'actualNet, tax, performance and health must always receive targeted crop recheck');
 assert(html.includes("consensus>=2&&conf>=.9"),'two-pass-or-better targeted consensus must be able to override stale local OCR');
+assert(html.includes("['actualNet','performance','dedTax'].includes(key)&&String(r.status||'')==='conflict'"),'actualNet must clear stale auto-value when targeted recheck has no trusted consensus');
 assert(!html.includes("consensus>=2&&conf>=.92&&localConf<.82"),'high-confidence stale OCR must not block a stronger crop consensus');
 assert(edge.includes('forceRecheck = key === "actualNet" || key === "performance" || key === "dedTax"'),'server must force actualNet/tax/performance crop recheck');
 assert(edge.includes('let third: any = null'),'disagreeing first/second crop reads must trigger a third vote');

@@ -46,6 +46,7 @@ assert(edge.includes('safeTranscript'), 'unseen payroll labels require repeated 
 assert(edge.includes('.slice(0, 8)'), 'all recovered extra rows must be eligible for exact-label verification');
 
 assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['actualNet','performance','dedTax','dedHealth'])"), 'actualNet, tax, performance and health insurance must be forced into field crops');
+assert(html.includes("['actualNet','performance','dedTax'].includes(key)&&String(r.status||'')==='conflict'"), 'actualNet conflict must fail closed instead of preserving a stale OCR amount');
 assert(html.includes("PAYSLIP_BLIND_BENCHMARK_KEY"), 'blind benchmark mode must be available');
 assert(html.includes("if(payslipBlindBenchmarkMode())return run"), 'blind benchmark must disable layout memory');
 assert(html.includes("if(PAYSLIP_CRITICAL_KEYS.has(key))return"), 'critical fields must never be synthesized from layout memory');
