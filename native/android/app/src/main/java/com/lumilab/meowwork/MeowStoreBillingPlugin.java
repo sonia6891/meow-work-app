@@ -18,7 +18,6 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import org.json.JSONException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -241,8 +240,7 @@ public class MeowStoreBillingPlugin extends Plugin {
     }
 
     private void putArray(JSArray array, Object value) {
-        try { array.put(value); }
-        catch (JSONException error) { throw new IllegalStateException("Unable to build billing response", error); }
+        array.put(value);
     }
 
     private String sha256(String input) {
