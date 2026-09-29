@@ -478,7 +478,7 @@ Deno.serve(async (req: Request) => {
       const actualNet = own("actualNet") ? Number(f.actualNet) : null;
       const roughGap = actualNet === null ? 0 : Math.abs(actualNet - (roughIncome - roughDeduction));
       const mathSuggestsMissing = actualNet !== null && own("base") && recognizedCount >= 6 &&
-        roughGap > Math.max(120, Math.abs(actualNet) * .008);
+        roughGap > Math.max(5, Math.min(20, Math.abs(actualNet) * .0004));
       if (!extraHint && !mathSuggestsMissing) return [];
 
       const knownAmounts = Object.values(f)
