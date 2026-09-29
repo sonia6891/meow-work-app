@@ -33,10 +33,10 @@ for (const [name, reads, aiValue, aiConfidence, expected] of cases) {
   if (expected === null) assert.strictEqual(result.unanimous, false, name + ' must fail closed');
 }
 
-assert(edge.includes('key === "performance" || key === "dedTax" || key === "dedHealth"'), 'tax, performance and health must always be reread');
+assert(edge.includes('key === "actualNet" || key === "performance" || key === "dedTax" || key === "dedHealth"'), 'actualNet, tax, performance and health must always be reread');
 assert(edge.includes('digitOnlyRead'), 'critical payroll digits require an independent amount-only verifier');
 assert(edge.includes('group.digitVotes * 2'), 'digit-only reads must carry independent weight');
-assert(edge.includes('key === "dedHealth" || key === "dedTax" || key === "performance"'), 'health/tax/performance must receive digit audit');
+assert(edge.includes('key === "actualNet" || key === "dedHealth" || key === "dedTax" || key === "performance"'), 'actualNet/health/tax/performance must receive digit audit');
 assert(edge.includes('recoverExtraItemsFromRows'), 'independent extra row rediscovery must remain wired');
 assert(edge.includes('.slice(0, 16)'), 'extra row rediscovery must inspect enough unclaimed candidate rows');
 assert(edge.includes('名稱待確認（讀到：'), 'uncertain extra-row amounts must remain visible for human label confirmation');
@@ -45,7 +45,7 @@ assert(edge.includes('best.rs.length >= 2') && edge.includes('2/3 高信心逐�
 assert(edge.includes('safeTranscript'), 'unseen payroll labels require repeated high-confidence literal transcription');
 assert(edge.includes('.slice(0, 8)'), 'all recovered extra rows must be eligible for exact-label verification');
 
-assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax','dedHealth'])"), 'tax, performance and health insurance must be forced into field crops');
+assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['actualNet','performance','dedTax','dedHealth'])"), 'actualNet, tax, performance and health insurance must be forced into field crops');
 assert(html.includes("PAYSLIP_BLIND_BENCHMARK_KEY"), 'blind benchmark mode must be available');
 assert(html.includes("if(payslipBlindBenchmarkMode())return run"), 'blind benchmark must disable layout memory');
 assert(html.includes("if(PAYSLIP_CRITICAL_KEYS.has(key))return"), 'critical fields must never be synthesized from layout memory');
@@ -57,6 +57,6 @@ assert(html.includes('mergedAmounts=new Map()'), 'money candidates must merge ac
 assert(html.includes('payslipScanEpoch'), 'rerun/clear generation guard missing');
 assert(html.includes('resetPayslipScan(false,false)'), 'a new scan must reset UI without invalidating itself');
 assert(html.includes("item.confidence<.45"), 'uncertain recovered extra rows must not be silently discarded');
-assert(html.includes('v270-payroll-digit-blind-gate'), 'test must target the new visible build');
+assert(html.includes('v271-payroll-actualnet-rescue'), 'test must target the actualNet rescue build');
 
 console.log('PASS independent Pro payslip red gate:', cases.length, 'consensus cases plus rerun/crop/extra-row wiring checks');
