@@ -15,6 +15,7 @@ concurrency:
   group: payslip-vision-ship-v3
   cancel-in-progress: true
 
+jobs:
   contract:
     name: V3.1 numeric rescue contract
     runs-on: ubuntu-latest
@@ -29,7 +30,6 @@ concurrency:
           grep -Fq "purpose:'payslip-numeric'" index.html
           grep -Fq 'function fusePayslipVisionNumericData' index.html
 
-jobs:
   holdout:
     name: V3 unseen-layout shard ${{ matrix.shard }}
     runs-on: macos-latest

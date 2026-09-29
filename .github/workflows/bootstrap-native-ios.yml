@@ -159,7 +159,7 @@ jobs:
           grep -q 'registerPluginInstance(MeowScheduleVisionPlugin())' ios/App/App/SceneDelegate.swift
           grep -q 'let isPayslip = purpose.hasPrefix("payslip")' ios/App/App/SceneDelegate.swift
           grep -q 'let isPayslipLabelPass = purpose == "payslip-label"' ios/App/App/SceneDelegate.swift
-          # V3.1 numeric rescue is checked in both native Swift and the bundled web runtime.
+          # V3.1 numeric rescue is checked in native Swift, the bundled web runtime, and the ship gate.
           grep -Fq 'let isPayslipNumericPass = purpose == "payslip-numeric"' ios/App/App/SceneDelegate.swift
           grep -q 'request.usesLanguageCorrection = isPayslipLabelPass' ios/App/App/SceneDelegate.swift
           grep -Fq 'request.recognitionLanguages = isPayslipNumericPass ? ["en-US"] : ["zh-Hant", "en-US"]' ios/App/App/SceneDelegate.swift
