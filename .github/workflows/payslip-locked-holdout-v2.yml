@@ -102,6 +102,7 @@ jobs:
           assert mc['dedHealth']['accuracy'] >= .88, mc['dedHealth']
           assert mc['dedTax']['accuracy'] >= .88, mc['dedTax']
           assert mc['performance']['accuracy'] >= .85, mc['performance']
+          assert mc['actualNet']['accuracy'] >= .90, mc['actualNet']
           assert out['extra_amount_recall'] >= .95, out['extra_amount_recall']
           PY
       - uses: actions/upload-artifact@v4

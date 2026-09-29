@@ -129,6 +129,7 @@ jobs:
           assert mc['dedHealth']['accuracy'] >= .95, mc['dedHealth']
           assert mc['dedTax']['accuracy'] >= .95, mc['dedTax']
           assert mc['performance']['accuracy'] >= .92, mc['performance']
+          assert mc['actualNet']['accuracy'] >= .95, mc['actualNet']
           assert out['extra_amount_recall'] >= .99, out['extra_amount_recall']
           assert out['extra_label_recall'] >= .80, out['extra_label_recall']
           PY
