@@ -33,6 +33,31 @@ for(let i=0;i<10000;i++){
   f.actualNet=40000+extras[0].amount-800-500-extras[1].amount;tested++;
   assert(payslipMathAudit(f,extras,{base:40000,dedLabor:800,dedHealth:500}).mathOk);
 }
+
+// Regression locks for real payslip arbitration failures reported on device.
+// Correct: income tax 97, performance allowance 1,300, plus a dynamic 餐費補助 row.
+{
+  const extras=[{label:'餐費補助',amount:1200,kind:'income'}];
+  const correct={base:29300,shiftAllowance:5120,meal:0,performance:1300,transport:0,otherIncome:0,otPay:0,dedLabor:700,dedHealth:500,dedWelfare:100,dedPension:0,dedAttendance:0,dedTax:97,dedHealthExtra:0,dedOther:0};
+  correct.actualNet=29300+5120+1300+1200-700-500-100-97;
+  const good=payslipMathAudit(correct,extras,{...correct});
+  assert(good.mathOk,'correct 97 tax / 1300 performance / 餐費補助 must balance');
+  assert.strictEqual(good.extraIncome,1200,'餐費補助 must remain a separate extra income item');
+
+  const wrongTax={...correct,dedTax:15};
+  assert(!payslipMathAudit(wrongTax,extras,correct).mathOk,'15 must not be accepted when printed income tax is 97');
+
+  const wrongPerformance={...correct,performance:300};
+  assert(!payslipMathAudit(wrongPerformance,extras,correct).mathOk,'300 must not be accepted when printed performance allowance is 1300');
+}
+assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax'])"),'tax and performance must always receive targeted crop recheck');
+assert(html.includes("consensus>=2&&conf>=.9"),'two-pass-or-better targeted consensus must be able to override stale local OCR');
+assert(!html.includes("consensus>=2&&conf>=.92&&localConf<.82"),'high-confidence stale OCR must not block a stronger crop consensus');
+assert(edge.includes('forceRecheck = key === "performance" || key === "dedTax"'),'server must force tax/performance crop recheck');
+assert(edge.includes('let third: any = null'),'disagreeing first/second crop reads must trigger a third vote');
+assert(edge.includes('recoverExtraItemsFromRows'),'missing extra payroll rows must be recoverable independently of first-pass extraItems');
+assert(edge.includes('payslip_extra_row_recovery'),'dynamic extra-row image recovery contract missing');
+
 assert(tested>=50000);
 for(const n of ['assessPayslipImageQuality','imageQuality.blocked','buildPayslipFieldCrops','applyPayslipArbitration',"num(payslipOcrResult.__confidence?.[key])<.85","num(payslipOcrResult.__confidence?.[key])<.9",'meow-work-payslip-format-memory-v4','實發金額是 Pro 薪資對帳的核心欄位'])assert(html.includes(n),'missing '+n);
 for(const n of ['fieldCropRead','fieldRechecks','錯誤的自信答案比待確認更糟'])assert(edge.includes(n),'edge missing '+n);
