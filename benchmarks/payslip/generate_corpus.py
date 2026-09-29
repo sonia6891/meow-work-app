@@ -121,7 +121,7 @@ def save_critical_crops(im,field_boxes,out_dir,idx):
 def render(idx,out_dir):
     rng=random.Random(934871+idx*7919)
     split="tune" if idx<4000 else "holdout"
-    family=(idx%32) if split=="tune" else (32+(idx%8))
+    family=(idx%32) if split=="tune" else ((40+(idx%8)) if idx>=12000 else (32+(idx%8)))
     vals=case_values(rng,idx)
     bg=rng.choice([(255,255,255),(250,250,247),(248,252,255),(255,250,246)])
     im=Image.new("RGB",(W,H),bg)
@@ -212,7 +212,7 @@ def render(idx,out_dir):
             else:
                 kind=next((x["kind"] for x in vals["extras"] if x["label"]==k and x["amount"]==v),"income")
                 extra_boxes.append({"label":k,"amount":v,"kind":kind,"bbox":bb})
-    else:
+    elif family<40:
         # Locked holdout families: reversed direction, boxed cards, alternating label/value order,
         # and a right-side net summary. These structures are not used in tune families.
         card_y=y0
@@ -231,6 +231,70 @@ def render(idx,out_dir):
                 bb=list(d.textbbox((x+18,y+15),txt,font=font))
             if k in FIELD_ALIASES:field_boxes[k]=bb
             else:extra_boxes.append({"label":k,"amount":v,"kind":kind,"bbox":bb})
+    else:
+        # Ship-gate V3 families (40-47): deliberately new geometry.
+        rows=[(k,vals[k],"income" if k in earnings else "deduction") for k in earnings+deductions]
+        rows += [(x["label"],x["amount"],x["kind"]) for x in vals["extras"]]
+        mode=family%4
+        if mode==0:
+            # Receipt-like single column with kind markers between label and amount.
+            y=y0
+            for k,v,kind in rows:
+                label=label_for(rng,k) if k in FIELD_ALIASES else k
+                draw_text(d,(80,y),label,small)
+                draw_text(d,(600,y),"＋" if kind=="income" else "－",small)
+                txt=money(v,comma);draw_text(d,(1080,y),txt,font,anchor="ra")
+                bb=list(d.textbbox((1080,y),txt,font=font,anchor="ra"))
+                if k in FIELD_ALIASES:field_boxes[k]=bb
+                else:extra_boxes.append({"label":k,"amount":v,"kind":kind,"bbox":bb})
+                d.line((70,y+38,1100,y+38),fill=(218,218,218),width=1)
+                y+=55
+        elif mode==1:
+            # Two zig-zag columns; values lead, labels trail.
+            for i,(k,v,kind) in enumerate(rows):
+                col=i%2;row=i//2;x=70+col*555;y=y0+row*92
+                txt=money(v,comma);draw_text(d,(x+20,y+12),txt,font)
+                label=label_for(rng,k) if k in FIELD_ALIASES else k
+                draw_text(d,(x+205,y+16),label,small)
+                d.line((x,y+60,x+500,y+60),fill=(195,195,195),width=1)
+                bb=list(d.textbbox((x+20,y+12),txt,font=font))
+                if k in FIELD_ALIASES:field_boxes[k]=bb
+                else:extra_boxes.append({"label":k,"amount":v,"kind":kind,"bbox":bb})
+        elif mode==2:
+            # Three-column ledger cards with label over value and explicit income/deduction badge.
+            cols=[70,430,790]
+            for i,(k,v,kind) in enumerate(rows):
+                col=i%3;row=i//3;x=cols[col];y=y0+row*108
+                d.rounded_rectangle((x,y,x+310,y+88),radius=8,outline=(180,180,180),width=1)
+                label=label_for(rng,k) if k in FIELD_ALIASES else k
+                draw_text(d,(x+14,y+10),label,small)
+                draw_text(d,(x+250,y+10),"應發" if kind=="income" else "應扣",find_font(17),anchor="ra")
+                txt=money(v,comma);draw_text(d,(x+286,y+45),txt,font,anchor="ra")
+                bb=list(d.textbbox((x+286,y+45),txt,font=font,anchor="ra"))
+                if k in FIELD_ALIASES:field_boxes[k]=bb
+                else:extra_boxes.append({"label":k,"amount":v,"kind":kind,"bbox":bb})
+        else:
+            # Income and deduction sections stacked; some values precede labels.
+            inc=[r for r in rows if r[2]=="income"];ded=[r for r in rows if r[2]=="deduction"]
+            y=y0
+            for title_text,group in (("本期應發",inc),("本期應扣",ded)):
+                draw_text(d,(70,y),title_text,header);y+=42
+                for i,(k,v,kind) in enumerate(group):
+                    col=i%2
+                    if col==0 and i>0:y+=64
+                    x=80+col*550
+                    label=label_for(rng,k) if k in FIELD_ALIASES else k
+                    if (i+family)%2:
+                        txt=money(v,comma);draw_text(d,(x,y),txt,font)
+                        draw_text(d,(x+180,y+3),label,small)
+                        bb=list(d.textbbox((x,y),txt,font=font))
+                    else:
+                        draw_text(d,(x,y+3),label,small)
+                        txt=money(v,comma);draw_text(d,(x+485,y),txt,font,anchor="ra")
+                        bb=list(d.textbbox((x+485,y),txt,font=font,anchor="ra"))
+                    if k in FIELD_ALIASES:field_boxes[k]=bb
+                    else:extra_boxes.append({"label":k,"amount":v,"kind":kind,"bbox":bb})
+                y+=92
 
     # Net pay summary.
     net_y=1380 if family<32 else 1320
