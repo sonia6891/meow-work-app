@@ -9446,7 +9446,7 @@ async function preprocessPayslipVariants(file){
     img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('圖片讀取失敗'))};img.src=url;
   });
 }
-function renderPayslipDetected(){function renderPayslipDetected(){
+function renderPayslipDetected(){
   const box=$('payslipDetectedFields');if(!box)return;
   const matches=Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches:[],validation=validatePayslipValues(payslipOcrResult);
   const disagreement=payslipOcrResult.__fieldWarnings||{};
@@ -9671,7 +9671,7 @@ function mergePayslipAiVerification(ai){
   payslipOcrResult.__extraItems=payslipOcrResult.__extraItems.map(item=>String(item&&item.label||'').trim()==='餐費補助'?Object.assign({},item,{kind:'income'}):item);
   payslipOcrResult.__aiVerified=true;payslipOcrResult.__aiSummary={agreed,conflicts,added,rechecked,extra:payslipOcrResult.__extraItems.length,model:ai.model||'',remaining:ai.usage&&ai.usage.remaining};payslipOcrResult.__aiNotes=Array.isArray(ai.notes)?ai.notes.slice(0,12):[];applyPayslipArbitration();return true;
 }
-async function payslipBlobImage(blob){async function payslipBlobImage(blob){
+async function payslipBlobImage(blob){
   return new Promise((resolve,reject)=>{
     const url=URL.createObjectURL(blob),img=new Image();
     img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
