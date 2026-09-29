@@ -134,8 +134,9 @@ for(let i=0;i<200;i++)for(const q of questions){
 
 // UI discovery contract requested by product review.
 assert(!html.includes('🏖 查特休餘額'),'assistant quick actions must not spend a slot on annual-leave balance');
-assert(html.includes('📅 新增行程'),'assistant must teach itinerary voice usage');
-assert(html.includes('☑ 新增待辦'),'assistant must teach todo voice usage');
+assert(html.includes('📅 行程管理'),'assistant must teach itinerary management voice usage');
+assert(html.includes('☑ 待辦管理'),'assistant must teach todo management voice usage');
+assert(html.includes('⚖ 勞動法規問答'),'assistant must advertise labor-law Q&A');
 assert(html.includes('明天記得買貓砂'),'todo quick prompt should demonstrate ordinary speech');
 
 // Speech transcription and cloud fallback must be todo-aware.
