@@ -11570,6 +11570,7 @@ function meowAssistantActionTitle(raw,kind){
     .replace(/(?:到|至|~|～)/g,' ')
     .replace(/前\s*(?:3|1)\s*(?:天|小時)\s*(?:提醒我|提醒)?|前三天\s*(?:提醒我|提醒)?|前一天\s*(?:提醒我|提醒)?|前一小時\s*(?:提醒我|提醒)?/g,' ')
     .replace(/請幫我|麻煩幫我|幫我記一下|幫我記得|幫我記|記一下|記著|提醒我|別忘了|記得|幫我|我要|我想要|我想/g,' ')
+    .replace(kind==='todo'?/取消(?=(?:訂閱|會員|服務|自動續訂|預約))/g:/a^/g,'__MEOW_TODO_CANCEL__')
     .replace(/新增|增加|建立|加一個|加個|記一個|排一個|安排|取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了/g,' ')
     .replace(kind==='todo'?/(?:待辦事項|代辦事項|待辦|代辦|TODO)/ig:/(?:行程|活動|約會|EVENT)/ig,' ')
     .replace(/一個|一項/g,' ')
@@ -11578,7 +11579,8 @@ function meowAssistantActionTitle(raw,kind){
     .replace(/^麻煩\s*/,'')
     .replace(/^我\s+(?=\S)/,'')
     .replace(/^(?:我\s*)?(?:會|要|得|需要|必須|想要|想|打算|預計)\s*/,'')
-    .replace(/^的\s*|\s*的$/g,'').trim();
+    .replace(/^的\s*|\s*的$/g,'').trim()
+    .replace(/__MEOW_TODO_CANCEL__/g,'取消');
   if(kind!=='todo')t=t.replace(/^準備\s*/,'').trim();
   return t.slice(0,80);
 }
