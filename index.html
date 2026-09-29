@@ -9668,7 +9668,11 @@ function mergePayslipAiVerification(ai){
     if(has&&!payslipAmountsAgree(current,value)){payslipOcrResult.__openAiAlternates[key]={value,confidence:conf,evidence:String(r.evidence||'局部重讀')};payslipOcrResult.__confidence[key]=Math.min(localConf||.6,.6);payslipOcrResult.__fieldWarnings[key]=(payslipOcrResult.__fieldWarnings[key]||'')+' 局部重讀得到 '+value.toLocaleString('zh-TW')+'，仍與目前值不一致，禁止自動確認。'}
   });
   const seen=new Set();payslipOcrResult.__extraItems=(Array.isArray(ai.extraItems)?ai.extraItems:[]).map(item=>({label:String(item&&item.label||'').trim(),amount:Number(item&&item.amount),kind:item&&item.kind==='deduction'?'deduction':'income',confidence:Math.max(0,Math.min(1,Number(item&&item.confidence)||0)),evidence:String(item&&item.evidence||'').trim()})).filter(item=>{if(!item.label||!Number.isFinite(item.amount)||item.amount<0||item.confidence<.55)return false;const k=item.kind+'|'+normalizeOcrText(item.label)+'|'+Math.round(item.amount);if(seen.has(k))return false;seen.add(k);return true}).slice(0,20);
-  payslipOcrResult.__extraItems=payslipOcrResult.__extraItems.map(item=>String(item&&item.label||'').trim()==='餐費補助'?Object.assign({},item,{kind:'income'}):item);
+  payslipOcrResult.__extraItems=payslipOcrResult.__extraItems.map(item=>{
+    const label=String(item&&item.label||'').trim();
+    if(label==='餐費補助')return Object.assign({},item,{kind:'income'});
+    return item;
+  });
   payslipOcrResult.__aiVerified=true;payslipOcrResult.__aiSummary={agreed,conflicts,added,rechecked,extra:payslipOcrResult.__extraItems.length,model:ai.model||'',remaining:ai.usage&&ai.usage.remaining};payslipOcrResult.__aiNotes=Array.isArray(ai.notes)?ai.notes.slice(0,12):[];applyPayslipArbitration();return true;
 }
 async function payslipBlobImage(blob){

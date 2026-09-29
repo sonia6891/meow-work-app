@@ -4,20 +4,12 @@ const html=fs.readFileSync('index.html','utf8');
 const edge=fs.readFileSync('supabase/functions/payslip-verify/index.ts','utf8');
 const swift=fs.readFileSync('native/ios-sources/ViewController.swift','utf8');
 
-function extractFunction(name){
+function extractFunction(name,nextName){
   const start=html.indexOf('function '+name+'(');assert(start>=0,'missing '+name);
-  const brace=html.indexOf('{',start);let depth=0,inStr='',esc=false,inRegex=false,inClass=false;
-  for(let i=brace;i<html.length;i++){
-    const ch=html[i],prev=html[i-1]||'',next=html[i+1]||'';
-    if(inStr){if(esc){esc=false;continue}if(ch==='\\'){esc=true;continue}if(ch===inStr)inStr='';continue}
-    if(inRegex){if(esc){esc=false;continue}if(ch==='\\'){esc=true;continue}if(ch==='[')inClass=true;else if(ch===']')inClass=false;else if(ch==='/'&&!inClass)inRegex=false;continue}
-    if(ch==="'"||ch==='"'||ch==='\`'){inStr=ch;continue}
-    if(ch==='/'&&next!=='/'&&next!=='*'&&prev!=='\\'){inRegex=true;continue}
-    if(ch==='{')depth++;else if(ch==='}'&&--depth===0)return html.slice(start,i+1);
-  }
-  throw new Error('unterminated '+name);
+  const end=html.indexOf('function '+nextName+'(',start+1);assert(end>start,'missing next function '+nextName);
+  return html.slice(start,end).trim();
 }
-const payslipMathAudit=new Function(extractFunction('payslipMathAudit')+';return payslipMathAudit')();
+const payslipMathAudit=new Function(extractFunction('payslipMathAudit','payslipTrustScore')+';return payslipMathAudit')();
 
 let tested=0;
 for(let i=0;i<20000;i++){
