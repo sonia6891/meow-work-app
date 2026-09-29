@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v267-natural-todo-voice">
+<meta name="meow-ui-build" content="v268-payroll-accuracy-v2">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -8715,7 +8715,7 @@ const ITEMIZED_FIELDS=[
   {key:'dedOther',label:'其他扣款',kind:'deduction'}
 ];
 let itemizedOpen=false,salaryHistoryOpen=false,payslipScanOpen=false,salaryExportOpen=false,salarySubTab='calc',historyYear=current.getFullYear(),aiSchedulePending=null,payslipOcrResult={},payslipRawText='',payslipOcrRuns=[],payslipOcrDocument={width:0,height:0},payslipManualFieldKey='',payslipAiResult=null,payslipAiStatus='idle',payslipCurrentFile=null,payslipPreviousRun=null;
-const PAYSLIP_FORMAT_MEMORY_KEY='meow-work-payslip-format-memory-v3';
+const PAYSLIP_FORMAT_MEMORY_KEY='meow-work-payslip-format-memory-v4';
 const PAYSLIP_OCR_FIELDS=[
   {key:'actualNet',label:'實發金額',kind:'net',priority:30,terms:['實發金額','實領金額','實領薪資','實領工資','實領合計','實發合計','本期實發','本期實領','實付金額','實付薪資','實付額','實領','實發','淨額','淨薪','入帳金額','轉帳金額','銀行入帳','匯款金額','應付淨額','應領淨額','應領金額','實際入帳','薪資入帳','NET PAY','NETPAY','TAKE HOME'],mode:'last'},
   {key:'dedHealthExtra',label:'健保補扣／補充保費',kind:'deduction',priority:40,terms:['健保補扣','健保補扣款','健保補繳','健保補收','健保補費','健保追補','補健保','健保補充保費','健保補充費','補充保費','補充健保費','補充保險費','補充保險','補充保','補保費','二代健保','二代健保補充保費','二代健保費','二代健保補費'],mode:'sum'},
@@ -8734,6 +8734,7 @@ const PAYSLIP_OCR_FIELDS=[
   {key:'otPay',label:'加班費',kind:'income',priority:30,terms:['免稅加班費','加班免稅','免稅延長工時','免稅延時工資','應稅加班費','加班應稅','應稅延長工時','應稅延時工資','平日加班費','平日加班工資','休息日加班費','休息日加班工資','假日加班費','假日加班工資','國定假日加班費','國假加班費','例假日加班費','延長工時工資','延長工時費','延時工資','超時工資','加班薪資','加班工資','加班費','OVERTIME PAY','OVERTIME'],mode:'sum'},
   {key:'otherIncome',label:'其他收入',kind:'income',priority:5,minScore:.94,terms:['其他收入','其他津貼','其他加給','其他應發','其他獎金','應發其他','應發雜項','其他應發款','雜項收入'],mode:'sum'}
 ]
+const PAYSLIP_CRITICAL_KEYS=new Set(['actualNet','base','shiftAllowance','otPay','dedLabor','dedHealth','dedAttendance','dedHealthExtra','dedPension']);
 function setSalarySubTab(tab){
   salarySubTab=tab==='pro'?'pro':tab==='reconcile'?'reconcile':'calc';
   if($('salaryCalcPane'))$('salaryCalcPane').classList.toggle('hidden',salarySubTab!=='calc');
@@ -9174,7 +9175,7 @@ function loadPayslipFormatMemory(){
   try{const v=JSON.parse(localStorage.getItem(PAYSLIP_FORMAT_MEMORY_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return[]}
 }
 function savePayslipFormatMemory(list){
-  try{localStorage.setItem(PAYSLIP_FORMAT_MEMORY_KEY,JSON.stringify((list||[]).slice(0,8)))}catch(e){}
+  try{localStorage.setItem(PAYSLIP_FORMAT_MEMORY_KEY,JSON.stringify((list||[]).slice(0,12)))}catch(e){}
 }
 function numericLayoutSimilarity(a,b){
   if(!Array.isArray(a)||!Array.isArray(b)||a.length<4||b.length<4)return 0;
@@ -9199,7 +9200,7 @@ function templateSimilarity(template,run){
   return Math.max(labelScore,numericScore*.92);
 }
 function bestPayslipTemplate(run){
-  let best=null;loadPayslipFormatMemory().forEach(t=>{const score=templateSimilarity(t,run);if(score>=.5&&(!best||score>best.score))best={template:t,score}});
+  let best=null;loadPayslipFormatMemory().forEach(t=>{const score=templateSimilarity(t,run);if(score>=.62&&(!best||score>best.score))best={template:t,score}});
   return best;
 }
 function nearestAmountForTemplate(run,anchor){
@@ -9219,12 +9220,12 @@ function nearestAmountForTemplate(run,anchor){
 function applyFormatMemory(run){
   const found=bestPayslipTemplate(run);if(!found)return run;
   Object.entries(found.template.anchors||{}).forEach(([key,anchor])=>{
-    const current=run.fields[key];if(current&&current.confidence>=.78)return;
+    const current=run.fields[key];if(current&&current.confidence>=.84)return;
     const criticalDeduction=['dedAttendance','dedLabor','dedHealth','dedHealthExtra','dedPension'].includes(key);
-    if(criticalDeduction&&(!run.labelAnchors[key]||num(run.labelAnchors[key].score)<.72))return;
+    if(criticalDeduction&&(!run.labelAnchors[key]||num(run.labelAnchors[key].score)<.82))return;
     const hit=nearestAmountForTemplate(run,anchor);if(!hit)return;
     const def=PAYSLIP_OCR_FIELDS.find(x=>x.key===key);if(!def)return;
-    run.fields[key]={key,value:hit.amount.value,term:anchor.term||'格式記憶',confidence:Math.min(.94,.76+found.score*.14+hit.score*.04),method:'格式記憶',variant:run.variant,
+    run.fields[key]={key,value:hit.amount.value,term:anchor.term||'格式記憶',confidence:Math.min(.86,.72+found.score*.1+hit.score*.04),method:'格式記憶',variant:run.variant,
       labelNorm:{x:anchor.labelX,y:anchor.labelY},amountNorm:hit.amount.norm,line:'本機格式記憶'};
   });
   run.usedMemory=found.score;run.memoryTemplateId=found.template.id;
@@ -9302,6 +9303,51 @@ function validatePayslipValues(values){
   }
   return warnings;
 }
+function payslipMathAudit(values,extraItems=[],expected={}){
+  const incomeKeys=['base','shiftAllowance','meal','performance','transport','otherIncome','otPay'],deductionKeys=['dedLabor','dedHealth','dedWelfare','dedPension','dedAttendance','dedTax','dedHealthExtra','dedOther'];
+  const own=k=>Object.prototype.hasOwnProperty.call(values||{},k)&&Number.isFinite(Number(values[k]));
+  const sum=keys=>keys.reduce((s,k)=>s+(own(k)?Number(values[k]):0),0),extras=Array.isArray(extraItems)?extraItems:[];
+  const extraIncome=extras.filter(x=>x&&x.kind!=='deduction'&&Number.isFinite(Number(x.amount))).reduce((s,x)=>s+Number(x.amount),0);
+  const extraDeduction=extras.filter(x=>x&&x.kind==='deduction'&&Number.isFinite(Number(x.amount))).reduce((s,x)=>s+Number(x.amount),0);
+  const income=sum(incomeKeys)+extraIncome,deductions=sum(deductionKeys)+extraDeduction,recognizedNet=income-deductions,actualNet=own('actualNet')?Number(values.actualNet):null;
+  const recognizedCount=[...incomeKeys,...deductionKeys].filter(own).length,expectedActive=[...incomeKeys,...deductionKeys].filter(k=>Number(expected&&expected[k])>0);
+  const coverage=expectedActive.length?expectedActive.filter(own).length/expectedActive.length:Math.min(1,recognizedCount/10),comparable=actualNet!==null&&own('base')&&(recognizedCount>=7||coverage>=.72);
+  const tolerance=actualNet===null?0:Math.max(120,Math.abs(actualNet)*.008),mismatch=comparable?actualNet-recognizedNet:null,mathOk=!comparable||Math.abs(mismatch)<=tolerance,digitShiftKeys=[];
+  [...incomeKeys,...deductionKeys,'actualNet'].forEach(k=>{if(!own(k))return;const exp=Number(expected&&expected[k]);if(!Number.isFinite(exp)||exp<100)return;const r=Number(values[k])/exp;if((r>=8.5&&r<=11.5)||(r>=.085&&r<=.115))digitShiftKeys.push(k)});
+  return{income,deductions,extraIncome,extraDeduction,recognizedNet,actualNet,recognizedCount,coverage,comparable,tolerance,mismatch,mathOk,digitShiftKeys};
+}
+function payslipTrustScore(key,rawConfidence,meta={}){
+  if(meta.manual)return 1;
+  let score=Math.max(0,Math.min(1,Number(rawConfidence)||0));
+  if(Number(meta.ocrAgreement)>=2)score+=.04;if(meta.aiAgreement)score+=.05;if(meta.recheckAgreement)score+=.07;if(meta.mathAgreement)score+=.035;
+  if(meta.templateOnly)score=Math.min(score,.82);if(meta.conflict)score-=.26;if(meta.mathRisk)score-=.18;if(meta.digitShift)score-=.3;
+  if(Number(meta.qualityScore)>0&&Number(meta.qualityScore)<70)score-=.08;
+  if(PAYSLIP_CRITICAL_KEYS.has(key)&&meta.singleSource)score=Math.min(score,.86);
+  return Math.max(0,Math.min(.99,score));
+}
+function applyPayslipArbitration(){
+  payslipOcrResult.__fieldWarnings=payslipOcrResult.__fieldWarnings||{};payslipOcrResult.__confidence=payslipOcrResult.__confidence||{};
+  const extra=Array.isArray(payslipOcrResult.__extraItems)?payslipOcrResult.__extraItems:[],expected=expectedOcrValues(),a=payslipMathAudit(payslipOcrResult,extra,expected);
+  payslipOcrResult.__integrity=a;
+  const manual=payslipOcrResult.__manualKeys||{},rechecks=payslipOcrResult.__fieldRechecks||{},quality=payslipOcrResult.__imageQuality||{},aiAgreed=new Set(payslipOcrResult.__aiAgreedKeys||[]);
+  PAYSLIP_OCR_FIELDS.forEach(def=>{
+    if(!Object.prototype.hasOwnProperty.call(payslipOcrResult,def.key))return;
+    const hit=(payslipOcrResult.__matches||[]).find(m=>m.key===def.key),r=rechecks[def.key],conflict=!!payslipOcrResult.__fieldWarnings[def.key]||String(r&&r.status||'')==='conflict',digitShift=a.digitShiftKeys.includes(def.key);
+    const score=payslipTrustScore(def.key,payslipOcrResult.__confidence[def.key]||hit?.confidence||0,{manual:!!manual[def.key],ocrAgreement:Number(hit&&hit.agreement)||0,aiAgreement:aiAgreed.has(def.key),
+      recheckAgreement:!!(r&&r.value!==null&&payslipAmountsAgree(r.value,payslipOcrResult[def.key])&&num(r.confidence)>=.84),
+      mathAgreement:def.key==='actualNet'&&a.comparable&&a.mathOk,templateOnly:String(hit&&hit.method||'')==='格式記憶',conflict,
+      mathRisk:def.key==='actualNet'&&a.comparable&&!a.mathOk,digitShift,qualityScore:Number(quality.score)||0,singleSource:!hit||Number(hit.agreement||0)<2});
+    payslipOcrResult.__confidence[def.key]=score;if(hit)hit.confidence=score;
+    if(digitShift)payslipOcrResult.__fieldWarnings[def.key]=(payslipOcrResult.__fieldWarnings[def.key]||'')+' 與 App 預估接近 10 倍／1⁄10，疑似多讀或少讀一位數，請核對原圖。';
+  });
+  if(a.comparable&&!a.mathOk){
+    payslipOcrResult.__fieldWarnings.actualNet=(payslipOcrResult.__fieldWarnings.actualNet||'')+' 應發／應扣逐項重算與實發仍差 '+money(Math.round(Math.abs(a.mismatch)))+'，本次不視為高信心完成。';
+    const gap=Math.abs(a.mismatch);
+    Object.entries(payslipOcrResult.__openAiAlternates||{}).forEach(([key,alt])=>{if(!alt||!Number.isFinite(Number(alt.value))||num(alt.confidence)<.85)return;const n=payslipMathAudit(Object.assign({},payslipOcrResult,{[key]:Number(alt.value)}),extra,expected);if(n.comparable&&Math.abs(n.mismatch)<Math.max(120,gap*.3))payslipOcrResult.__fieldWarnings[key]=(payslipOcrResult.__fieldWarnings[key]||'')+' 數學仲裁顯示第二判讀更接近實發平衡，請對照原圖後再採用。'});
+  }
+  payslipOcrResult.__reviewKeys=PAYSLIP_OCR_FIELDS.filter(def=>Object.prototype.hasOwnProperty.call(payslipOcrResult,def.key)&&!manual[def.key]&&(num(payslipOcrResult.__confidence[def.key])<.9||!!payslipOcrResult.__fieldWarnings[def.key])).map(def=>def.key);
+  return a;
+}
 function rememberPayslipFormat(values){
   const matches=Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches:[],anchors={};
   matches.forEach(m=>{
@@ -9314,7 +9360,7 @@ function rememberPayslipFormat(values){
   let replaced=false;
   for(let i=0;i<list.length;i++){
     const fakeRun={aspect:template.aspect,labelAnchors:Object.fromEntries(Object.entries(anchors).map(([k,a])=>[k,{x:a.labelX,y:a.labelY}]))};
-    if(templateSimilarity(list[i],fakeRun)>.72){list[i]=template;replaced=true;break}
+    if(templateSimilarity(list[i],fakeRun)>.82){list[i]=template;replaced=true;break}
   }
   if(!replaced)list.unshift(template);savePayslipFormatMemory(list);
 }
@@ -9332,22 +9378,61 @@ function otsuThreshold(values){
   }
   return best||170;
 }
+function assessPayslipImageQuality(grayVals,w,h,originalWidth=w,originalHeight=h){
+  const total=Array.isArray(grayVals)?grayVals.length:0;
+  if(!total)return{score:0,blocked:true,warnings:['無法分析影像品質'],brightness:0,contrast:0,sharpness:0,glareRatio:0,darkRatio:0};
+  const step=Math.max(1,Math.floor(Math.sqrt(total/90000)));
+  let n=0,sum=0,sumSq=0,glare=0,dark=0,grad=0,gradN=0;
+  for(let y=0;y<h;y+=step){
+    const row=y*w;
+    for(let x=0;x<w;x+=step){
+      const i=row+x,g=Number(grayVals[i])||0;
+      n++;sum+=g;sumSq+=g*g;
+      if(g>=248)glare++;if(g<=20)dark++;
+      if(x+step<w){grad+=Math.abs(g-(Number(grayVals[i+step])||0));gradN++}
+      if(y+step<h){grad+=Math.abs(g-(Number(grayVals[i+step*w])||0));gradN++}
+    }
+  }
+  const brightness=sum/Math.max(1,n),variance=Math.max(0,sumSq/Math.max(1,n)-brightness*brightness);
+  const contrast=Math.sqrt(variance),sharpness=grad/Math.max(1,gradN),glareRatio=glare/Math.max(1,n),darkRatio=dark/Math.max(1,n);
+  const warnings=[],minSide=Math.min(Number(originalWidth)||w,Number(originalHeight)||h);
+  if(minSide<900)warnings.push('解析度偏低');
+  if(contrast<28)warnings.push('文字與底色對比偏低');
+  if(sharpness<6)warnings.push('影像可能模糊');
+  if(glareRatio>.18)warnings.push('高亮／反光區域偏多');
+  if(darkRatio>.18)warnings.push('陰影／過暗區域偏多');
+  if(brightness<55)warnings.push('整體偏暗');
+  if(brightness>225)warnings.push('整體過亮');
+  let score=100;
+  if(minSide<1200)score-=Math.min(26,(1200-minSide)/20);
+  if(contrast<45)score-=Math.min(22,(45-contrast)*.7);
+  if(sharpness<10)score-=Math.min(25,(10-sharpness)*2.5);
+  score-=Math.min(18,glareRatio*70);score-=Math.min(18,darkRatio*70);
+  if(brightness<70)score-=Math.min(15,(70-brightness)*.3);
+  if(brightness>215)score-=Math.min(15,(brightness-215)*.5);
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  const blocked=minSide<560||contrast<13||sharpness<2.4||glareRatio>.48||darkRatio>.48||brightness<30||brightness>245;
+  return{score,blocked,warnings,brightness,contrast,sharpness,glareRatio,darkRatio,width:originalWidth,height:originalHeight};
+}
 async function preprocessPayslipVariants(file){
   return await new Promise((resolve,reject)=>{
     const url=URL.createObjectURL(file),img=new Image();
     img.onload=async()=>{
       try{
+        const originalWidth=img.naturalWidth||img.width,originalHeight=img.naturalHeight||img.height;
         const maxSide=2400,scale=Math.max(.7,Math.min(maxSide/Math.max(img.width,img.height),Math.max(1,1500/Math.max(img.width,img.height))));
         const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
         const base=document.createElement('canvas');base.width=w;base.height=h;
         const ctx=base.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,w,h);
         const original=await canvasToBlob(base);
-        const src=ctx.getImageData(0,0,w,h),grayVals=new Array(w*h),grayData=new ImageData(new Uint8ClampedArray(src.data),w,h);
+        const src=ctx.getImageData(0,0,w,h),rawGrayVals=new Array(w*h),grayVals=new Array(w*h),grayData=new ImageData(new Uint8ClampedArray(src.data),w,h);
         for(let i=0,j=0;i<grayData.data.length;i+=4,j++){
-          let g=.299*grayData.data[i]+.587*grayData.data[i+1]+.114*grayData.data[i+2];
-          g=Math.max(0,Math.min(255,(g-128)*1.48+128));grayVals[j]=g;
+          const raw=.299*src.data[i]+.587*src.data[i+1]+.114*src.data[i+2];
+          rawGrayVals[j]=raw;
+          const g=Math.max(0,Math.min(255,(raw-128)*1.48+128));grayVals[j]=g;
           grayData.data[i]=grayData.data[i+1]=grayData.data[i+2]=g;
         }
+        const quality=assessPayslipImageQuality(rawGrayVals,w,h,originalWidth,originalHeight);
         const gray=document.createElement('canvas');gray.width=w;gray.height=h;gray.getContext('2d').putImageData(grayData,0,0);
         const highContrast=await canvasToBlob(gray);
         const threshold=otsuThreshold(grayVals),binData=new ImageData(new Uint8ClampedArray(grayData.data),w,h);
@@ -9355,13 +9440,13 @@ async function preprocessPayslipVariants(file){
         const binary=document.createElement('canvas');binary.width=w;binary.height=h;binary.getContext('2d').putImageData(binData,0,0);
         const binaryBlob=await canvasToBlob(binary);
         URL.revokeObjectURL(url);
-        resolve([{name:'原圖增強',image:original,width:w,height:h},{name:'高對比',image:highContrast,width:w,height:h},{name:'二值化',image:binaryBlob,width:w,height:h}]);
+        resolve([{name:'原圖增強',image:original,width:w,height:h,quality},{name:'高對比',image:highContrast,width:w,height:h,quality},{name:'二值化',image:binaryBlob,width:w,height:h,quality}]);
       }catch(e){URL.revokeObjectURL(url);reject(e)}
     };
     img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('圖片讀取失敗'))};img.src=url;
   });
 }
-function renderPayslipDetected(){
+function renderPayslipDetected(){function renderPayslipDetected(){
   const box=$('payslipDetectedFields');if(!box)return;
   const matches=Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches:[],validation=validatePayslipValues(payslipOcrResult);
   const disagreement=payslipOcrResult.__fieldWarnings||{};
@@ -9369,7 +9454,7 @@ function renderPayslipDetected(){
     const has=Object.prototype.hasOwnProperty.call(payslipOcrResult,def.key),value=has?payslipOcrResult[def.key]:'',hit=matches.find(m=>m.key===def.key),alt=payslipOcrResult.__openAiAlternates&&payslipOcrResult.__openAiAlternates[def.key];
     const conf=has?Math.round(100*num(payslipOcrResult.__confidence?.[def.key]||hit?.confidence||0)):0;
     const labelSeen=!has&&!!(payslipOcrResult.__labelOnly&&payslipOcrResult.__labelOnly[def.key]);
-    const confClass=conf>=85?'':conf>=65?' mid':' low',source=hit?(hit.source||hit.method||'OCR'):(labelSeen?'有讀到欄位名，但金額尚未配對':'未辨識');
+    const confClass=conf>=90?'':conf>=80?' mid':' low',source=hit?(hit.source||hit.method||'OCR'):(labelSeen?'有讀到欄位名，但金額尚未配對':'未辨識');
     const warn=[disagreement[def.key],validation[def.key]].filter(Boolean).join(' ');
     return '<div class="scan-result-field'+(warn?' has-warning':'')+'"><label>'+escapeHtml(def.label)+'</label><input type="number" min="0" step="1" data-ocr-field="'+def.key+'" value="'+(value===''?'':escapeHtml(value))+'" placeholder="未辨識">'+
       '<div class="ocr-meta">'+(has?'<span class="ocr-confidence'+confClass+'">信心 '+conf+'%</span>':(labelSeen?'<span class="ocr-confidence mid">欄位已讀到</span>':'<span class="ocr-confidence low">未辨識</span>'))+'<span class="ocr-source">'+escapeHtml(source)+(hit&&hit.term?'・'+escapeHtml(hit.term):'')+'</span></div>'+
@@ -9384,9 +9469,9 @@ function renderPayslipDetected(){
       extraItems.map((item,index)=>{
         const kindLabel=item.kind==='deduction'?'額外扣項':'額外加項';
         const conf=Math.round(100*num(item.confidence));
-        return '<div class="scan-result-field'+(conf<72||/^名稱待確認/.test(String(item.label||''))?' has-warning':'')+'"><label>'+escapeHtml(item.label)+'</label>'+
+        return '<div class="scan-result-field'+(conf<85||/^名稱待確認/.test(String(item.label||''))?' has-warning':'')+'"><label>'+escapeHtml(item.label)+'</label>'+
           '<input type="number" min="0" step="1" data-ocr-extra-index="'+index+'" value="'+escapeHtml(Math.round(num(item.amount)))+'">'+
-          '<div class="ocr-meta"><span class="ocr-confidence'+(conf>=85?'':conf>=65?' mid':' low')+'">'+kindLabel+'・信心 '+conf+'%</span><span class="ocr-source">交叉判讀</span></div>'+
+          '<div class="ocr-meta"><span class="ocr-confidence'+(conf>=90?'':conf>=80?' mid':' low')+'">'+kindLabel+'・信心 '+conf+'%</span><span class="ocr-source">交叉判讀</span></div>'+
           (item.evidence?'<span class="ocr-warning" style="color:var(--mobile-muted,#765)">依據：'+escapeHtml(item.evidence)+'</span>':'')+
           '<button type="button" class="ocr-pick-btn" data-ocr-extra-label="'+index+'">修正項目名稱</button>'+
           '</div>';
@@ -9423,14 +9508,14 @@ function renderPayslipDetected(){
     const key=e.target.dataset.ocrField,raw=e.target.value;
     if(raw==='')delete payslipOcrResult[key];
     else{
-      payslipOcrResult[key]=num(raw);
-      payslipOcrResult.__confidence=payslipOcrResult.__confidence||{};payslipOcrResult.__confidence[key]=1;
+      const prior=(Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches:[]).find(m=>m.key===key);
+      payslipOcrResult[key]=num(raw);payslipOcrResult.__confidence=payslipOcrResult.__confidence||{};payslipOcrResult.__confidence[key]=1;
       payslipOcrResult.__manualKeys=payslipOcrResult.__manualKeys||{};payslipOcrResult.__manualKeys[key]=true;
       payslipOcrResult.__matches=Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches.filter(m=>m.key!==key):[];
-      if(payslipOcrResult.__fieldWarnings)delete payslipOcrResult.__fieldWarnings[key];
-      if(payslipOcrResult.__openAiAlternates)delete payslipOcrResult.__openAiAlternates[key];
+      payslipOcrResult.__matches.push({key,label:(PAYSLIP_OCR_FIELDS.find(x=>x.key===key)||{label:key}).label,term:'使用者修正',amount:num(raw),value:num(raw),confidence:1,method:'使用者修正',source:'使用者修正',labelNorm:prior&&prior.labelNorm?prior.labelNorm:null,amountNorm:prior&&prior.amountNorm?prior.amountNorm:null,line:'使用者確認後保留版面位置供同公司格式學習'});
+      if(payslipOcrResult.__fieldWarnings)delete payslipOcrResult.__fieldWarnings[key];if(payslipOcrResult.__openAiAlternates)delete payslipOcrResult.__openAiAlternates[key];
     }
-    renderPayslipDetected();
+    applyPayslipArbitration();renderPayslipDetected();
   });
   qsa('[data-ocr-ai]').forEach(btn=>btn.onclick=()=>applyOpenAiPayslipAmount(btn.dataset.ocrAi));
   qsa('[data-ocr-pick]').forEach(btn=>btn.onclick=()=>showPayslipAmountPicker(btn.dataset.ocrPick));
@@ -9561,81 +9646,32 @@ function payslipAmountsAgree(a,b){
 }
 function mergePayslipAiVerification(ai){
   if(!ai||ai.ok!==true||!ai.fields)return false;
-  payslipAiResult=ai;
-  payslipOcrResult.__openAiAlternates=payslipOcrResult.__openAiAlternates||{};
-  payslipOcrResult.__fieldWarnings=payslipOcrResult.__fieldWarnings||{};
-  payslipOcrResult.__confidence=payslipOcrResult.__confidence||{};
-  payslipOcrResult.__matches=Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches:[];
-  let agreed=0,conflicts=0,added=0;
+  payslipAiResult=ai;payslipOcrResult.__openAiAlternates=payslipOcrResult.__openAiAlternates||{};payslipOcrResult.__fieldWarnings=payslipOcrResult.__fieldWarnings||{};payslipOcrResult.__confidence=payslipOcrResult.__confidence||{};
+  payslipOcrResult.__matches=Array.isArray(payslipOcrResult.__matches)?payslipOcrResult.__matches:[];payslipOcrResult.__aiAgreedKeys=[];let agreed=0,conflicts=0,added=0,rechecked=0;
   PAYSLIP_OCR_FIELDS.forEach(def=>{
-    const raw=ai.fields[def.key],aiValue=raw===null||raw===undefined?null:Number(raw);
-    const aiConf=Math.max(0,Math.min(1,Number(ai.confidence&&ai.confidence[def.key])||0));
-    if(aiValue===null||!Number.isFinite(aiValue)||aiConf<.55)return;
-    const hasApple=Object.prototype.hasOwnProperty.call(payslipOcrResult,def.key);
-    const evidence=String(ai.evidence&&ai.evidence[def.key]||'').trim();
-    if(!hasApple){
-      if(aiConf<.82)return;
-      payslipOcrResult[def.key]=aiValue;
-      payslipOcrResult.__confidence[def.key]=Math.min(.94,aiConf*.96);
-      payslipOcrResult.__matches.push({key:def.key,label:def.label,term:evidence||'第二判讀',amount:aiValue,value:aiValue,confidence:payslipOcrResult.__confidence[def.key],method:'第二判讀',source:'第二判讀',line:evidence||'第二判讀從薪資單影像辨識'});
-      added++;return;
-    }
-    const appleValue=Number(payslipOcrResult[def.key]);
-    const hit=payslipOcrResult.__matches.find(m=>m.key===def.key);
-    if(payslipAmountsAgree(appleValue,aiValue)){
-      agreed++;
-      payslipOcrResult.__confidence[def.key]=Math.max(Number(payslipOcrResult.__confidence[def.key])||0,Math.min(.99,.9+aiConf*.09));
-      if(hit){hit.confidence=payslipOcrResult.__confidence[def.key];hit.source='多重判讀一致'}
-      delete payslipOcrResult.__fieldWarnings[def.key];delete payslipOcrResult.__openAiAlternates[def.key];
-    }else if(aiConf>=.68){
-      const localConf=Number(payslipOcrResult.__confidence[def.key])||0;
-      const directCritical=payslipAiEvidenceSupportsField(def.key,evidence);
-      const weakLocal=!hit||localConf<.8||/(格式記憶|文字模糊|座標模糊)/.test(String(hit.method||''));
-      if(directCritical&&aiConf>=.9&&weakLocal){
-        payslipOcrResult[def.key]=aiValue;
-        payslipOcrResult.__confidence[def.key]=Math.min(.96,.86+aiConf*.1);
-        if(hit){hit.value=aiValue;hit.amount=aiValue;hit.term=evidence||hit.term;hit.confidence=payslipOcrResult.__confidence[def.key];hit.method='交叉判讀高信心校正';hit.source='交叉判讀校正'}
-        delete payslipOcrResult.__fieldWarnings[def.key];delete payslipOcrResult.__openAiAlternates[def.key];
-        added++;
-      }else{
-        conflicts++;
-        payslipOcrResult.__openAiAlternates[def.key]={value:aiValue,confidence:aiConf,evidence};
-        payslipOcrResult.__confidence[def.key]=Math.min(localConf||.64,.64);
-        payslipOcrResult.__fieldWarnings[def.key]='第一判讀：'+appleValue.toLocaleString('zh-TW')+'；第二判讀：'+aiValue.toLocaleString('zh-TW')+'。兩邊不一致，請確認原圖。';
-        if(hit)hit.source='交叉判讀不一致';
-      }
+    const raw=ai.fields[def.key],aiValue=raw===null||raw===undefined?null:Number(raw),aiConf=Math.max(0,Math.min(1,Number(ai.confidence&&ai.confidence[def.key])||0));if(aiValue===null||!Number.isFinite(aiValue)||aiConf<.55)return;
+    const hasApple=Object.prototype.hasOwnProperty.call(payslipOcrResult,def.key),evidence=String(ai.evidence&&ai.evidence[def.key]||'').trim();
+    if(!hasApple){if(aiConf<.86)return;payslipOcrResult[def.key]=aiValue;payslipOcrResult.__confidence[def.key]=Math.min(.92,aiConf*.94);payslipOcrResult.__matches.push({key:def.key,label:def.label,term:evidence||'第二判讀',amount:aiValue,value:aiValue,confidence:payslipOcrResult.__confidence[def.key],method:'第二判讀',source:'第二判讀',line:evidence||'第二判讀從薪資單影像辨識'});added++;return}
+    const appleValue=Number(payslipOcrResult[def.key]),hit=payslipOcrResult.__matches.find(m=>m.key===def.key);
+    if(payslipAmountsAgree(appleValue,aiValue)){agreed++;payslipOcrResult.__aiAgreedKeys.push(def.key);payslipOcrResult.__confidence[def.key]=Math.max(Number(payslipOcrResult.__confidence[def.key])||0,Math.min(.99,.9+aiConf*.09));if(hit){hit.confidence=payslipOcrResult.__confidence[def.key];hit.source='多重判讀一致'}delete payslipOcrResult.__fieldWarnings[def.key];delete payslipOcrResult.__openAiAlternates[def.key]}
+    else if(aiConf>=.68){const localConf=Number(payslipOcrResult.__confidence[def.key])||0,direct=payslipAiEvidenceSupportsField(def.key,evidence),weak=!hit||localConf<.8||/(格式記憶|文字模糊|座標模糊)/.test(String(hit.method||''));
+      if(direct&&aiConf>=.93&&weak){payslipOcrResult[def.key]=aiValue;payslipOcrResult.__confidence[def.key]=Math.min(.94,.84+aiConf*.1);if(hit){hit.value=aiValue;hit.amount=aiValue;hit.term=evidence||hit.term;hit.confidence=payslipOcrResult.__confidence[def.key];hit.method='交叉判讀高信心校正';hit.source='交叉判讀校正'}delete payslipOcrResult.__fieldWarnings[def.key];delete payslipOcrResult.__openAiAlternates[def.key];added++}
+      else{conflicts++;payslipOcrResult.__openAiAlternates[def.key]={value:aiValue,confidence:aiConf,evidence};payslipOcrResult.__confidence[def.key]=Math.min(localConf||.62,.62);payslipOcrResult.__fieldWarnings[def.key]='第一判讀：'+appleValue.toLocaleString('zh-TW')+'；第二判讀：'+aiValue.toLocaleString('zh-TW')+'。兩邊不一致，已排入局部重讀／人工確認。';if(hit)hit.source='交叉判讀不一致'}
     }
   });
-  const extraSeen=new Set();
-  payslipOcrResult.__extraItems=(Array.isArray(ai.extraItems)?ai.extraItems:[])
-    .map(item=>({
-      label:String(item&&item.label||'').trim(),
-      amount:Number(item&&item.amount),
-      kind:item&&item.kind==='deduction'?'deduction':'income',
-      confidence:Math.max(0,Math.min(1,Number(item&&item.confidence)||0)),
-      evidence:String(item&&item.evidence||'').trim()
-    }))
-    .filter(item=>{
-      if(!item.label||!Number.isFinite(item.amount)||item.amount<0||item.confidence<.55)return false;
-      const k=item.kind+'|'+normalizeOcrText(item.label)+'|'+Math.round(item.amount);
-      if(extraSeen.has(k))return false;
-      extraSeen.add(k);return true;
-    })
-    .slice(0,20);
-  // Keep 伙食津貼 and 餐費補助 separate. If the verifier returns a
-  // clearly named 餐費補助, it remains an extra income item and is never
-  // folded into the configured 伙食津貼 field.
-  payslipOcrResult.__extraItems=(Array.isArray(payslipOcrResult.__extraItems)?payslipOcrResult.__extraItems:[]).map(item=>{
-    const label=String(item&&item.label||'').trim();
-    if(label==='餐費補助')return Object.assign({},item,{kind:'income'});
-    return item;
+  const rr=ai.fieldRechecks&&typeof ai.fieldRechecks==='object'?ai.fieldRechecks:{};payslipOcrResult.__fieldRechecks=rr;
+  Object.entries(rr).forEach(([key,r])=>{const def=PAYSLIP_OCR_FIELDS.find(x=>x.key===key);if(!def||!r)return;const value=r.value===null||r.value===undefined?null:Number(r.value),conf=Math.max(0,Math.min(1,Number(r.confidence)||0));if(value===null||!Number.isFinite(value)||conf<.7)return;
+    rechecked++;const has=Object.prototype.hasOwnProperty.call(payslipOcrResult,key),current=has?Number(payslipOcrResult[key]):null,localConf=has?num(payslipOcrResult.__confidence[key]):0,hit=payslipOcrResult.__matches.find(m=>m.key===key),consensus=Number(r.consensus)||0,status=String(r.status||'');
+    if(has&&payslipAmountsAgree(current,value)){payslipOcrResult.__confidence[key]=Math.max(localConf,Math.min(.99,.91+conf*.08));if(hit){hit.confidence=payslipOcrResult.__confidence[key];hit.source='局部重讀一致'}if(status!=='conflict'){delete payslipOcrResult.__fieldWarnings[key];delete payslipOcrResult.__openAiAlternates[key]}if(!payslipOcrResult.__aiAgreedKeys.includes(key))payslipOcrResult.__aiAgreedKeys.push(key);return}
+    if(!has&&consensus>=2&&conf>=.9){payslipOcrResult[key]=value;payslipOcrResult.__confidence[key]=Math.min(.95,.88+conf*.07);payslipOcrResult.__matches.push({key,label:def.label,term:String(r.evidence||'局部重讀'),amount:value,value,confidence:payslipOcrResult.__confidence[key],method:'局部雙重重讀補足',source:'局部雙重重讀',line:String(r.label||r.evidence||'')});added++;return}
+    if(has&&consensus>=2&&conf>=.92&&localConf<.82&&['resolved_ai','corrected','filled'].includes(status)){payslipOcrResult[key]=value;payslipOcrResult.__confidence[key]=Math.min(.96,.89+conf*.07);if(hit){hit.value=value;hit.amount=value;hit.confidence=payslipOcrResult.__confidence[key];hit.method='局部雙重重讀校正';hit.source='局部雙重重讀校正'}delete payslipOcrResult.__fieldWarnings[key];delete payslipOcrResult.__openAiAlternates[key];added++;return}
+    if(has&&!payslipAmountsAgree(current,value)){payslipOcrResult.__openAiAlternates[key]={value,confidence:conf,evidence:String(r.evidence||'局部重讀')};payslipOcrResult.__confidence[key]=Math.min(localConf||.6,.6);payslipOcrResult.__fieldWarnings[key]=(payslipOcrResult.__fieldWarnings[key]||'')+' 局部重讀得到 '+value.toLocaleString('zh-TW')+'，仍與目前值不一致，禁止自動確認。'}
   });
-  payslipOcrResult.__aiVerified=true;
-  payslipOcrResult.__aiSummary={agreed,conflicts,added,extra:payslipOcrResult.__extraItems.length,model:ai.model||'',remaining:ai.usage&&ai.usage.remaining};
-  payslipOcrResult.__aiNotes=Array.isArray(ai.notes)?ai.notes.slice(0,12):[];
-  return true;
+  const seen=new Set();payslipOcrResult.__extraItems=(Array.isArray(ai.extraItems)?ai.extraItems:[]).map(item=>({label:String(item&&item.label||'').trim(),amount:Number(item&&item.amount),kind:item&&item.kind==='deduction'?'deduction':'income',confidence:Math.max(0,Math.min(1,Number(item&&item.confidence)||0)),evidence:String(item&&item.evidence||'').trim()})).filter(item=>{if(!item.label||!Number.isFinite(item.amount)||item.amount<0||item.confidence<.55)return false;const k=item.kind+'|'+normalizeOcrText(item.label)+'|'+Math.round(item.amount);if(seen.has(k))return false;seen.add(k);return true}).slice(0,20);
+  payslipOcrResult.__extraItems=payslipOcrResult.__extraItems.map(item=>String(item&&item.label||'').trim()==='餐費補助'?Object.assign({},item,{kind:'income'}):item);
+  payslipOcrResult.__aiVerified=true;payslipOcrResult.__aiSummary={agreed,conflicts,added,rechecked,extra:payslipOcrResult.__extraItems.length,model:ai.model||'',remaining:ai.usage&&ai.usage.remaining};payslipOcrResult.__aiNotes=Array.isArray(ai.notes)?ai.notes.slice(0,12):[];applyPayslipArbitration();return true;
 }
-async function payslipBlobImage(blob){
+async function payslipBlobImage(blob){async function payslipBlobImage(blob){
   return new Promise((resolve,reject)=>{
     const url=URL.createObjectURL(blob),img=new Image();
     img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
@@ -9684,8 +9720,17 @@ async function buildPayslipRowCrops(variants,candidates){
     ].filter(Boolean)
   }));
 }
-function verifyPayslipWithOpenAI(imageDataUrl,rowCrops=[]){
-  return invokeUserFunction('payslip-verify',{imageDataUrl,ocrText:String(payslipRawText||'').slice(0,16000),rowCrops});
+async function buildPayslipFieldCrops(variants,result){
+  if(!variants||!variants[0]||!result)return[];
+  const original=await payslipBlobImage(variants[0].image),contrast=variants[1]?await payslipBlobImage(variants[1].image):null,matches=Array.isArray(result.__matches)?result.__matches:[],warnings=result.__fieldWarnings||{},labelOnly=result.__labelOnly||{},ranked=[];
+  PAYSLIP_OCR_FIELDS.forEach(def=>{const hit=matches.find(m=>m.key===def.key),anchor=hit&&hit.labelNorm?hit.labelNorm:labelOnly[def.key]?{x:labelOnly[def.key].x,y:labelOnly[def.key].y}:null;if(!anchor||!Number.isFinite(Number(anchor.y)))return;
+    const has=Object.prototype.hasOwnProperty.call(result,def.key),conf=has?num(result.__confidence&&result.__confidence[def.key]):0,critical=PAYSLIP_CRITICAL_KEYS.has(def.key);
+    if(!(!has||conf<.9||!!warnings[def.key]||(critical&&conf<.95)))return;ranked.push({def,anchor,has,conf,priority:(critical?10:0)+(!has?8:0)+(warnings[def.key]?6:0)+(1-conf)*5})});
+  ranked.sort((a,b)=>b.priority-a.priority);
+  return ranked.slice(0,8).map(x=>({key:x.def.key,currentAmount:x.has?num(result[x.def.key]):null,currentConfidence:x.conf,images:[payslipRowCropDataUrl(original,x.anchor.y),contrast?payslipRowCropDataUrl(contrast,x.anchor.y):null].filter(Boolean)}));
+}
+function verifyPayslipWithOpenAI(imageDataUrl,rowCrops=[],fieldCrops=[],imageQuality=null){
+  return invokeUserFunction('payslip-verify',{imageDataUrl,ocrText:String(payslipRawText||'').slice(0,16000),rowCrops,fieldCrops,imageQuality});
 } 
 function applyOpenAiPayslipAmount(fieldKey){
   const alt=payslipOcrResult.__openAiAlternates&&payslipOcrResult.__openAiAlternates[fieldKey],def=PAYSLIP_OCR_FIELDS.find(x=>x.key===fieldKey);
@@ -9718,6 +9763,8 @@ async function runPayslipOcr(file){
   try{
     setPayslipScanStage(1,'已接收薪資單，正在準備辨識…',8);
     const variants=await preprocessPayslipVariants(file);
+    const imageQuality=variants[0]&&variants[0].quality?variants[0].quality:{score:0,blocked:false,warnings:[]};
+    if(imageQuality.blocked){setPayslipScanStage(0,'這張薪資單影像品質不足，為避免誤判已停止辨識。請重新拍攝：保持平整、無反光、對焦清楚並讓整張薪資單填滿畫面。',0);return}
     payslipOcrDocument={width:variants[0].width,height:variants[0].height};
     const nativeVision=localVisionTextBridge();
     const runs=[];
@@ -9760,19 +9807,21 @@ async function runPayslipOcr(file){
     if(worker){await worker.terminate();worker=null}
     payslipOcrRuns=runs;
     payslipRawText=runs.map(r=>'【'+r.variant+'】\n'+(r.text||'')).join('\n\n');
-    payslipOcrResult=mergePayslipRuns(runs);
+    payslipOcrResult=mergePayslipRuns(runs);payslipOcrResult.__imageQuality=imageQuality;
     payslipAiStatus='running';
     setPayslipScanStage(3,'解析完成，正在交叉核對各項金額…',66);
     try{
       const aiImageDataUrl=await blobDataUrl(variants[0].image);
       const rowCrops=await buildPayslipRowCrops(variants,payslipOcrResult.__amountCandidates||[]).catch(()=>[]);
-      const ai=await verifyPayslipWithOpenAI(aiImageDataUrl,rowCrops);
+      const fieldCrops=await buildPayslipFieldCrops(variants,payslipOcrResult).catch(()=>[]);
+      const ai=await verifyPayslipWithOpenAI(aiImageDataUrl,rowCrops,fieldCrops,imageQuality);
       if(ai&&ai.ok&&mergePayslipAiVerification(ai))payslipAiStatus='verified';
       else payslipAiStatus='unavailable';
     }catch(aiError){
       const code=aiError&&aiError.payload&&aiError.payload.code;
       payslipAiStatus=code==='MONTHLY_LIMIT'?'limit':code==='PRO_REQUIRED'?'pro_required':code==='AI_NOT_CONFIGURED'?'not_configured':'unavailable';
     }
+    applyPayslipArbitration();
     if(previous){
       payslipPreviousRun=previous;
       payslipOcrResult.__rerunChanges=comparePayslipSnapshots(previous,payslipResultSnapshot(payslipOcrResult));
@@ -9785,15 +9834,17 @@ async function runPayslipOcr(file){
     const engine=nativeVision?'本機辨識':'相容辨識';
     const recognizedKeys=foundDefs.map(def=>def.key);
     const manualKeys=payslipOcrResult.__manualKeys||{};
-    const lowConfidenceKeys=recognizedKeys.filter(key=>!manualKeys[key]&&num(payslipOcrResult.__confidence?.[key])<.72);
-    const highConfidenceCount=recognizedKeys.filter(key=>manualKeys[key]||num(payslipOcrResult.__confidence?.[key])>=.85).length;
+    const lowConfidenceKeys=recognizedKeys.filter(key=>!manualKeys[key]&&num(payslipOcrResult.__confidence?.[key])<.85);
+    const highConfidenceCount=recognizedKeys.filter(key=>manualKeys[key]||num(payslipOcrResult.__confidence?.[key])>=.9).length;
     const aiSummary=payslipOcrResult.__aiSummary||{};
     const aiText=payslipAiStatus==='verified'
       ?'・交叉判讀完成（一致 '+num(aiSummary.agreed)+'、衝突 '+num(aiSummary.conflicts)+'、補足 '+num(aiSummary.added)+'、額外項目 '+num(aiSummary.extra)+'）'
       :payslipAiStatus==='limit'?'・本月 第二判讀次數已用完'
       :payslipAiStatus==='not_configured'?'・第二判讀尚未完成設定'
       :'・第二判讀暫時無法使用';
-    status.childNodes[0].nodeValue=engine+' 辨識完成：找到 '+foundDefs.length+' / '+PAYSLIP_OCR_FIELDS.length+' 個欄位・高信心 '+highConfidenceCount+' 項・需確認 '+lowConfidenceKeys.length+' 項'+aiText+(payslipOcrResult.__usedMemory?'・已套用本機格式記憶':'')+'。 ';
+    const integrity=payslipOcrResult.__integrity||{},qualityText='・影像品質 '+Math.round(num(imageQuality.score))+'/100'+(imageQuality.warnings&&imageQuality.warnings.length?'（'+imageQuality.warnings.slice(0,2).join('、')+'）':'');
+    const mathText=integrity.comparable?(integrity.mathOk?'・數學核對通過':'・數學核對不一致'):'・數學核對資料尚不足';
+    status.childNodes[0].nodeValue=engine+' 辨識完成：找到 '+foundDefs.length+' / '+PAYSLIP_OCR_FIELDS.length+' 個欄位・高信心 '+highConfidenceCount+' 項・需確認 '+lowConfidenceKeys.length+' 項'+aiText+qualityText+mathText+(payslipOcrResult.__usedMemory?'・已套用本機格式記憶':'')+'。 ';
     if($('payslipMissingFields')){
       const valueWarnings=validatePayslipValues(payslipOcrResult);
       const disagreement=payslipOcrResult.__fieldWarnings||{};
@@ -9811,11 +9862,14 @@ function importPayslipDetected(){
   if(!canUse('payslip_scan'))return;
   const confirmed={};qsa('[data-ocr-field]').forEach(input=>{if(input.value!=='')confirmed[input.dataset.ocrField]=num(input.value)});
   const extraItems=(Array.isArray(payslipOcrResult.__extraItems)?payslipOcrResult.__extraItems:[]).filter(item=>item&&item.label&&Number.isFinite(Number(item.amount))&&Number(item.amount)>=0);
-  const unresolvedExtra=extraItems.filter(item=>/^名稱待確認/.test(String(item.label||''))||num(item.confidence)<.72);
+  const unresolvedExtra=extraItems.filter(item=>/^名稱待確認/.test(String(item.label||''))||num(item.confidence)<.85);
   if(unresolvedExtra.length){alert('有 '+unresolvedExtra.length+' 個額外項目的名稱還沒有確認。請先按「修正項目名稱」確認後，再導入逐項對帳。');return}
   const keys=Object.keys(confirmed);if(!keys.length&&!extraItems.length){alert('目前沒有可導入的辨識欄位。');return}
+  if(!keys.includes('actualNet')){alert('實發金額是 Pro 薪資對帳的核心欄位，目前尚未確認。請先從薪資單核對並填入實發金額，再導入。');return}
   const warnings=validatePayslipValues(confirmed),disagreement=payslipOcrResult.__fieldWarnings||{},manualKeys=payslipOcrResult.__manualKeys||{};
-  const lowConfidenceKeys=keys.filter(key=>!manualKeys[key]&&num(payslipOcrResult.__confidence?.[key])<.72);
+  const lowConfidenceKeys=keys.filter(key=>!manualKeys[key]&&num(payslipOcrResult.__confidence?.[key])<.85);
+  const criticalUnresolved=keys.filter(key=>PAYSLIP_CRITICAL_KEYS.has(key)&&!manualKeys[key]&&num(payslipOcrResult.__confidence?.[key])<.9);
+  if(criticalUnresolved.length){const labels=criticalUnresolved.map(k=>(PAYSLIP_OCR_FIELDS.find(x=>x.key===k)||{label:k}).label).join('、');alert('以下關鍵欄位尚未達到 90% 自動確認門檻：'+labels+'。\n\n請重新判讀、點選圖片上的正確金額，或手動輸入確認後再導入。');return}
   const warningKeys=[...new Set([...Object.keys(warnings),...Object.keys(disagreement),...lowConfidenceKeys])];
   if(warningKeys.length){
     const labels=warningKeys.map(k=>(PAYSLIP_OCR_FIELDS.find(x=>x.key===k)||{label:k}).label).join('、');
@@ -9842,7 +9896,10 @@ function importPayslipDetected(){
     alternates:reviewAlternates,
     labelOnly:reviewLabelOnly,
     missing:reviewMissing,
-    rerunChanges:Array.isArray(payslipOcrResult.__rerunChanges)?payslipOcrResult.__rerunChanges.slice(0,12):[]
+    rerunChanges:Array.isArray(payslipOcrResult.__rerunChanges)?payslipOcrResult.__rerunChanges.slice(0,12):[],
+    imageQuality:payslipOcrResult.__imageQuality||null,
+    integrity:payslipOcrResult.__integrity||null,
+    fieldRechecks:payslipOcrResult.__fieldRechecks||{}
   };
   rememberPayslipFormat(confirmed);
   captureSalarySnapshot(calcMonth(),mm);changedAndSync();
