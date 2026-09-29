@@ -9661,7 +9661,15 @@ function mergePayslipAiVerification(ai){
     }
   });
   const rr=ai.fieldRechecks&&typeof ai.fieldRechecks==='object'?ai.fieldRechecks:{};payslipOcrResult.__fieldRechecks=rr;const manualKeys=payslipOcrResult.__manualKeys||{};
-  Object.entries(rr).forEach(([key,r])=>{const def=PAYSLIP_OCR_FIELDS.find(x=>x.key===key);if(!def||!r)return;const value=r.value===null||r.value===undefined?null:Number(r.value),conf=Math.max(0,Math.min(1,Number(r.confidence)||0));if(value===null||!Number.isFinite(value)||conf<.7)return;
+  Object.entries(rr).forEach(([key,r])=>{const def=PAYSLIP_OCR_FIELDS.find(x=>x.key===key);if(!def||!r)return;const value=r.value===null||r.value===undefined?null:Number(r.value),conf=Math.max(0,Math.min(1,Number(r.confidence)||0));
+    if(value===null||!Number.isFinite(value)||conf<.7){
+      if(['performance','dedTax'].includes(key)&&String(r.status||'')==='conflict'&&!manualKeys[key]){
+        delete payslipOcrResult[key];payslipOcrResult.__confidence[key]=0;
+        payslipOcrResult.__fieldWarnings[key]='多次局部辨讀仍不一致，已清除自動帶入值；請依薪資單原圖手動確認。';
+        payslipOcrResult.__matches=payslipOcrResult.__matches.filter(m=>m.key!==key);
+      }
+      return;
+    }
     rechecked++;const has=Object.prototype.hasOwnProperty.call(payslipOcrResult,key),current=has?Number(payslipOcrResult[key]):null,localConf=has?num(payslipOcrResult.__confidence[key]):0,hit=payslipOcrResult.__matches.find(m=>m.key===key),consensus=Number(r.consensus)||0,status=String(r.status||'');
     if(has&&payslipAmountsAgree(current,value)){payslipOcrResult.__confidence[key]=Math.max(localConf,Math.min(.99,.91+conf*.08));if(hit){hit.confidence=payslipOcrResult.__confidence[key];hit.source='局部重讀一致'}if(status!=='conflict'){delete payslipOcrResult.__fieldWarnings[key];delete payslipOcrResult.__openAiAlternates[key]}if(!payslipOcrResult.__aiAgreedKeys.includes(key))payslipOcrResult.__aiAgreedKeys.push(key);return}
     if(!has&&consensus>=2&&conf>=.9){payslipOcrResult[key]=value;payslipOcrResult.__confidence[key]=Math.min(.95,.88+conf*.07);payslipOcrResult.__matches.push({key,label:def.label,term:String(r.evidence||'局部重讀'),amount:value,value,confidence:payslipOcrResult.__confidence[key],method:'局部雙重重讀補足',source:'局部雙重重讀',line:String(r.label||r.evidence||'')});added++;return}

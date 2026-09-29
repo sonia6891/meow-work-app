@@ -10,6 +10,20 @@ const FIELD_KEYS = [
   "dedLabor","dedHealth","dedWelfare","dedPension","dedAttendance","dedTax","dedHealthExtra","dedOther"
 ] as const;
 
+// Fail closed when image reads disagree. Confidence alone cannot establish
+// which OCR result is true; unresolved values must go back for human review.
+function resolveCropReadConsensus(reads) {
+  const amountAgree = (a, b) => Number.isFinite(Number(a)) && Number.isFinite(Number(b)) && Math.abs(Number(a) - Number(b)) <= 1;
+  const valid = reads.filter((r) => r && r.value !== null && r.value !== undefined && Number.isFinite(Number(r.value)));
+  if (valid.length < 2 || valid.some((r) => Number(r.confidence) < .82 || !amountAgree(r.value, valid[0].value))) {
+    return { value: null, consensus: 0, confidence: .5, unanimous: false };
+  }
+  const confidence = valid.reduce((sum, r) => sum + Number(r.confidence), 0) / valid.length;
+  if (confidence < .82) return { value: null, consensus: 0, confidence: .5, unanimous: false };
+  return { value: Math.round(valid.reduce((sum, r) => sum + Number(r.value), 0) / valid.length),
+    consensus: valid.length, confidence: Math.min(.99, confidence + .05), unanimous: true };
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -408,36 +422,12 @@ Deno.serve(async (req: Request) => {
         { pass: 1, value: v1, confidence: c1, raw: first },
         { pass: 2, value: v2, confidence: c2, raw: second },
         { pass: 3, value: v3, confidence: c3, raw: third }
-      ].filter((r: any) => r.value !== null && Number.isFinite(Number(r.value)) && r.confidence >= .55);
-      const groups: any[] = [];
-      for (const read of reads) {
-        const found = groups.find((g: any) => amountAgree(g.mean, read.value));
-        if (found) {
-          found.items.push(read);
-          found.mean = found.items.reduce((sum: number, x: any) => sum + Number(x.value), 0) / found.items.length;
-        } else {
-          groups.push({ mean: Number(read.value), items: [read] });
-        }
-      }
-      for (const group of groups) {
-        group.avgConfidence = group.items.reduce((sum: number, x: any) => sum + Number(x.confidence), 0) / group.items.length;
-        group.maxConfidence = Math.max(...group.items.map((x: any) => Number(x.confidence)));
-      }
-      groups.sort((a: any, b: any) =>
-        b.items.length - a.items.length ||
-        b.avgConfidence - a.avgConfidence ||
-        b.maxConfidence - a.maxConfidence
-      );
-      const winner = groups[0] || null;
-      const consensus = winner ? winner.items.length : 0;
-      const strongConsensus = !!winner && consensus >= 2 && winner.avgConfidence >= .82;
-      const singleTrusted = reads.length === 1 && firstMatchesBoth && c1 >= .9;
-      const chosen = strongConsensus
-        ? Math.round(Number(winner.mean))
-        : (singleTrusted ? Number(v1) : null);
-      const chosenConf = strongConsensus
-        ? Math.min(.99, winner.avgConfidence + .05)
-        : (singleTrusted ? c1 : Math.min(c1 || .5, c2 || .5, c3 || .5, .55));
+      ].filter((r: any) => r.value !== null && Number.isFinite(Number(r.value)));
+      const resolvedReads = resolveCropReadConsensus(reads);
+      const consensus = resolvedReads.consensus;
+      const strongConsensus = resolvedReads.unanimous;
+      const chosen = resolvedReads.value;
+      const chosenConf = resolvedReads.confidence;
       let status = "conflict";
       if (chosen !== null) {
         const agreesAI = aiValue !== null && amountAgree(chosen, aiValue);
@@ -448,8 +438,7 @@ Deno.serve(async (req: Request) => {
         else if ((aiValue === null || clientValue === null) && strongConsensus) status = "filled";
         else if (strongConsensus) status = "corrected";
       }
-      const bestRead = winner?.items?.slice().sort((a: any, b: any) => b.confidence - a.confidence)[0] ||
-        reads.slice().sort((a: any, b: any) => b.confidence - a.confidence)[0] || null;
+      const bestRead = reads.slice().sort((a: any, b: any) => b.confidence - a.confidence)[0] || null;
       fieldRechecks[key] = {
         value: chosen,
         confidence: chosenConf,

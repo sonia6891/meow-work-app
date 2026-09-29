@@ -5,7 +5,7 @@ on:
     paths:
       - index.html
       - tests/pro-ai-v125.cjs
-      - tests/pro-payslip-accuracy-v2.test.cjs
+      - tests/pro-payslip-independent-red-gate.test.cjs
       - native/ios-sources/ViewController.swift
       - supabase/functions/pro-ai/index.ts
       - supabase/functions/payslip-verify/index.ts
@@ -36,8 +36,8 @@ jobs:
           PY
       - name: Local payroll intelligence regression checks
         run: node tests/pro-ai-v125.cjs
-      - name: Pro payslip Accuracy V2 — 50,000 cases
-        run: node tests/pro-payslip-accuracy-v2.test.cjs
+      - name: Independent Pro payslip fail-closed regression gate
+        run: node tests/pro-payslip-independent-red-gate.test.cjs
       - name: Secret leak guard
         run: |
           if grep -R --line-number --exclude-dir=.git -E 'sk-[A-Za-z0-9_-]{20,}' index.html supabase docs tests; then
