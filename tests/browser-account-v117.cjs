@@ -405,8 +405,8 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
             rows:document.getElementById('v219TodayList')?.innerText||''
           };
         });
-        check('390px 今天的安排留在左側行程卡，不跨成整頁滿版', todayLayout.todayWidth<todayLayout.boardWidth*.75);
-        check('今天的安排顯示日期與班別', /\d+月\d+日/.test(todayLayout.date) && /班|休/.test(todayLayout.rows));
+        check('390px 近期行程留在左側行程卡，不跨成整頁滿版', todayLayout.todayWidth<todayLayout.boardWidth*.75);
+        check('近期行程只顯示已交代個人行程，不混入班別', /近期行程/.test(todayLayout.title) && /目前沒有已交代的行程/.test(todayLayout.rows) && !/(?:A班|B班|早班|中班|晚班|夜班|大夜班|小夜班)\s*上班/.test(todayLayout.rows));
 
         await page.evaluate(() => window.__accountV119.settings());
         await page.waitForTimeout(120);

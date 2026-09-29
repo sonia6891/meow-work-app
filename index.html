@@ -11572,7 +11572,7 @@ function meowAssistantActionTitle(raw,kind){
     .replace(/一個|一項/g,' ')
     .replace(/[：:、]/g,' ')
     .replace(/\s+/g,' ').trim()
-    .replace(/^(?:我會去|我要去|我會|我得去|我得|我需要|我必須|我要|要去|會去|得去|需要|必須|打算|預計|準備|我)\s*/,'')
+    .replace(/^(?:我\s*)?(?:會|要|得|需要|必須|想要|想|打算|預計|準備)\s*/,'')
     .replace(/^的\s*|\s*的$/g,'').trim();
   return t.slice(0,80);
 }
