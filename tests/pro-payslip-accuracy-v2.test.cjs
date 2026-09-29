@@ -61,6 +61,13 @@ assert(edge.includes('payslip_extra_row_recovery'),'dynamic extra-row image reco
 assert(tested>=50000);
 for(const n of ['assessPayslipImageQuality','imageQuality.blocked','buildPayslipFieldCrops','applyPayslipArbitration',"num(payslipOcrResult.__confidence?.[key])<.85","num(payslipOcrResult.__confidence?.[key])<.9",'meow-work-payslip-format-memory-v4','實發金額是 Pro 薪資對帳的核心欄位'])assert(html.includes(n),'missing '+n);
 for(const n of ['fieldCropRead','fieldRechecks','錯誤的自信答案比待確認更糟'])assert(edge.includes(n),'edge missing '+n);
-assert(swift.includes('request.recognitionLevel = .accurate'));assert(swift.includes('request.usesLanguageCorrection = false'));assert(swift.includes('purpose == "payslip" ? 0.0025 : 0.008'));
+assert(swift.includes('request.recognitionLevel = .accurate'));
+assert(swift.includes('request.usesLanguageCorrection = isPayslipLabelPass'),'numeric pass must remain literal while label pass may use language correction');
+assert(swift.includes('request.minimumTextHeight = isPayslip ? 0.0025 : 0.008'),'payslip Vision must keep the low text-height threshold');
+assert(swift.includes('request.customWords = ['),'label-focused Vision pass must carry payroll vocabulary');
+assert(html.includes('function payslipNumericFragmentText'),'split numeric fragments must be stitchable before payroll field arbitration');
+assert(html.includes("payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'tight')"),'critical amount audit must include tight crop');
+assert(html.includes("payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'medium')"),'critical amount audit must include medium crop');
+assert(html.includes("'wide'"),'critical amount audit must include a wider crop for leading-digit recovery');
 fs.mkdirSync('test-results',{recursive:true});fs.writeFileSync('test-results/pro-payslip-accuracy-v2.json',JSON.stringify({tested,failed:0},null,2));
 console.log('PASS Pro payslip Accuracy V2:',tested,'cases');
