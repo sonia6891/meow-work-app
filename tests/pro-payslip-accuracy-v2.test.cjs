@@ -50,7 +50,7 @@ for(let i=0;i<10000;i++){
   const wrongPerformance={...correct,performance:300};
   assert(!payslipMathAudit(wrongPerformance,extras,correct).mathOk,'300 must not be accepted when printed performance allowance is 1300');
 }
-assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax'])"),'tax and performance must always receive targeted crop recheck');
+assert(html.includes("PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax','dedHealth'])"),'tax, performance and health must always receive targeted crop recheck');
 assert(html.includes("consensus>=2&&conf>=.9"),'two-pass-or-better targeted consensus must be able to override stale local OCR');
 assert(!html.includes("consensus>=2&&conf>=.92&&localConf<.82"),'high-confidence stale OCR must not block a stronger crop consensus');
 assert(edge.includes('forceRecheck = key === "performance" || key === "dedTax"'),'server must force tax/performance crop recheck');
