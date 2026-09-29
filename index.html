@@ -8734,7 +8734,8 @@ const PAYSLIP_OCR_FIELDS=[
   {key:'otPay',label:'加班費',kind:'income',priority:30,terms:['免稅加班費','加班免稅','免稅延長工時','免稅延時工資','應稅加班費','加班應稅','應稅延長工時','應稅延時工資','平日加班費','平日加班工資','休息日加班費','休息日加班工資','假日加班費','假日加班工資','國定假日加班費','國假加班費','例假日加班費','延長工時工資','延長工時費','延時工資','超時工資','加班薪資','加班工資','加班費','OVERTIME PAY','OVERTIME'],mode:'sum'},
   {key:'otherIncome',label:'其他收入',kind:'income',priority:5,minScore:.94,terms:['其他收入','其他津貼','其他加給','其他應發','其他獎金','應發其他','應發雜項','其他應發款','雜項收入'],mode:'sum'}
 ]
-const PAYSLIP_CRITICAL_KEYS=new Set(['actualNet','base','shiftAllowance','otPay','dedLabor','dedHealth','dedAttendance','dedHealthExtra','dedPension']);
+const PAYSLIP_CRITICAL_KEYS=new Set(['actualNet','base','shiftAllowance','performance','otPay','dedLabor','dedHealth','dedAttendance','dedTax','dedHealthExtra','dedPension']);
+const PAYSLIP_ALWAYS_RECHECK_KEYS=new Set(['performance','dedTax']);
 function setSalarySubTab(tab){
   salarySubTab=tab==='pro'?'pro':tab==='reconcile'?'reconcile':'calc';
   if($('salaryCalcPane'))$('salaryCalcPane').classList.toggle('hidden',salarySubTab!=='calc');
@@ -9659,12 +9660,12 @@ function mergePayslipAiVerification(ai){
       else{conflicts++;payslipOcrResult.__openAiAlternates[def.key]={value:aiValue,confidence:aiConf,evidence};payslipOcrResult.__confidence[def.key]=Math.min(localConf||.62,.62);payslipOcrResult.__fieldWarnings[def.key]='第一判讀：'+appleValue.toLocaleString('zh-TW')+'；第二判讀：'+aiValue.toLocaleString('zh-TW')+'。兩邊不一致，請確認原圖；系統已排入局部重讀／人工確認。';if(hit)hit.source='交叉判讀不一致'}
     }
   });
-  const rr=ai.fieldRechecks&&typeof ai.fieldRechecks==='object'?ai.fieldRechecks:{};payslipOcrResult.__fieldRechecks=rr;
+  const rr=ai.fieldRechecks&&typeof ai.fieldRechecks==='object'?ai.fieldRechecks:{};payslipOcrResult.__fieldRechecks=rr;const manualKeys=payslipOcrResult.__manualKeys||{};
   Object.entries(rr).forEach(([key,r])=>{const def=PAYSLIP_OCR_FIELDS.find(x=>x.key===key);if(!def||!r)return;const value=r.value===null||r.value===undefined?null:Number(r.value),conf=Math.max(0,Math.min(1,Number(r.confidence)||0));if(value===null||!Number.isFinite(value)||conf<.7)return;
     rechecked++;const has=Object.prototype.hasOwnProperty.call(payslipOcrResult,key),current=has?Number(payslipOcrResult[key]):null,localConf=has?num(payslipOcrResult.__confidence[key]):0,hit=payslipOcrResult.__matches.find(m=>m.key===key),consensus=Number(r.consensus)||0,status=String(r.status||'');
     if(has&&payslipAmountsAgree(current,value)){payslipOcrResult.__confidence[key]=Math.max(localConf,Math.min(.99,.91+conf*.08));if(hit){hit.confidence=payslipOcrResult.__confidence[key];hit.source='局部重讀一致'}if(status!=='conflict'){delete payslipOcrResult.__fieldWarnings[key];delete payslipOcrResult.__openAiAlternates[key]}if(!payslipOcrResult.__aiAgreedKeys.includes(key))payslipOcrResult.__aiAgreedKeys.push(key);return}
     if(!has&&consensus>=2&&conf>=.9){payslipOcrResult[key]=value;payslipOcrResult.__confidence[key]=Math.min(.95,.88+conf*.07);payslipOcrResult.__matches.push({key,label:def.label,term:String(r.evidence||'局部重讀'),amount:value,value,confidence:payslipOcrResult.__confidence[key],method:'局部雙重重讀補足',source:'局部雙重重讀',line:String(r.label||r.evidence||'')});added++;return}
-    if(has&&consensus>=2&&conf>=.92&&localConf<.82&&['resolved_ai','corrected','filled'].includes(status)){payslipOcrResult[key]=value;payslipOcrResult.__confidence[key]=Math.min(.96,.89+conf*.07);if(hit){hit.value=value;hit.amount=value;hit.confidence=payslipOcrResult.__confidence[key];hit.method='局部雙重重讀校正';hit.source='局部雙重重讀校正'}delete payslipOcrResult.__fieldWarnings[key];delete payslipOcrResult.__openAiAlternates[key];added++;return}
+    if(has&&!manualKeys[key]&&consensus>=2&&conf>=.9&&['resolved_ai','resolved_client','corrected','filled'].includes(status)){payslipOcrResult[key]=value;payslipOcrResult.__confidence[key]=Math.min(.96,.89+conf*.07);if(hit){hit.value=value;hit.amount=value;hit.confidence=payslipOcrResult.__confidence[key];hit.method='局部雙重重讀校正';hit.source='局部雙重重讀校正'}delete payslipOcrResult.__fieldWarnings[key];delete payslipOcrResult.__openAiAlternates[key];added++;return}
     if(has&&!payslipAmountsAgree(current,value)){payslipOcrResult.__openAiAlternates[key]={value,confidence:conf,evidence:String(r.evidence||'局部重讀')};payslipOcrResult.__confidence[key]=Math.min(localConf||.6,.6);payslipOcrResult.__fieldWarnings[key]=(payslipOcrResult.__fieldWarnings[key]||'')+' 局部重讀得到 '+value.toLocaleString('zh-TW')+'，仍與目前值不一致，禁止自動確認。'}
   });
   const seen=new Set();payslipOcrResult.__extraItems=(Array.isArray(ai.extraItems)?ai.extraItems:[]).map(item=>({label:String(item&&item.label||'').trim(),amount:Number(item&&item.amount),kind:item&&item.kind==='deduction'?'deduction':'income',confidence:Math.max(0,Math.min(1,Number(item&&item.confidence)||0)),evidence:String(item&&item.evidence||'').trim()})).filter(item=>{if(!item.label||!Number.isFinite(item.amount)||item.amount<0||item.confidence<.55)return false;const k=item.kind+'|'+normalizeOcrText(item.label)+'|'+Math.round(item.amount);if(seen.has(k))return false;seen.add(k);return true}).slice(0,20);
@@ -9726,12 +9727,12 @@ async function buildPayslipRowCrops(variants,candidates){
 }
 async function buildPayslipFieldCrops(variants,result){
   if(!variants||!variants[0]||!result)return[];
-  const original=await payslipBlobImage(variants[0].image),contrast=variants[1]?await payslipBlobImage(variants[1].image):null,matches=Array.isArray(result.__matches)?result.__matches:[],warnings=result.__fieldWarnings||{},labelOnly=result.__labelOnly||{},ranked=[];
+  const original=await payslipBlobImage(variants[0].image),contrast=variants[1]?await payslipBlobImage(variants[1].image):null,binary=variants[2]?await payslipBlobImage(variants[2].image):null,matches=Array.isArray(result.__matches)?result.__matches:[],warnings=result.__fieldWarnings||{},labelOnly=result.__labelOnly||{},ranked=[];
   PAYSLIP_OCR_FIELDS.forEach(def=>{const hit=matches.find(m=>m.key===def.key),anchor=hit&&hit.labelNorm?hit.labelNorm:labelOnly[def.key]?{x:labelOnly[def.key].x,y:labelOnly[def.key].y}:null;if(!anchor||!Number.isFinite(Number(anchor.y)))return;
-    const has=Object.prototype.hasOwnProperty.call(result,def.key),conf=has?num(result.__confidence&&result.__confidence[def.key]):0,critical=PAYSLIP_CRITICAL_KEYS.has(def.key);
-    if(!(!has||conf<.9||!!warnings[def.key]||(critical&&conf<.95)))return;ranked.push({def,anchor,has,conf,priority:(critical?10:0)+(!has?8:0)+(warnings[def.key]?6:0)+(1-conf)*5})});
+    const has=Object.prototype.hasOwnProperty.call(result,def.key),conf=has?num(result.__confidence&&result.__confidence[def.key]):0,critical=PAYSLIP_CRITICAL_KEYS.has(def.key),force=PAYSLIP_ALWAYS_RECHECK_KEYS.has(def.key);
+    if(!(!has||conf<.9||!!warnings[def.key]||(critical&&conf<.95)||force))return;ranked.push({def,anchor,has,conf,priority:(force?16:0)+(critical?10:0)+(!has?8:0)+(warnings[def.key]?6:0)+(1-conf)*5})});
   ranked.sort((a,b)=>b.priority-a.priority);
-  return ranked.slice(0,8).map(x=>({key:x.def.key,currentAmount:x.has?num(result[x.def.key]):null,currentConfidence:x.conf,images:[payslipRowCropDataUrl(original,x.anchor.y),contrast?payslipRowCropDataUrl(contrast,x.anchor.y):null].filter(Boolean)}));
+  return ranked.slice(0,12).map(x=>({key:x.def.key,currentAmount:x.has?num(result[x.def.key]):null,currentConfidence:x.conf,images:[payslipRowCropDataUrl(original,x.anchor.y),contrast?payslipRowCropDataUrl(contrast,x.anchor.y):null,binary?payslipRowCropDataUrl(binary,x.anchor.y):null].filter(Boolean)}));
 }
 function verifyPayslipWithOpenAI(imageDataUrl,rowCrops=[],fieldCrops=[],imageQuality=null){
   return invokeUserFunction('payslip-verify',{imageDataUrl,ocrText:String(payslipRawText||'').slice(0,16000),rowCrops,fieldCrops,imageQuality});
