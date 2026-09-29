@@ -17,7 +17,7 @@
 
 <link rel="shortcut icon" type="image/png" href="./app-icon-v178-192.png?v=178">
 <title>喵的，又要上班了</title>
-<meta name="meow-ui-build" content="v266-natural-itinerary">
+<meta name="meow-ui-build" content="v267-natural-todo-voice">
 <script id="meow-theme-boot">
 // Apply the device preference before CSS/first paint; never import a cloud theme.
 (function(){
@@ -6638,20 +6638,20 @@ html.dark .holiday-tag{
     </div>
     <div class="ref-assistant-quick">
       <b>直接用語音告訴喵助理要做什麼：</b>
-      <small class="ref-assistant-voice-hint">可以更動班表、登記加班、病假／生理假／事假／特休，也能幫你做薪資對帳。</small>
+      <small class="ref-assistant-voice-hint">直接說日常口語就可以：改班、加班、請假、新增行程、新增待辦，或做薪資對帳。</small>
       <div>
         <button type="button" data-meow-prompt="9月30號幫我改成晚班">🎙 更動班表</button>
         <button type="button" data-meow-prompt="明天幫我登記加班4小時">⏱ 登記加班</button>
         <button type="button" data-meow-prompt="9月30號幫我請病假">☂ 登記請假</button>
+        <button type="button" data-meow-prompt="我明天要帶貓咪去看醫生">📅 新增行程</button>
+        <button type="button" data-meow-prompt="明天記得買貓砂">☑ 新增待辦</button>
         <button type="button" data-meow-prompt="幫我做薪資對帳">💰 薪資對帳</button>
-        <button type="button" data-meow-prompt="我的特休還剩幾天">🏖 查特休餘額</button>
-        <button type="button" data-meow-prompt="其他特別假別怎麼請">📖 假別怎麼請</button>
       </div>
     </div>
     <div class="meow-assistant-chat hidden" id="meowAssistantReply" aria-live="polite"></div>
-    <div class="meow-assistant-pro-strip">☼　按麥克風直接說：改班、加班、請假、特休、生理假，或幫我薪資對帳　🐾</div>
+    <div class="meow-assistant-pro-strip">☼　按麥克風直接說：明天買貓砂、後天看醫生、改班、加班、請假，或幫我薪資對帳　🐾</div>
     <div class="meow-assistant-compose">
-      <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="有任何職場問題，問我吧…"></textarea>
+      <textarea id="meowAssistantInput" rows="2" maxlength="180" placeholder="直接說：明天買貓砂、後天看醫生、幫我改班…"></textarea>
       <span class="meow-assistant-attach" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8.5 12.5l6.2-6.2a3.4 3.4 0 014.8 4.8l-8.4 8.4a5 5 0 01-7.1-7.1l8-8"/><path d="M6.8 14.2l7.3-7.3"/></svg></span>
       <button type="button" class="meow-assistant-mic" id="meowAssistantMic" aria-label="語音輸入"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4M8.5 21h7"/></svg></button>
       <button type="button" class="btn primary" id="meowAssistantSend" aria-label="送出">送出</button>
@@ -11348,6 +11348,8 @@ function normalizeMeowAssistantText(raw){
     .replace(/津贴/g,'津貼').replace(/实领/g,'實領').replace(/实发/g,'實發')
     .replace(/發新日|发薪日/g,'發薪日').replace(/扣款明细/g,'扣款明細')
     .replace(/帮我/g,'幫我').replace(/带我去/g,'帶我去').replace(/打开/g,'打開').replace(/钟头/g,'鐘頭')
+    .replace(/(?:帶辦事項|戴辦事項|待半事項|代半事項|帶辦|戴辦|待半|代半)/g,'待辦')
+    .replace(/行成|行呈/g,'行程').replace(/提行我/g,'提醒我')
     .replace(/下个月/g,'下個月').replace(/这个月/g,'這個月').replace(/这月/g,'這月')
     .replace(/上个月/g,'上個月').replace(/号/g,'號').replace(/小时/g,'小時')
     .replace(/[，,；;。！？!?]+/g,'、').replace(/\s+/g,' ');
@@ -11567,7 +11569,7 @@ function meowAssistantActionTitle(raw,kind){
     .replace(/(?<!\d)(?:[01]?\d|2[0-3]):[0-5]\d(?!\d)/g,' ')
     .replace(/(?:到|至|~|～)/g,' ')
     .replace(/前\s*(?:3|1)\s*(?:天|小時)\s*(?:提醒我|提醒)?|前三天\s*(?:提醒我|提醒)?|前一天\s*(?:提醒我|提醒)?|前一小時\s*(?:提醒我|提醒)?/g,' ')
-    .replace(/請幫我|麻煩幫我|幫我記得|提醒我|別忘了|記得|幫我|我要|我想要|我想/g,' ')
+    .replace(/請幫我|麻煩幫我|幫我記一下|幫我記得|幫我記|記一下|記著|提醒我|別忘了|記得|幫我|我要|我想要|我想/g,' ')
     .replace(/新增|增加|建立|加一個|加個|記一個|排一個|安排|取消|刪除|刪掉|拿掉|移除|撤銷|不要了|不用了/g,' ')
     .replace(kind==='todo'?/(?:待辦事項|代辦事項|待辦|代辦|TODO)/ig:/(?:行程|活動|約會|EVENT)/ig,' ')
     .replace(/一個|一項/g,' ')
@@ -11585,13 +11587,19 @@ function meowAssistantImplicitPersonalIntent(raw){
   if(/[?？]/.test(t)||/(嗎|嘛|呢|是不是|要不要|可不可以|能不能|是否|哪天|哪一天|哪裡|哪儿|去哪裡|去哪儿|幾點|何時|什麼時候|什麼|怎么|怎麼)/.test(t))return null;
   if(/(班表|排班|輪班|上班|下班|加班|請假|休假|特休|年假|病假|事假|生理假|婚假|喪假|產假|育嬰|薪資|薪水|工資|對帳|津貼|扣款|發薪)/.test(t))return null;
   const dates=meowAssistantMutationDates(t),times=meowAssistantTimes(t);
-  const eventLike=/(去|看醫生|看診|回診|牙醫|門診|聚餐|吃飯|約會|見面|開會|會議|上課|健身|運動|剪頭髮|做頭髮|看電影|復健|面試|旅行|出遊|出差|拜訪|接人|送人|接小孩|接家人|接朋友|看展|健康檢查|打預防針|參加|報到|回娘家|回老家|去醫院|去診所|去學校|去銀行|去機場)/.test(t);
-  const todoLike=/(繳(?:費|款|房租|電費|水費|信用卡)|付款|買|採買|採購|領(?:包裹|貨|藥)|取貨|拿包裹|打電話|回電話|回覆|回信|寄(?:信|件|包裹)|整理|提交|繳交|申請|填(?:表|資料)|處理|完成|報稅|倒垃圾|洗衣服|吃藥|補貨|訂票|預約掛號)/.test(t);
-  const commitment=/(我要|我會|我得|我需要|我必須|要去|會去|得去|打算|預計|準備|約了|有約|安排了|記得|別忘了|提醒我)/.test(t);
+  const eventLike=/(去|看醫生|看診|回診|牙醫|門診|聚餐|吃(?:飯|早餐|午餐|晚餐|火鍋)|約會|見面|開會|會議|上課|健身|運動|剪頭髮|做頭髮|看電影|復健|面試|旅行|出遊|出差|拜訪|接人|送人|接小孩|接家人|接朋友|看展|健康檢查|打預防針|參加|報到|回娘家|回老家|去醫院|去診所|去學校|去銀行|去機場)/.test(t);
+  const todoLike=/(繳(?:費|款|房租|租金|電費|水費|水電費|瓦斯費|電話費|網路費|管理費|停車費|保費|保險費|學費|卡費|信用卡|稅|罰單|貸款)|付(?:款|錢|帳單)|匯款|轉帳|儲值|買|採買|採購|下單|訂購|補貨|領(?:取|包裹|貨|藥|錢)|取(?:貨|件|藥)|拿(?:包裹|藥|文件)|寄(?:信|件|包裹|回)|退(?:貨|件)|換貨|退換貨|打電話|回電話|聯絡|回覆|回信|傳(?:訊息|LINE|簡訊)|發(?:信|郵件|email|Email)|追蹤|催(?:款|件|回覆)|整理|提交|繳交|申請|填(?:表|資料|問卷)|處理|完成|準備|修改|檢查|核對|列印|打印|掃描|影印|簽(?:名|文件)|上傳|下載|備份|報稅|報帳|請款|倒垃圾|洗衣(?:服)?|曬衣(?:服)?|收衣(?:服)?|洗碗|掃地|拖地|打掃|整理房間|澆花|餵(?:貓|狗|寵物)|清(?:貓砂|冰箱)|換(?:床單|濾芯|電池)|煮飯|備餐|準備便當|吃藥|量(?:血壓|體重|血糖)|加油|充電|保養|送修|修理|維修|續約|續費|取消訂閱|更新|安裝|訂票|訂位|預約(?:掛號|牙醫|看診|保養|維修)?|寫(?:作業|報告|信|email|Email|企劃)|讀(?:書|文件|報告)|複習|練習|繳作業|準備考試|帶(?:雨傘|傘|證件|文件|藥|便當|充電器|鑰匙|水壺|卡))/i.test(t);
+  const reminderCommand=/(提醒我|記得|別忘了|幫我記一下|幫我記得|幫我記|記一下|記著)/.test(t);
+  const commitment=/(我要|我會|我得|我需要|我必須|要去|會去|得去|要記得|需要|必須|打算|預計|準備|約了|有約|安排了|待會|等一下|等等|晚點|稍後|先)/.test(t)||reminderCommand;
   const remove=/(取消|改天|不去了|不要去|不用去|不看了|不做了|不用了|不要了|刪掉|刪除|拿掉|移除|撤銷)/.test(t);
-  if(remove&&dates.length&&(eventLike||todoLike))return{kind:todoLike&&!eventLike?'todo':'event',action:'remove',dates,times};
-  if(eventLike&&(dates.length||times.length)&&(commitment||dates.length))return{kind:'event',action:'add',dates,times};
-  if(todoLike&&(dates.length||times.length||/(記得|別忘了|提醒我)/.test(t)))return{kind:'todo',action:'add',dates,times};
+  const completed=/(已經|已|剛剛|剛才|剛|之前).{0,12}(?:做完|完成|買了|買完|繳了|付了|寄了|領了|取了|拿了|回覆了|回了|打了|整理了|提交了|申請了|處理了|洗了|倒了|吃了|修了|預約了)|(?:做完|完成了|買完了|繳完了|付完了|寄完了|領完了|取完了|回覆完了|處理好了|辦好了)/.test(t);
+  const directTodo=/^(?:買|採買|採購|下單|訂購|補貨|繳|付|付款|匯款|轉帳|領|領取|取貨|取件|寄|寄件|回覆|回信|聯絡|打電話|整理|提交|繳交|申請|填|處理|完成|準備|修改|檢查|核對|列印|掃描|影印|簽名|上傳|下載|備份|報稅|報帳|請款|倒垃圾|洗衣|曬衣|收衣|洗碗|掃地|拖地|打掃|澆花|餵|清貓砂|換床單|煮飯|備餐|吃藥|量血壓|量體重|量血糖|加油|充電|保養|送修|修理|維修|續約|續費|取消訂閱|更新|安裝|訂票|訂位|預約|寫|讀|複習|練習|繳作業|帶)/.test(t);
+  if(completed&&!reminderCommand)return null;
+  if(remove&&(eventLike||todoLike))return{kind:todoLike&&!eventLike?'todo':'event',action:'remove',dates,times};
+  if(eventLike&&(dates.length||times.length||commitment))return{kind:'event',action:'add',dates,times};
+  if((todoLike&&(commitment||dates.length||times.length||directTodo))||(reminderCommand&&!eventLike)){
+    return{kind:'todo',action:'add',dates,times};
+  }
   return null;
 }
 function meowAssistantEventTodoOperation(raw){

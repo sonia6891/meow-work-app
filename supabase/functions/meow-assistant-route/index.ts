@@ -280,6 +280,7 @@ Deno.serve(async (req: Request) => {
     "連續請假／育嬰留職停薪等若使用者給明確起訖日，可以把完整日期放 dates；若區間很長，也可填 fromDate/toDate 供 App 展開。缺起日或迄日就追問，不可自行補日期。",
     "新增行程使用 add_event：至少要有唯一日期與 title；時間可以省略。若有明確時間，startTime/endTime 使用 HH:MM；只有一個時間就填 startTime、endTime=null。取消行程使用 remove_event，必須用 title、dates 或兩者足以唯一辨識；不唯一就追問。",
     "不要要求使用者一定說『新增行程／新增待辦』。自然口語的未來／已發生安排本身就可代表操作：例如『我明天要帶貓咪去看醫生』『後天跟朋友吃飯』『10月3日回診』應解析為 add_event；『明天要繳電費』『後天記得買貓砂』『提醒我週五領包裹』應解析為 add_todo。是否有時間要忠於原句：沒說時間就保持 startTime/endTime=null，不可自行補時間。",
+    "待辦不要求日期、時間或『待辦』關鍵字。『我要買衛生紙』『買牛奶』『幫我記一下回覆主管』『記得繳水電費』『晚點把衣服拿去曬』『領包裹』『續繳保費』『整理報稅資料』都可直接解析為 add_todo；沒有日期就 dates=[]，沒有時間就 startTime/endTime=null。已完成／過去敘述如『我剛剛買了牛奶』『昨天已經繳電費了』不是新增待辦，除非使用者明確要求再次提醒。",
     "新增待辦使用 add_todo：title 必填，日期與時間可省略；取消待辦使用 remove_todo，必須用 title、dates 或兩者足以唯一辨識。使用者說『代辦』也視為『待辦』。",
     "行程／待辦也必須正確處理否定取消：『不要取消明天的回診行程』『不用刪掉繳費待辦』『那個行程先不要移除』都不是 remove_event/remove_todo，operation.kind 必須是 none；若語意仍不確定就 shouldClarify=true，絕對不可因為看到『取消／刪除』就執行刪除。",
     "行程／待辦的更正句如『不是明天，是後天的回診』『不是繳費，是繳電話費』若無法用 recentContext 唯一決定要修改哪一筆，operation.kind=none 並追問；不能把兩筆都新增或刪除。",

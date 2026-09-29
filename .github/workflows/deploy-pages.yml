@@ -39,6 +39,8 @@ jobs:
         run: node tests/meow-assistant-natural-actions-20000.test.cjs
       - name: Meow Assistant implicit itinerary / todo spoken-language corpus — 10,000+ cases
         run: node tests/meow-assistant-implicit-plans-10000.test.cjs
+      - name: Meow Assistant todo voice natural-language corpus — 10,000+ cases
+        run: node tests/meow-assistant-todo-voice-10000.test.cjs
       - name: Meow Assistant action execution / undo / ambiguity safety
         run: node tests/meow-assistant-action-execution.test.cjs
       - name: Meow Assistant multi-turn stateful E2E
