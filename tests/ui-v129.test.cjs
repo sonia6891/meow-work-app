@@ -218,7 +218,7 @@ for(const id of ['meowAssistantFab','meowAssistantDialog','meowAssistantDragHand
 assert(html.includes('.meow-assistant-dialog.minimized'),'Meow Assistant minimized floating state missing');
 assert(html.includes('function bindMeowAssistantDrag()'),'Meow Assistant drag binding missing');
 assert(html.includes("setMeowAssistantMinimized(!d.classList.contains('minimized'))"),'Meow Assistant minimize/expand control missing');
-assert(html.includes("placeholder=\"有任何職場問題，問我吧…\""),'Meow Assistant input should match approved Pro reference copy');
+assert(html.includes("placeholder=\"直接說：明天買貓砂、後天看醫生、幫我改班…\""),'Meow Assistant input should teach natural voice commands');
 assert(html.includes(":'已更新班表。';") && html.includes("renderMeowAssistantReply(reply,'success')"),'Meow Assistant success copy must stay concise');
 assert(html.includes('async function meowAssistantCloudSnapshot(year,month)'),'Month-aware cloud schedule lookup missing');
 assert(html.includes('cloudHistoryEntries(payload)'),'Month lookup must consider cloud history snapshots');
