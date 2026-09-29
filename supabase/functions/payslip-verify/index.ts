@@ -28,7 +28,9 @@ function resolveCropReadConsensus(reads, aiValue = null, aiConfidence = 0) {
     group.cropVotes = group.items.length;
     group.digitVotes = group.items.filter((x) => x && x.source === "digit").length;
     group.aiVote = aiTrusted && amountAgree(group.mean, aiValue) ? 1 : 0;
-    group.support = group.cropVotes + group.aiVote;
+    // Amount-only digit reads are deliberately narrower and less context-biased
+    // than whole-field reads, so two agreeing digit reads carry extra weight.
+    group.support = (group.cropVotes - group.digitVotes) + group.digitVotes * 2 + group.aiVote;
     group.avgConfidence = group.items.reduce((sum, x) => sum + Number(x.confidence), 0) / group.items.length;
   }
   groups.sort((a, b) => b.support - a.support || b.cropVotes - a.cropVotes || b.avgConfidence - a.avgConfidence);
@@ -485,7 +487,8 @@ Deno.serve(async (req: Request) => {
       const v2 = second?.amount === null || second?.amount === undefined ? null : Number(second.amount);
       const c2 = Math.max(0, Math.min(1, Number(second?.confidence) || 0));
       let third: any = null;
-      if (v1 !== null && v2 !== null && !amountAgree(v1, v2)) {
+      if ((v1 !== null && v2 !== null && !amountAgree(v1, v2)) ||
+          key === "dedHealth" || key === "dedTax" || key === "performance") {
         third = await fieldCropRead(crop, 3);
       }
       const v3 = third?.amount === null || third?.amount === undefined ? null : Number(third.amount);
