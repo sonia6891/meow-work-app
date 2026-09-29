@@ -11,6 +11,7 @@ struct CaseOut: Codable {
     let id: Int
     let split: String
     let observations: [ObservationOut]
+    let labelObservations: [ObservationOut]
     let digitCrops: [String: [String: AnyCodable]]
 }
 
@@ -42,12 +43,13 @@ func loadCGImage(_ path: String) -> CGImage? {
     return image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
 }
 
-func recognize(_ cg: CGImage, languages: [String], minimumTextHeight: Float) throws -> [ObservationOut] {
+func recognize(_ cg: CGImage, languages: [String], minimumTextHeight: Float, languageCorrection: Bool = false, customWords: [String] = []) throws -> [ObservationOut] {
     let req = VNRecognizeTextRequest()
     req.recognitionLevel = .accurate
-    req.usesLanguageCorrection = false
+    req.usesLanguageCorrection = languageCorrection
     req.recognitionLanguages = languages
     req.minimumTextHeight = minimumTextHeight
+    if !customWords.isEmpty { req.customWords = customWords }
     let handler = VNImageRequestHandler(cgImage: cg, orientation: .up, options: [:])
     try handler.perform([req])
     let w = Double(cg.width), h = Double(cg.height)
@@ -124,6 +126,16 @@ guard let handle = FileHandle(forWritingAtPath: outPath) else { exit(3) }
 defer { try? handle.close() }
 let encoder = JSONEncoder()
 
+let payrollWords = [
+    "底薪","本薪","基本薪資","基本工資","輪班津貼","夜班津貼","班別加給","大夜津貼",
+    "伙食津貼","餐費補助","伙食補助","膳食補助","表現津貼","績效獎金","績效津貼","工作獎金",
+    "交通津貼","通勤補助","加班費","延長工時工資","免稅加班費","勞保費","勞工保險費",
+    "健保費","全民健保費","健康保險費","福利金","職工福利金","勞退自提","退休金自提",
+    "考勤扣款","請假扣款","缺勤扣款","所得稅","薪資所得稅","扣繳稅額","健保補扣","補充保費",
+    "實發金額","實領金額","淨額","入帳金額","工會費","停車費","團保費","代扣款","宿舍費",
+    "制服費","專案獎金","特殊津貼","職務加給","誤餐費"
+]
+
 var processed = 0
 for line in data.split(separator: "\n") {
     guard let raw = line.data(using: .utf8),
@@ -133,8 +145,10 @@ for line in data.split(separator: "\n") {
           let imagePath = obj["image"] as? String,
           let cg = loadCGImage(imagePath) else { continue }
     let observations: [ObservationOut]
+    let labelObservations: [ObservationOut]
     do {
         observations = try recognize(cg, languages: ["zh-Hant","en-US"], minimumTextHeight: 0.0025)
+        labelObservations = try recognize(cg, languages: ["zh-Hant","en-US"], minimumTextHeight: 0.0025, languageCorrection: true, customWords: payrollWords)
     } catch {
         continue
     }
@@ -142,7 +156,7 @@ for line in data.split(separator: "\n") {
     if let crops = obj["critical_crops"] as? [String:String] {
         for (key,path) in crops { digitCrops[key] = recognizeDigits(path) }
     }
-    let result = CaseOut(id:id, split:split, observations:observations, digitCrops:digitCrops)
+    let result = CaseOut(id:id, split:split, observations:observations, labelObservations:labelObservations, digitCrops:digitCrops)
     let enc = try encoder.encode(result)
     handle.write(enc); handle.write(Data([0x0A]))
     processed += 1
