@@ -72,6 +72,8 @@ assert(swift.includes('let candidateLimit = isPayslipNumericPass ? 3 : 1'),'nume
 assert(swift.includes('request.customWords = ['),'label-focused Vision pass must carry payroll vocabulary');
 assert(html.includes("purpose:'payslip-numeric'"),'client must request the dedicated numeric rescue pass');
 assert(html.includes('function fusePayslipVisionNumericData'),'numeric rescue candidates must be fused into spatial OCR');
+assert(html.includes('candidateRank:Math.max(0,Math.min(9'),'ranked numeric Vision alternatives must survive OCR conversion');
+assert(html.includes('score-=Math.min(.10,Math.max(0,Number(a.candidateRank)||0)*.04)'),'lower-ranked Vision alternatives must not beat the primary candidate on a geometry tie');
 assert(html.includes('function payslipNumericFragmentText'),'split numeric fragments must be stitchable before payroll field arbitration');
 assert(html.includes("payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'tight')"),'critical amount audit must include tight crop');
 assert(html.includes("payslipAmountOnlyCropDataUrl(original,x.amountAnchor,'medium')"),'critical amount audit must include medium crop');

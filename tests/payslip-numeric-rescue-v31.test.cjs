@@ -51,6 +51,9 @@ const numeric={
   ]
 };
 
+const convertedRankContract=/candidateRank:Math\.max\(0,Math\.min\(9/.test(html);
+assert(convertedRankContract,'Vision candidate rank must survive the web OCR conversion layer');
+
 const out=fuse(base,numeric);
 assert.strictEqual(out.text,base.text,'numeric rescue must not pollute label/text parsing');
 const texts=out.words.map(x=>x.text);
@@ -69,4 +72,5 @@ const repeated=fuse({text:'',words:[]},{words:[
 ]});
 assert.strictEqual(repeated.words.filter(x=>x.text==='1200').length,2,'same amount on different payroll rows must not be collapsed');
 
+assert(html.includes('score-=Math.min(.10,Math.max(0,Number(a.candidateRank)||0)*.04)'),'lower-ranked Vision alternatives must lose geometry ties while remaining available');
 console.log('PASS payslip V3.1 numeric rescue fusion behavior');
