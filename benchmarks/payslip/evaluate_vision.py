@@ -83,10 +83,14 @@ def main():
         out["splits"][split]={
             "cases":st["cases"],
             "field_accuracy":field_acc,
+            "field_counts":{k:{"correct":st["fields"][k],"total":st["field_total"][k]} for k in ALL_FIELDS},
             "overall_field_accuracy":total_correct/total if total else 0,
             "critical_microcrop_accuracy":micro_acc,
+            "micro_counts":{k:{"correct":st["micro"][k],"total":st["micro_total"][k]} for k in CRITICAL},
             "extra_amount_recall":st["extras_amount_ok"]/st["extras_total"] if st["extras_total"] else 0,
             "extra_label_recall":st["extras_label_ok"]/st["extras_total"] if st["extras_total"] else 0,
+            "extra_amount_correct":st["extras_amount_ok"],
+            "extra_label_correct":st["extras_label_ok"],
             "extra_total":st["extras_total"]
         }
     out["top_confusions"]=[{"field":k[0],"expected":k[1],"read":k[2],"count":n} for k,n in confusions.most_common(30)]
