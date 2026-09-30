@@ -87,6 +87,25 @@ jobs:
       - name: Archive and export signed IPA
         working-directory: native/ios
         run: |
+          gem install xcodeproj --no-document
+          ruby - <<'RUBY'
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('App/App.xcodeproj')
+          profiles = {
+            'App' => 'Meow Work App Store v2',
+            'MeowDateWidget' => 'Meow Work Widget App Store v2'
+          }
+          project.targets.each do |target|
+            next unless profiles.key?(target.name)
+            target.build_configurations.each do |configuration|
+              configuration.build_settings['CODE_SIGN_STYLE'] = 'Manual'
+              configuration.build_settings['DEVELOPMENT_TEAM'] = ENV.fetch('APPLE_TEAM_ID')
+              configuration.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = profiles.fetch(target.name)
+              configuration.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
+            end
+          end
+          project.save
+          RUBY
           xcodebuild -project App/App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/MeowWork.xcarchive" \
