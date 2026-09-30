@@ -31,13 +31,15 @@ jobs:
             let attempts = 0;
             const timer = setInterval(() => {
               const guest = document.getElementById('welcomeGuest');
-              if (!guest || !guest.onclick || typeof openProSettings !== 'function') {
-                if (++attempts >= 40) clearInterval(timer);
+              const welcome = document.getElementById('welcomeDialog');
+              const booting = document.documentElement.classList.contains('auth-booting');
+              if (!guest || !guest.onclick || !welcome || !welcome.open || booting || typeof openProSettings !== 'function') {
+                if (++attempts >= 240) clearInterval(timer);
                 return;
               }
               clearInterval(timer);
               guest.click();
-              setTimeout(openProSettings, 500);
+              setTimeout(openProSettings, 1500);
             }, 250);
           });
           </script>
@@ -67,12 +69,14 @@ jobs:
           xcrun simctl status_bar "$DEVICE_ID" override --time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
           xcrun simctl install "$DEVICE_ID" "$APP_PATH"
           xcrun simctl launch "$DEVICE_ID" com.lumilab.meowwork
-          sleep 15
+          sleep 25
           mkdir -p store-assets/native-ios
           xcrun simctl io "$DEVICE_ID" screenshot store-assets/native-ios/pro-plan-original.png
+          sleep 20
+          xcrun simctl io "$DEVICE_ID" screenshot store-assets/native-ios/pro-plan-late.png
           sips -g pixelWidth -g pixelHeight store-assets/native-ios/pro-plan-original.png
 
       - uses: actions/upload-artifact@v4
         with:
           name: native-ios-subscription-review-screen
-          path: store-assets/native-ios/pro-plan-original.png
+          path: store-assets/native-ios/pro-plan-*.png
