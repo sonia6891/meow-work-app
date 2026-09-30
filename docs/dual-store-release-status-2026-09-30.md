@@ -1,7 +1,7 @@
 # 雙平台上架狀態｜喵的，又要上班了
 
 盤點日期：2026-09-30
-程式基準：`sonia6891/meow-work-app` 最新主線 `e492418`（雙平台建置與部署驗收記錄）；Android 原生生成專案 `8462837`；提醒修補 `1561879`
+程式基準：`sonia6891/meow-work-app` 最新主線 `daacc06`（雙平台驗收記錄）；Android 原生生成專案 `8462837`；iOS 原生生成專案 `d01ed84`；提醒修補 `1561879`
 本文件描述程式、GitHub CI 和部署狀態；不代表已建立完整商店商品、上傳簽署二進位檔或送審。
 
 ## iOS App Store
@@ -12,7 +12,7 @@
 - 商品 ID 為 `meowwork.pro.monthly` / `meowwork.pro.yearly`；月繳 NT$99、年繳 NT$790、符合資格者 3 天試用。
 - 已有交易伺服器驗證、未完成交易重試、Restore、管理訂閱及 App Store Server Notifications V2 程式路徑。
 - 仍須確認 Apple Developer 團隊及簽署、正式 App Store Connect 記錄與訂閱商品、正式 App ID／Server Notifications、TestFlight 沙盒實機流程、隱私揭露、商店文案／截圖／聯絡人。這些帳號與真實聯絡資料不可由程式推定。
-- Windows 工作環境無 Xcode。先前 GitHub macOS bootstrap workflow #556 在源碼檢查階段因 grep 方括號語法失敗；已修正為固定文字檢查。已將 bootstrap 與 signed release workflow 改用 GitHub 標準 `macos-15-intel` runner。GitHub Actions iOS bootstrap #561（`36652795916`）於 2026-09-30 成功：iOS Simulator Debug 與 unsigned iPhoneOS Release 均編譯完成，App Store 法務頁、出口合規旗標、App 隱私 manifest 與 SDK 隱私 manifests 檢查通過。此結果不是簽署 archive，也未上傳 TestFlight。
+- Windows 工作環境無 Xcode。先前 GitHub macOS bootstrap workflow #556 在源碼檢查階段因 grep 方括號語法失敗；已修正為固定文字檢查。已將 bootstrap 與 signed release workflow 改用 GitHub 標準 `macos-15-intel` runner。GitHub Actions iOS bootstrap #561（`36652795916`）於 2026-09-30 成功：iOS Simulator Debug 與 unsigned iPhoneOS Release 均編譯完成，App Store 法務頁、出口合規旗標、App 隱私 manifest 與 SDK 隱私 manifests 檢查通過；生成原生專案已提交為 `d01ed84`。此結果不是簽署 archive，也未上傳 TestFlight。
 
 ## Android Google Play
 
@@ -50,7 +50,7 @@
 - 已推送 `379cbb7`（雙平台原生／付款準備）、`b594426`（修正 Android Billing 編譯）、`dac58b1`（OAuth 僅用 PKCE code exchange）及 `893c337`（修正 iOS CI literal bracket check）。舊本機鏡像未修改。
 - Node runtime 可用；已透過隨附 pnpm 啟用 Windows 系統憑證呼叫 npm CLI。更新 `package-lock.json` 並成功完成 `npm ci --ignore-scripts`、Capacitor web bundle 同步、Android/iOS plugin sync、原生 patch 腳本重複執行，以及 iOS URL scheme plist 解析檢查。
 - 本機 45 個 Node regression tests、5 個 Google Play entitlement tests、Deno Edge Function type checks 全通過；Pages run `36645468517`、LINE/OAuth CI `36645468540`、Android debug build `36645468550`、assistant self-test `36645468446`、payroll preflight `36645468468` 均成功。線上 Pages 回應 HTTP 200，部署內容已核對。
-- Supabase deploy run `36645095707` 曾因 `SUPABASE_ACCESS_TOKEN` 缺少而停止；使用者補上 GitHub secret 後，run `36648640983` 成功。run `36649858592` 的最後 secrets 寫入步驟因 scoped PAT 缺少 `edge_functions_secrets_write` 權限而失敗；已移除該步驟，改由固定程式預設值，run `36650024839` 全步驟成功，且線上 `billing-config` 讀回預期值。iOS 舊 run `36645468479` 的 literal grep 檢查失敗，#557 因較高優先序的新請求取消；切換 Intel runner 後，iOS bootstrap #561（`36652795916`）成功。Android bootstrap #6（`36652795834`）成功；生成原生專案提交為 `8462837`。尚未完成簽署 archive、TestFlight 上傳、Play signed AAB 上傳或商店送審。
+- Supabase deploy run `36645095707` 曾因 `SUPABASE_ACCESS_TOKEN` 缺少而停止；使用者補上 GitHub secret 後，run `36648640983` 成功。run `36649858592` 的最後 secrets 寫入步驟因 scoped PAT 缺少 `edge_functions_secrets_write` 權限而失敗；已移除該步驟，改由固定程式預設值，run `36650024839` 全步驟成功，且線上 `billing-config` 讀回預期值。iOS 舊 run `36645468479` 的 literal grep 檢查失敗，#557 因較高優先序的新請求取消；切換 Intel runner 後，iOS bootstrap #561（`36652795916`）成功並提交生成專案 `d01ed84`。Android bootstrap #6（`36652795834`）成功並提交生成專案 `8462837`。尚未完成簽署 archive、TestFlight 上傳、Play signed AAB 上傳或商店送審。
 - 無 Xcode／Android SDK，故未執行本機 iOS／Android 原生建置；Android 二進位由 GitHub runner 建置成功。尚無 iPhone／Android 真機與 StoreKit／Play 沙盒實測。
 - 本次 `1561879` 後 GitHub Actions StoreKit local purchase smoke #339（`36652307371`）、Android bootstrap #6（`36652795834`）、iOS bootstrap #561（`36652795916`）、Pages #1434（`36652795999`）及 LINE/OAuth、薪資預檢、助理自測均成功。Pages 隱私、支援、條款網址均回應 HTTP 200，支援頁線上內容已包含 Android 省電延遲提醒。StoreKit smoke 為模擬測試，不等同真機 TestFlight 購買。
 - Google 官方 Play Billing 9.1.0 文件要求 secure backend 向 `subscriptionsv2.get` 驗證，並透過 purchase acknowledgement 與 RTDN 維持訂閱狀態；本次後端依此落實。[Billing integration](https://developer.android.com/google/play/billing/integrate)／[backend](https://developer.android.com/google/play/billing/backend)／[subscription lifecycle](https://developer.android.com/google/play/billing/lifecycle/subscriptions)
