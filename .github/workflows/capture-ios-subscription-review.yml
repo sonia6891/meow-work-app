@@ -27,31 +27,35 @@ jobs:
           path = Path('www/index.html')
           html = path.read_text(encoding='utf-8')
           automation = '''<script>
-          window.addEventListener('load', () => {
-            let attempts = 0;
-            const timer = setInterval(() => {
-              const guest = document.getElementById('welcomeGuest');
-              const welcome = document.getElementById('welcomeDialog');
-              const booting = document.documentElement.classList.contains('auth-booting');
-              if (booting) {
-                if (++attempts >= 240) clearInterval(timer);
-                return;
-              }
-              clearInterval(timer);
-              if (welcome && welcome.open && guest && guest.onclick) guest.click();
-              let planAttempts = 0;
-              const planTimer = setInterval(() => {
-                const dialog = document.getElementById('proPlanDialog');
-                if (welcome && welcome.open && guest && guest.onclick) guest.click();
-                if (dialog && dialog.open && (!welcome || !welcome.open)) { clearInterval(planTimer); return; }
-                if (++planAttempts >= 50) { clearInterval(planTimer); return; }
-                const settings = document.querySelector('[data-tab="settings"]');
-                const upgrade = document.getElementById('accountUpgrade');
-                if (settings && document.documentElement.dataset.activeTab !== 'settings') settings.click();
-                if (upgrade && upgrade.onclick) upgrade.click();
-              }, 1000);
-            }, 250);
-          });
+          let planAttempts = 0;
+          const planTimer = setInterval(() => {
+            const guest = document.getElementById('welcomeGuest');
+            const welcome = document.getElementById('welcomeDialog');
+            const dialog = document.getElementById('proPlanDialog');
+            const booting = document.documentElement.classList.contains('auth-booting');
+            const settings = document.querySelector('.bottom-nav [data-tab="settings"]');
+            const upgrade = document.getElementById('accountUpgrade');
+            if (!booting && welcome && welcome.open && guest && guest.onclick) guest.click();
+            if (!booting && (!welcome || !welcome.open) && dialog && !dialog.open) {
+              if (settings && settings.onclick) settings.click();
+              if (upgrade && upgrade.onclick) upgrade.click();
+            }
+            if (dialog && dialog.open) { clearInterval(planTimer); return; }
+            if (++planAttempts >= 80) clearInterval(planTimer);
+          }, 1000);
+          setTimeout(() => {
+            const dialog = document.getElementById('proPlanDialog');
+            if (dialog && dialog.open) return;
+            const note = document.createElement('div');
+            note.textContent = 'capture: boot=' + document.documentElement.classList.contains('auth-booting') +
+              ' welcome=' + !!document.getElementById('welcomeDialog')?.open +
+              ' guest=' + !!document.getElementById('welcomeGuest')?.onclick +
+              ' settings=' + !!document.querySelector('.bottom-nav [data-tab="settings"]')?.onclick +
+              ' upgrade=' + !!document.getElementById('accountUpgrade')?.onclick +
+              ' active=' + document.documentElement.dataset.activeTab;
+            note.style.cssText = 'position:fixed;top:80px;left:0;z-index:999999;background:white;color:black;font:20px monospace;padding:10px';
+            document.body.appendChild(note);
+          }, 40000);
           </script>
           '''
           assert '</body>' in html
