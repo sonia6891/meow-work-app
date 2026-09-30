@@ -1,7 +1,7 @@
 const PRODUCT_IDS = new Set(["meowwork.pro.monthly", "meowwork.pro.yearly"]);
 
 export function getGooglePlayConfig() {
-  const packageName = String(Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME") || "").trim();
+  const packageName = String(Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME") || "com.lumilab.meowwork").trim();
   let accountRaw = String(Deno.env.get("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON") || "").trim();
   if (packageName !== "com.lumilab.meowwork" || !accountRaw) throw new Error("google_play_not_configured");
   let account = JSON.parse(accountRaw);

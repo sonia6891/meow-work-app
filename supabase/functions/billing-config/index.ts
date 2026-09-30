@@ -8,7 +8,7 @@ Deno.serve(async(req)=>{
   if(req.method==="OPTIONS") return new Response("ok",{headers:cors});
   const appleAppId=String(Deno.env.get("APPLE_APP_ID")||"").trim();
   const appleBundleId=String(Deno.env.get("APPLE_BUNDLE_ID")||"com.lumilab.meowwork").trim();
-  const playPackageName=String(Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")||"").trim();
+  const playPackageName=String(Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME")||"com.lumilab.meowwork").trim();
   let playCredentialsConfigured=false;
   try{
     let account:any=JSON.parse(String(Deno.env.get("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON")||"{}"));
