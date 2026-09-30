@@ -44,7 +44,11 @@ jobs:
               if (typeof openProPlanDialog === 'function') openProPlanDialog();
               else if (upgrade) upgrade.click();
             }
-            if (dialog && dialog.open) { clearInterval(planTimer); return; }
+            if (dialog && dialog.open) {
+              clearInterval(planTimer);
+              setTimeout(() => { dialog.scrollTop = dialog.scrollHeight; }, 32000);
+              return;
+            }
             if (++planAttempts >= 80) clearInterval(planTimer);
           }, 1000);
           setTimeout(() => {
