@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'store-assets', 'drafts');
 fs.mkdirSync(out, { recursive: true });
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const bridge = `window.__storeDraft={seed:(tab)=>{state=defaultState();state.theme='light';state.profile={...state.profile,name:'輪班喵'};state.schedule={preset:'2-2',shiftName:'A班',workDays:2,offDays:2,startDate:'2026-09-01'};state.settings={...state.settings,baseSalary:36000,shiftAllowancePerDay:180,mealAllowance:1200,performanceAllowance:2500,transportAllowance:800,payday:5,defaultOvertimeHours:8,overtimeRateMode:'legal'};state.months['2026-09']={overtimeHours:8,dedLabor:1120,dedHealth:760,dedWelfare:180,dedPension:2160,dedTax:300,dedAttendance:0};state.personalEvents={e1:{id:'e1',kind:'event',title:'牙醫預約',date:'2026-10-02',start:'10:30',end:'11:30',reminder:'1d'},t1:{id:'t1',kind:'todo',title:'繳電費',date:'2026-10-01',time:'09:00',reminder:'1d',completed:false},t2:{id:'t2',kind:'todo',title:'採買日用品',date:'2026-10-03',time:'18:00',reminder:'none',completed:true}};setTab(tab);},tabs:()=>[...document.querySelectorAll('.bottom-nav [data-tab]')].map(x=>x.dataset.tab)};`;
+const bridge = `window.__storeDraft={seed:(tab)=>{state=defaultState();state.theme='light';state.profile={...state.profile,name:'輪班喵'};state.schedule={preset:'2-2',shiftName:'A班',workDays:2,offDays:2,startDate:'2026-09-01'};state.settings={...state.settings,baseSalary:36000,shiftAllowancePerDay:180,mealAllowance:1200,performanceAllowance:2500,transportAllowance:800,payday:5,defaultOvertimeHours:8,overtimeRateMode:'legal'};state.months['2026-09']={overtimeHours:8,dedLabor:1120,dedHealth:760,dedWelfare:180,dedPension:2160,dedTax:300,dedAttendance:0};state.personalEvents={e1:{id:'e1',kind:'event',title:'牙醫預約',date:'2026-10-02',start:'10:30',end:'11:30',reminder:'1d'},t1:{id:'t1',kind:'todo',title:'繳電費',date:'2026-10-01',time:'09:00',reminder:'1d',completed:false},t2:{id:'t2',kind:'todo',title:'採買日用品',date:'2026-10-03',time:'18:00',reminder:'none',completed:true}};setTab(tab==='schedule-setup'?'calendar':tab);scheduleOpen=tab==='schedule-setup';if(scheduleOpen)renderCalendar();},tabs:()=>[...document.querySelectorAll('.bottom-nav [data-tab]')].map(x=>x.dataset.tab)};`;
 const at = html.lastIndexOf('})();');
 if (at < 0) throw new Error('App closure not found');
 html = html.slice(0, at) + bridge + '\n' + html.slice(at);
@@ -30,7 +30,7 @@ const server = http.createServer((req, res) => {
     const page=await context.newPage();
     const errors=[];page.on('pageerror',e=>errors.push(String(e)));
     await page.goto(base,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.__storeDraft);await page.waitForTimeout(2200);
-    for(const tab of ['dashboard','calendar','salary','attendance','settings']){
+    for(const tab of ['dashboard','calendar','schedule-setup','salary','attendance','settings']){
       await page.evaluate(tab=>window.__storeDraft.seed(tab),tab);await page.waitForTimeout(800);await page.evaluate(()=>{window.scrollTo(0,0);for(const el of document.querySelectorAll('*'))if(el.scrollTop)el.scrollTop=0;});await page.waitForTimeout(100);
       await page.screenshot({path:path.join(out,`${tab}-draft.png`),fullPage:false});
       if(tab==='salary'){
@@ -38,7 +38,7 @@ const server = http.createServer((req, res) => {
         await page.screenshot({path:path.join(out,'salary-result-draft.png'),fullPage:false});
         await page.evaluate(()=>{window.scrollTo(0,0);for(const el of document.querySelectorAll('*'))if(el.scrollTop)el.scrollTop=0;});
       }
-      console.log(`${tab}: ${await page.locator('#page-'+tab).innerText().then(t=>t.slice(0,160).replace(/\s+/g,' '))}`);
+      console.log(`${tab}: ${await page.locator('#page-'+(tab==='schedule-setup'?'calendar':tab)).innerText().then(t=>t.slice(0,160).replace(/\s+/g,' '))}`);
     }
     console.log('pageErrors='+JSON.stringify(errors));
     await context.close();
@@ -47,7 +47,7 @@ const server = http.createServer((req, res) => {
     await playContext.addInitScript(()=>{window.MeowReminder={getPermissionStatus:async()=>({granted:true,status:'authorized'}),requestPermission:async()=>({granted:true,status:'authorized'}),schedule:async()=>({scheduled:true}),cancel:async()=>({cancelled:true})};});
     await playContext.route('**/*',route=>{const u=route.request().url();if(u.startsWith(base))return route.continue();if(u.includes('esm.sh/'))return route.fulfill({status:200,contentType:'application/javascript',body:mockSupabase});if(u.includes('billing-config'))return route.fulfill({status:200,contentType:'application/json',body:'{"configured":true,"provider":"app_store_play","store_managed":true,"monthly":99,"yearly":790,"trial_days":3}'});if(u.includes('tesseract'))return route.fulfill({status:200,contentType:'application/javascript',body:'window.Tesseract={};'});return route.abort();});
     const playPage=await playContext.newPage();await playPage.goto(base,{waitUntil:'domcontentloaded'});await playPage.waitForFunction(()=>window.__storeDraft);await playPage.waitForTimeout(2200);
-    for(const tab of ['dashboard','calendar','salary','attendance','settings']){
+    for(const tab of ['dashboard','calendar','schedule-setup','salary','attendance','settings']){
       await playPage.evaluate(tab=>window.__storeDraft.seed(tab),tab);await playPage.waitForTimeout(800);await playPage.evaluate(()=>{window.scrollTo(0,0);for(const el of document.querySelectorAll('*'))if(el.scrollTop)el.scrollTop=0;});await playPage.waitForTimeout(100);
       await playPage.screenshot({path:path.join(googleOut,`${tab}-draft.png`),fullPage:false});
     }
