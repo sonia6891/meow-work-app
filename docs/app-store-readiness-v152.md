@@ -80,11 +80,11 @@ Bundle ID：`com.lumilab.meowwork`
 ### P1 — App Store metadata
 
 - [ ] Privacy Policy URL
-  - `https://sonia6891.github.io/https-github.com-facebook-facebook-ios-sdk/privacy.html`
+  - `https://sonia6891.github.io/meow-work-app/privacy.html`
 - [ ] Support URL
-  - `https://sonia6891.github.io/https-github.com-facebook-facebook-ios-sdk/support.html`
+  - `https://sonia6891.github.io/meow-work-app/support.html`
 - [ ] Terms of Use URL
-  - `https://sonia6891.github.io/https-github.com-facebook-facebook-ios-sdk/terms.html`
+  - `https://sonia6891.github.io/meow-work-app/terms.html`
 - [ ] App 名稱、副標題、Promotional Text、Description、Keywords
 - [ ] App Review 聯絡人：姓名、email、電話
 - [ ] Review Notes：Google／LINE／Apple 登入與 Pro 測試步驟

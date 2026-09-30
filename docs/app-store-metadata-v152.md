@@ -58,9 +58,9 @@ iPhone 先用 Apple Vision 在裝置端讀取薪資單，再由受保護的雲�
 
 ## URLs
 
-- Privacy Policy URL：https://sonia6891.github.io/https-github.com-facebook-facebook-ios-sdk/privacy.html
-- Support URL：https://sonia6891.github.io/https-github.com-facebook-facebook-ios-sdk/support.html
-- Terms of Use URL：https://sonia6891.github.io/https-github.com-facebook-facebook-ios-sdk/terms.html
+- Privacy Policy URL：https://sonia6891.github.io/meow-work-app/privacy.html
+- Support URL：https://sonia6891.github.io/meow-work-app/support.html
+- Terms of Use URL：https://sonia6891.github.io/meow-work-app/terms.html
 
 ## Category 建議
 
