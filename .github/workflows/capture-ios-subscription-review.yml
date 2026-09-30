@@ -27,19 +27,13 @@ jobs:
           path = Path('www/index.html')
           html = path.read_text(encoding='utf-8')
           automation = '''<script>
-          const captureDebug = document.createElement('div');
-          captureDebug.style.cssText = 'position:fixed;top:70px;left:10px;z-index:2147483647;background:#fff;color:#000;font:16px sans-serif;padding:5px';
-          captureDebug.textContent = 'capture: script loaded';
-          document.body.appendChild(captureDebug);
           window.addEventListener('load', () => {
-            captureDebug.textContent = 'capture: load fired';
             let attempts = 0;
             const timer = setInterval(() => {
               const guest = document.getElementById('welcomeGuest');
               const welcome = document.getElementById('welcomeDialog');
               const booting = document.documentElement.classList.contains('auth-booting');
-              captureDebug.textContent = 'capture: ' + attempts + ' boot=' + booting + ' fn=' + (typeof openProSettings) + ' welcome=' + !!(welcome && welcome.open);
-              if (booting || typeof openProSettings !== 'function') {
+              if (booting) {
                 if (++attempts >= 240) clearInterval(timer);
                 return;
               }
@@ -49,10 +43,12 @@ jobs:
               const planTimer = setInterval(() => {
                 const dialog = document.getElementById('proPlanDialog');
                 if (welcome && welcome.open && guest && guest.onclick) guest.click();
-                captureDebug.textContent = 'capture: plan ' + planAttempts + ' open=' + !!(dialog && dialog.open) + ' tab=' + document.documentElement.dataset.activeTab;
                 if (dialog && dialog.open && (!welcome || !welcome.open)) { clearInterval(planTimer); return; }
                 if (++planAttempts >= 50) { clearInterval(planTimer); return; }
-                try { openProSettings(); } catch (error) { captureDebug.textContent = 'capture error: ' + error.message; console.error('plan capture navigation', error); }
+                const settings = document.querySelector('[data-tab="settings"]');
+                const upgrade = document.getElementById('accountUpgrade');
+                if (settings && document.documentElement.dataset.activeTab !== 'settings') settings.click();
+                if (upgrade && upgrade.onclick) upgrade.click();
               }, 1000);
             }, 250);
           });

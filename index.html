@@ -14383,6 +14383,12 @@ $('accountLogout').onclick=signOutAccount;
 if($('deleteAccount'))$('deleteAccount').onclick=deleteAccountPermanently;
 initWelcome();
 initAuth();
+setTimeout(()=>{
+  if(!document.documentElement.classList.contains('auth-booting'))return;
+  document.documentElement.classList.remove('auth-booting');
+  if(!authUser&&!$('welcomeDialog').open)openWelcome(false);
+  setAccountStatus('登入服務回應較慢，可先使用訪客模式');
+},10000);
 loadBillingConfig();
 window.addEventListener('load',()=>{void initStoreTransactionListener();void loadNativeStoreProducts()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden||DEV_TESTING_ENABLED)return;if(authUser)void loadEntitlement();else void retryRememberedAuthSession()});
