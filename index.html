@@ -1492,7 +1492,6 @@ html.auth-needs-login #app-splash{opacity:1!important;pointer-events:none}
   text-align:center;
   color:#fff;
 }
-.meow-welcome.welcome-auto-login #welcomeApple{display:none!important}
 .welcome-login-mini-head{display:none}
 @media(max-width:760px){
   html.auth-booting,
@@ -7589,7 +7588,8 @@ function openWelcome(manual=false){
   $('welcomeTitle').focus({preventScroll:true});dialog.scrollTop=0;
 }
 async function initWelcome(){
-  $('welcomeApple').hidden=!appleAuthBridge();
+  const nativeIOS=window.Capacitor&&typeof window.Capacitor.getPlatform==='function'&&window.Capacitor.getPlatform()==='ios';
+  $('welcomeApple').hidden=!(nativeIOS||appleAuthBridge());
   $('welcomeGoogle').onclick=async()=>{const b=$('welcomeGoogle');b.disabled=true;try{await signInWithGoogle()}finally{b.disabled=false}};
   $('welcomeLine').onclick=async()=>{const b=$('welcomeLine');b.disabled=true;try{await signInWithLine()}finally{b.disabled=false}};
   $('welcomeApple').onclick=async()=>{const b=$('welcomeApple');b.disabled=true;try{await signInWithApple()}finally{b.disabled=false}};
