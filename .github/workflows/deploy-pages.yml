@@ -107,27 +107,15 @@ jobs:
           assert disable_auto=='true', disable_auto
           print('LINE provider redirect verified:',parsed.netloc,scopes,'disable_auto_login='+disable_auto)
           PY
-      - name: Generate valid web home-screen icons and splash
+      - name: Verify checked-in web home-screen icons and splash
         run: |
           set -euo pipefail
           ICON_VENV="$RUNNER_TEMP/meow-icon-venv"
           python3 -m venv "$ICON_VENV"
           "$ICON_VENV/bin/python" -m pip install --quiet pillow
-          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/55737aaf2c45506d5e29d823d614db2626d1ad79dd3ea82806858d64c267a2bc.png" -o icon-v178-source.png
-          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/b8ccc9163e5d72861ccb895c9425ea26942dcbc01b1f112860ca39e8cc48795c.png" -o splash-v183-source.png
           "$ICON_VENV/bin/python" - <<'PY'
-          from PIL import Image, ImageOps, ImageFilter
+          from PIL import Image
           from pathlib import Path
-
-          icon=Image.open('icon-v178-source.png').convert('RGB')
-          # Use the final frameless icon source; the platform supplies the only outer rounded mask.
-          for size in (180,192,512):
-              out=ImageOps.fit(icon,(size,size),method=Image.Resampling.LANCZOS)
-              out.save(f'app-icon-v178-{size}.png',format='PNG',optimize=True)
-
-          # Use the exact approved final splash artwork. No extra mirroring, zooming or synthetic sky.
-          splash=Image.open('splash-v183-source.png').convert('RGB')
-          splash.save('splash-v183.jpg',format='JPEG',quality=92,optimize=True,progressive=True)
 
           for name,size in [('app-icon-v178-180.png',(180,180)),('app-icon-v178-192.png',(192,192)),('app-icon-v178-512.png',(512,512))]:
               im=Image.open(name)

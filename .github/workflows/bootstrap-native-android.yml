@@ -48,20 +48,12 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Prepare the current web artwork
+      - name: Verify checked-in brand artwork
         run: |
-          python3 -m pip install --quiet pillow
-          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/55737aaf2c45506d5e29d823d614db2626d1ad79dd3ea82806858d64c267a2bc.png" -o /tmp/meow-app-icon.png
-          curl -L --fail --retry 3 "https://cdn.openart.ai/openart-uploads/production/attachment-transfers/b8ccc9163e5d72861ccb895c9425ea26942dcbc01b1f112860ca39e8cc48795c.png" -o /tmp/meow-splash.png
-          python3 - <<'PY'
-          from PIL import Image, ImageOps
-          icon=Image.open('/tmp/meow-app-icon.png').convert('RGB')
-          icon=ImageOps.fit(icon,(1024,1024),method=Image.Resampling.LANCZOS)
-          for size in (180,192,512):
-              ImageOps.fit(icon,(size,size),method=Image.Resampling.LANCZOS).save(f'app-icon-v178-{size}.png',format='PNG',optimize=True)
-          splash=Image.open('/tmp/meow-splash.png').convert('RGB')
-          splash.save('splash-v183.jpg',format='JPEG',quality=92,optimize=True,progressive=True)
-          PY
+          test -s app-icon-v178-180.png
+          test -s app-icon-v178-192.png
+          test -s app-icon-v178-512.png
+          test -s splash-v183.jpg
 
       - name: Install pinned Capacitor platforms
         working-directory: native

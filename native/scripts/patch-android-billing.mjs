@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -8,8 +8,12 @@ const appGradle = join(android, 'app', 'build.gradle');
 const variablesGradle = join(android, 'variables.gradle');
 const pluginSource = join(root, 'android-sources', 'MeowStoreBillingPlugin.java');
 const manifestPath = join(android, 'app', 'src', 'main', 'AndroidManifest.xml');
+const resources = join(android, 'app', 'src', 'main', 'res');
+const launchThemePath = join(resources, 'values', 'styles.xml');
+const brandIcon = join(root, '..', 'app-icon-v178-512.png');
+const brandSplash = join(root, '..', 'splash-v183.jpg');
 
-if (!existsSync(appGradle) || !existsSync(variablesGradle) || !existsSync(pluginSource) || !existsSync(manifestPath)) {
+if (!existsSync(appGradle) || !existsSync(variablesGradle) || !existsSync(pluginSource) || !existsSync(manifestPath) || !existsSync(launchThemePath) || !existsSync(brandIcon) || !existsSync(brandSplash)) {
   throw new Error('Generate the Capacitor Android project first, and keep android-sources/MeowStoreBillingPlugin.java available.');
 }
 
@@ -102,5 +106,51 @@ if (!manifest.includes('android:scheme="com.lumilab.meowwork"')) {
 }
 if (!manifest.includes('android:scheme="com.lumilab.meowwork"')) throw new Error('Could not register the native OAuth callback URL scheme.');
 if (!manifest.includes('android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove"')) throw new Error('Could not remove the unused exact-alarm permission.');
+manifest = manifest.replace(/android:icon="[^"]*"/, 'android:icon="@mipmap/meow_launcher"');
+manifest = manifest.replace(/android:roundIcon="[^"]*"/, 'android:roundIcon="@mipmap/meow_launcher"');
+if (!manifest.includes('android:icon="@mipmap/meow_launcher"') || !manifest.includes('android:roundIcon="@mipmap/meow_launcher"')) {
+  throw new Error('Could not install the branded Android launcher icon.');
+}
 writeFileSync(manifestPath, manifest);
-console.log(`Configured Play Billing 9.1.0, API 36, native bridge, and non-exact reminder permissions in ${android}`);
+
+function putResource(directory, filename, content) {
+  const target = join(resources, directory);
+  mkdirSync(target, { recursive: true });
+  writeFileSync(join(target, filename), content);
+}
+function copyResource(directory, filename, source) {
+  const target = join(resources, directory);
+  mkdirSync(target, { recursive: true });
+  copyFileSync(source, join(target, filename));
+}
+
+// Keep the approved web artwork in the native shell. The default Capacitor
+// launcher and splash assets are not suitable for the store build.
+copyResource('mipmap-nodpi', 'meow_launcher.png', brandIcon);
+copyResource('drawable-nodpi', 'meow_launcher_art.png', brandIcon);
+copyResource('drawable-nodpi', 'meow_splash_art.jpg', brandSplash);
+putResource('values', 'meow_launcher_colors.xml', `<?xml version="1.0" encoding="utf-8"?>
+<resources><color name="meow_launcher_background">#FAEEDA</color></resources>
+`);
+putResource('drawable', 'meow_launcher_foreground.xml', `<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/meow_launcher_art"
+    android:insetLeft="18dp" android:insetTop="18dp"
+    android:insetRight="18dp" android:insetBottom="18dp" />
+`);
+putResource('mipmap-anydpi-v26', 'meow_launcher.xml', `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/meow_launcher_background" />
+    <foreground android:drawable="@drawable/meow_launcher_foreground" />
+</adaptive-icon>
+`);
+putResource('drawable', 'meow_splash.xml', `<?xml version="1.0" encoding="utf-8"?>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/meow_splash_art" android:gravity="fill" />
+`);
+let launchTheme = readFileSync(launchThemePath, 'utf8');
+launchTheme = launchTheme.replace(/@drawable\/splash\b/, '@drawable/meow_splash');
+if (!launchTheme.includes('@drawable/meow_splash')) throw new Error('Could not install the branded Android launch image.');
+writeFileSync(launchThemePath, launchTheme);
+
+console.log(`Configured Play Billing 9.1.0, API 36, native bridge, reminders, and approved Android launch artwork in ${android}`);
