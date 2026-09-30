@@ -1,5 +1,12 @@
 # 雙平台上架狀態｜喵的，又要上班了
 
+## 2026-09-30 最新 iOS 簽署與上傳進度
+
+- Apple Distribution 憑證、主 App 與 Widget 的 App Store 描述檔已建立；兩個 App ID 均已綁定 `group.com.lumilab.meowwork.shared`，並重建含此授權的 v2 描述檔。簽署資料已放入 GitHub Actions secrets，未提交至 Git。
+- `build-ios-release.yml` 改用 `macos-26`／Xcode 26.6。簽署封存、IPA 匯出與 App Store Connect 上傳均成功；[GitHub Actions #6](https://github.com/sonia6891/meow-work-app/actions/runs/36668130275) 結果為 success。
+- App Store Connect 已處理版本 1.0（建置 601），build API 狀態為 `VALID`，TestFlight 顯示上傳「完成」。此建置也已選入 App Store 1.0 版本頁並儲存。尚無測試群組或邀請，因此沒有可供安裝的 TestFlight 邀請連結。
+- 正式送審仍待實際 App 截圖、App 隱私資料收集問卷、審查聯絡資料與其餘版本檢查。這些項目尚未提交或宣稱通過。下方較早的盤點段落保留為歷程，當中的「尚未簽署／上傳」已由本節更新。
+
 ## 商店後台即時核對（2026-09-30）
 
 - Google Play Console「Sonia.W」開發者首頁顯示：Google 正在驗證已上傳的身分文件；聯絡電話驗證須待文件核准；「建立應用程式」為停用狀態，且帳戶尚無 App。這是目前無法建立 Play 商品與上傳內測版的直接阻擋。
