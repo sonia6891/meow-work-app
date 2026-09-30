@@ -1,0 +1,31 @@
+name: Retrieve native iOS subscription capture
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-ios-subscription-review-screen
+          run-id: 36675316162
+          github-token: ${{ github.token }}
+          path: store-assets/native-ios
+      - name: Save capture for review
+        run: |
+          set -euo pipefail
+          test -s store-assets/native-ios/pro-plan-original.png
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add store-assets/native-ios/pro-plan-original.png
+          git commit -m 'chore: preserve native iOS subscription review capture [skip ci]'
+          git push origin HEAD:main
