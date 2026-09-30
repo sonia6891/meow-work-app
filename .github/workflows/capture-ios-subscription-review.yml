@@ -33,16 +33,17 @@ jobs:
               const guest = document.getElementById('welcomeGuest');
               const welcome = document.getElementById('welcomeDialog');
               const booting = document.documentElement.classList.contains('auth-booting');
-              if (!guest || !guest.onclick || !welcome || !welcome.open || booting || typeof openProSettings !== 'function') {
+              if (booting || typeof openProSettings !== 'function') {
                 if (++attempts >= 240) clearInterval(timer);
                 return;
               }
               clearInterval(timer);
-              guest.click();
+              if (welcome && welcome.open && guest && guest.onclick) guest.click();
               let planAttempts = 0;
               const planTimer = setInterval(() => {
                 const dialog = document.getElementById('proPlanDialog');
-                if (dialog && dialog.open) { clearInterval(planTimer); return; }
+                if (welcome && welcome.open && guest && guest.onclick) guest.click();
+                if (dialog && dialog.open && (!welcome || !welcome.open)) { clearInterval(planTimer); return; }
                 if (++planAttempts >= 50) { clearInterval(planTimer); return; }
                 try { openProSettings(); } catch (error) { console.error('plan capture navigation', error); }
               }, 1000);
@@ -55,6 +56,7 @@ jobs:
           PY
           node scripts/patch-ios-bridge.mjs
           npx cap sync ios
+          grep -q 'planAttempts' ios/App/App/public/index.html
 
       - name: Build and capture actual native screen
         shell: bash
