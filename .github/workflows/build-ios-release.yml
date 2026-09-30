@@ -68,7 +68,7 @@ jobs:
             -authenticationKeyPath "$APPLE_ASC_KEY_PATH" \
             -authenticationKeyID "$APPLE_ASC_KEY_ID" \
             -authenticationKeyIssuerID "$APPLE_ASC_ISSUER_ID" \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CURRENT_PROJECT_VERSION="$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CURRENT_PROJECT_VERSION="$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))" CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY="Apple Distribution" \
             archive
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
