@@ -59,3 +59,8 @@ jobs:
           supabase functions deploy app-store-notifications-v2 --project-ref "$SUPABASE_PROJECT_ID"
           supabase functions deploy verify-google-play-purchase --project-ref "$SUPABASE_PROJECT_ID"
           supabase functions deploy google-play-rtdn --project-ref "$SUPABASE_PROJECT_ID"
+      - name: Configure fixed Google Play package name
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ygrlvmyqrhyfkglomsbq
+        run: supabase secrets set GOOGLE_PLAY_PACKAGE_NAME=com.lumilab.meowwork --project-ref "$SUPABASE_PROJECT_ID"
