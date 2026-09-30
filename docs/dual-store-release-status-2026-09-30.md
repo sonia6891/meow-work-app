@@ -2,6 +2,8 @@
 
 ## 2026-09-30 最新 iOS 簽署與上傳進度
 
+- App Store Connect「App 資訊」已完成年齡分級問卷，依現有功能選擇無社群傳訊、廣告及成人／暴力／賭博內容，後台計算並儲存 4+。App Store Server Notifications V2 的正式與沙箱 URL 均已設定為專案 `app-store-notifications-v2` Edge Function，兩欄在後台讀回一致；該接收端的 GET 回應 HTTP 200。版本 1.0 改為審查通過後手動發佈，以便審核通過後再決定上線時點。
+- Google Play Console 再次核對仍顯示「Google 正在驗證您的身分」，建立第一個 App 的控制項停用；Android 商品建立與 AAB 上傳仍待 Google 放行。
 - 已修正原生 iOS 登入頁的 Apple 登入按鈕顯示，並由 GitHub macOS 模擬器擷取 1242 × 2688 截圖。這張原生登入截圖已透過 App Store Connect API 上傳至繁體中文版本的 6.5 吋 iPhone 截圖欄，後台顯示「共 1 張截圖」。功能頁與訂閱審查截圖仍待補齊。
 - [GitHub Actions 簽署版 901](https://github.com/sonia6891/meow-work-app/actions/runs/36671527755) 已成功封存、匯出及上傳，App Store Connect 處理狀態為 `VALID`。App Store 1.0 已選用建置 901；內部 TestFlight 群組已加入 901 並儲存「測試內容」。群組目前 0 位測試人員，因此尚無安裝邀請。
 - App 隱私權 9 種資料類型已發佈，審查聯絡資料已儲存。尚待確認版權權利人與審查登入方式，並補齊功能與訂閱審查畫面；未送出 App 審查。Google Play 開發者身分驗證仍阻擋建立 Android 商品。
