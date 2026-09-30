@@ -128,7 +128,7 @@ jobs:
       - name: Stage public application files only
         run: |
           mkdir -p _site
-          cp index.html privacy.html terms.html support.html sw.js manifest.webmanifest 404.html workcat-home-v12.png app-icon-v178-180.png app-icon-v178-192.png app-icon-v178-512.png splash-v183.jpg _site/
+          cp index.html privacy.html terms.html support.html delete-account.html sw.js manifest.webmanifest 404.html workcat-home-v12.png app-icon-v178-180.png app-icon-v178-192.png app-icon-v178-512.png splash-v183.jpg _site/
           cp -R assets _site/assets
           touch _site/.nojekyll
       - name: Setup Pages
@@ -152,7 +152,7 @@ jobs:
           import hashlib,json,os,re,time,urllib.request,urllib.error
           result={'commit':os.environ['GITHUB_SHA'],'files':{}}
           base=os.environ['PAGE_URL']
-          for name in ['index.html','privacy.html','terms.html','support.html','sw.js','manifest.webmanifest','app-icon-v178-180.png','app-icon-v178-192.png','app-icon-v178-512.png','splash-v183.jpg','assets/welcome-brand-v112.webp','assets/meow-assistant-pro-v169.webp']:
+          for name in ['index.html','privacy.html','terms.html','support.html','delete-account.html','sw.js','manifest.webmanifest','app-icon-v178-180.png','app-icon-v178-192.png','app-icon-v178-512.png','splash-v183.jpg','assets/welcome-brand-v112.webp','assets/meow-assistant-pro-v169.webp']:
               expected=hashlib.sha256(Path(name).read_bytes()).hexdigest()
               url=base+name+'?build-check='+os.environ['GITHUB_SHA']
               for attempt in range(10):
@@ -211,7 +211,7 @@ jobs:
           assert 'class="auth-booting"' in html
           assert "window.open('about:blank','meow-auth-window')" not in html
           assert "client.auth.setSession({" not in html
-          assert 'id="welcomeGuest"' not in html
+          assert 'id="welcomeGuest"' in html
           assert 'id="welcomeEmail"' not in html
           assert html.index('id="profilePreview"') < html.index('id="accountPlanCard"') < html.index('id="appearanceCard"') < html.index('id="workSettingsCard"') < html.index('id="dataSyncCard"') < html.index('id="installCard"') < html.index('id="aboutCard"')
           assert html.index('id="profilePreview"') < html.index('id="accountPlanCard"') < html.index('id="proPlanSettings"') < html.index('id="appearanceCard"')
