@@ -159,6 +159,8 @@
 
 這張是審查用，不是 App Store 公開產品頁主截圖。
 
+2026-09-30 已另存 `store-assets/drafts/apple-subscription-review-draft.png` 草稿，畫面可見 Free 狀態、月繳／年繳、三天試用提示、恢復購買與法務連結。它使用模擬的 iOS 商店橋接與設定價格，須待 App Store Connect 商品建立並由簽署版讀到實際商店價格後重拍。Free 購買狀態不會同時顯示已訂閱者的「管理／取消」按鈕；審查說明會另外指出其所在位置。
+
 ## 最後輸出檢查
 
 - [ ] 1320 × 2868 px

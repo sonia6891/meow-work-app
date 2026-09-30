@@ -72,6 +72,10 @@ jobs:
         working-directory: native/android
         run: ./gradlew --no-daemon assembleDebug
 
+      - name: Build unsigned Android release bundle
+        working-directory: native/android
+        run: ./gradlew --no-daemon bundleRelease
+
       - name: Save generated native project
         run: |
           git add native/android

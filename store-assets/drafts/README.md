@@ -4,7 +4,7 @@
 
 ## 檔案
 
-- 本目錄根目錄：Apple iPhone 規格草稿，8 張，1320 × 2868 px，PNG，RGB，無透明通道。
+- 本目錄根目錄：Apple 公開產品頁草稿 8 張，另有 `apple-subscription-review-draft.png` 訂閱審查用草稿 1 張；均為 1320 × 2868 px、PNG、RGB、無透明通道。
 - `google-play-1080x2400/`：Google Play 手機截圖草稿，8 張，1080 × 2400 px，PNG，RGB，無透明通道。
 - `google-play-feature-graphic-draft.png`：Google Play 宣傳圖草稿，1024 × 500 px，PNG，RGB，無透明通道。沿用 App 既有 `assets/mobile-hero-clean-v75.png` 品牌圖，另加上功能文案；這是宣傳素材，不是 App 畫面。
 - `../../work/capture-store-drafts.cjs`：可重跑的本機截圖腳本；所有使用者資料均由腳本注入為虛構展示資料，不會呼叫正式 Supabase。
@@ -17,6 +17,8 @@
 
 拍攝時額外隱藏 Pro 介紹卡與最近紀錄卡，只為讓逐項對帳結果完整入鏡；此隱藏不會套用到 App。正式送審前仍需在簽署 build 的 iPhone／Android 實機，以清楚標示的虛構薪資單真的跑過完整 OCR 與後端驗證後重新拍攝。
 
+訂閱審查草稿從實際 Free 購買視窗拍攝，腳本只模擬 iOS 商店橋接以顯示「恢復購買」入口；月繳 NT$99、年繳 NT$790 是尚未由 App Store Connect 商品讀回的設定值。它不證明商品已建立、試用資格、StoreKit 交易或真實付款畫面。正式商品審查圖須待簽署 iPhone build 顯示 App Store 商品後重拍。
+
 ## 正式上架前
 
 1. 等待 iOS 與 Android 簽署版本可安裝後，在實機用最終 build 重新拍攝。
@@ -26,4 +28,4 @@
 
 ## 拍攝結果
 
-2026-09-30：Apple 8 張、Google Play 8 張與 Google 宣傳圖已輸出。截圖流程沒有捕捉到 JavaScript page error；兩個平台均確認 Pro 面板打開時喵助理隱藏、收起面板後恢復。這只驗證瀏覽器中的截圖流程和該次介面行為，不代表原生安裝、真實 OCR、商店規範或整體功能已完成驗收。
+2026-09-30：Apple 公開候選圖 8 張、Apple 訂閱審查草稿 1 張、Google Play 手機圖 8 張與 Google 宣傳圖已輸出。截圖流程沒有捕捉到 JavaScript page error；兩個平台均確認 Pro 面板打開時喵助理隱藏、收起面板後恢復。這只驗證瀏覽器中的截圖流程和該次介面行為，不代表原生安裝、真實 OCR、商店規範或整體功能已完成驗收。

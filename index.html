@@ -11108,7 +11108,8 @@ function renderProPlanSettings(){
   }else if(trialStartedAt){
     box.innerHTML='<b>目前：Free</b>此帳號已使用過免費試用；可直接選擇月繳或年繳 Pro。';
   }else{
-    box.innerHTML='<b>目前：Free</b>月繳 NT$99／月・年繳 NT$790／年；首次符合資格可享 3 天免費試用。訂閱由 App Store／Google Play 管理。';
+    const storeName=storeBillingBridge()?storePlatformName():'App Store／Google Play';
+    box.innerHTML='<b>目前：Free</b>月繳 NT$99／月・年繳 NT$790／年；首次符合資格可享 3 天免費試用。訂閱由 '+storeName+' 管理。';
   }
 
   if(live){
@@ -11136,6 +11137,8 @@ function renderProPlanSettings(){
         :eligible===false
           ?'此 '+accountName+' 目前不符合免費試用資格，會依 '+storeName+' 顯示的價格直接開始訂閱。'
           :'免費試用資格會由商店在購買時確認。';
+    }else if(storeBillingBridge()){
+      offerHint.textContent='首次符合資格的訂閱可享 3 天免費試用。價格與資格以 '+storePlatformName()+' 購買畫面為準。';
     }else{
       offerHint.textContent='首次符合資格的訂閱可享 3 天免費試用。正式 iOS／Android 版以 App Store／Google Play 實際顯示的在地化價格與資格為準。';
     }
