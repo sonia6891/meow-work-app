@@ -3,7 +3,9 @@
 ## 商店後台即時核對（2026-09-30）
 
 - Google Play Console「Sonia.W」開發者首頁顯示：Google 正在驗證已上傳的身分文件；聯絡電話驗證須待文件核准；「建立應用程式」為停用狀態，且帳戶尚無 App。這是目前無法建立 Play 商品與上傳內測版的直接阻擋。
-- App Store Connect 目前導向 Apple 帳號登入頁，無法從未登入頁面確認 Apple Developer 團隊、App 記錄、訂閱商品或簽署設定。需要帳號持有人登入後才能繼續核對。
+- 使用者已登入 Apple Developer 並登記 App ID `com.lumilab.meowwork`（Meow Work iOS App，團隊 `UA6S3LJ86P`）。App Store Connect 已建立 iOS App「喵的，又要上班了」，Apple ID `6817588985`，SKU `MEOWWORK-IOS-001`，版本 1.0 狀態為「準備提交」。繁體中文產品文案、關鍵字、副標題、分類及隱私權政策網址已儲存。App 仍未送審。
+- 已建立訂閱群組 `Meow Work Pro`（群組 ID `22426667`，顯示名稱「Pro 方案」）。月繳 `meowwork.pro.monthly`（Apple ID `6817590548`）台灣價格 NT$99；年繳 `meowwork.pro.yearly`（Apple ID `6817593714`）台灣預付價格 NT$790。兩者均只在台灣供應，限 App Store 單一名額購買，家人共享未啟用；台灣新訂閱者的前 3 天免費試用已建立，2026-10-01 生效且無結束日期。上述資料均在 App Store Connect 儲存後讀回，商品仍為「準備提交」。
+- Apple 訂閱審查截圖、版本 iPhone 截圖、App 隱私問卷、年齡分級、審查聯絡資訊、簽署建置與 TestFlight 實機測試仍未完成。版本頁當前顯示的 6.5 吋 iPhone 截圖規格為 1242×2688 或 1284×2778；現有 1320×2868 草稿尺寸不符，也不是簽署原生版的實機畫面，不能直接上傳。
 - 公開 `support.html` 目前提供 GitHub Issues 支援表單，尚未提供已核實的客服電子郵件。正式商店聯絡資料需由帳號持有人提供，不能代填。
 
 ## 最新進度（2026-09-30，提交 `14303e2`）
@@ -25,7 +27,7 @@
 - Capacitor iOS、Bundle ID `com.lumilab.meowwork`、StoreKit 2 bridge 已存在。
 - 商品 ID 為 `meowwork.pro.monthly` / `meowwork.pro.yearly`；月繳 NT$99、年繳 NT$790、符合資格者 3 天試用。
 - 已有交易伺服器驗證、未完成交易重試、Restore、管理訂閱及 App Store Server Notifications V2 程式路徑。
-- 仍須確認 Apple Developer 團隊及簽署、正式 App Store Connect 記錄與訂閱商品、正式 App ID／Server Notifications、TestFlight 沙盒實機流程、隱私揭露、商店文案／截圖／聯絡人。這些帳號與真實聯絡資料不可由程式推定。
+- Apple Developer 團隊、App ID、App Store Connect 記錄及兩個訂閱商品已建立並讀回；仍須完成簽署、Server Notifications 設定、TestFlight 沙盒實機流程、隱私揭露、正式截圖及審查聯絡人。真實聯絡資料不可由程式推定。
 - Apple 截圖草稿 8 張已放在 `store-assets/drafts/`；它們由桌面 Chromium 手機尺寸視窗產生，須待簽署 build 在 iPhone 實機重新拍攝後，才可作為正式商品頁素材。Pro 逐項對帳圖使用直接注入的虛構辨識結果，並非真實 OCR 流程證據。
 - Windows 工作環境無 Xcode。先前 GitHub macOS bootstrap workflow #556 在源碼檢查階段因 grep 方括號語法失敗；已修正為固定文字檢查。已將 bootstrap 與 signed release workflow 改用 GitHub 標準 `macos-15-intel` runner。GitHub Actions iOS bootstrap #561（`36652795916`）於 2026-09-30 成功：iOS Simulator Debug 與 unsigned iPhoneOS Release 均編譯完成，App Store 法務頁、出口合規旗標、App 隱私 manifest 與 SDK 隱私 manifests 檢查通過；生成原生專案已提交為 `d01ed84`。此結果不是簽署 archive，也未上傳 TestFlight。
 
