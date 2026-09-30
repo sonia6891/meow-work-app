@@ -34,8 +34,6 @@ jobs:
           npm run sync:web
           node scripts/patch-ios-bridge.mjs
           npx cap sync ios
-          gem install xcodeproj --no-document
-          ruby scripts/add-date-widget.rb
           cp ios-sources/brand-app-icon-v178-1024.png ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
           cp ios-sources/brand-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png
           cp ios-sources/brand-splash-v183-2732.png ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png
