@@ -1,5 +1,13 @@
 # 雙平台上架狀態｜喵的，又要上班了
 
+## 最新進度（2026-09-30，提交 `14303e2`）
+
+- 原生 Android 啟動圖示與 splash 已改用專案追蹤的正式品牌圖；iOS bootstrap 和 Android debug build 在提交 `7f5f634` 後成功（iOS run `36657368394`、Android run `36657368385`）。iOS 生成專案更新提交為 `2ff5b61`。這些是未簽署的建置，無法證明實機購買或商店審核結果。
+- 訂閱 Free 畫面在原生平台只顯示對應的 App Store 或 Google Play 名稱，另產出 Apple 訂閱審查截圖草稿。草稿使用模擬 iOS 商店橋接及設定價格；正式審查圖仍須待 App Store Connect 商品與簽署版就緒後實機重拍。
+- Android bootstrap 已加入 unsigned `bundleRelease` 步驟；Android run `36657906032` 的 debug APK 與 unsigned release AAB 編譯成功。iOS run `36657905942` 的 Simulator Debug 與 unsigned iPhoneOS Release 編譯成功，生成專案更新為 `91bd50a`。Pages run `36657906009`、StoreKit 模擬購買 run `36657906040`、薪資預檢、助理自測及 LINE/UI 預檢均成功。這些結果尚不等於簽署封存、商店上傳或真機付款驗證。
+- 已製作新的素材包：Apple 公開候選圖 8 張、Apple 訂閱審查草稿 1 張、Google Play 手機候選圖 8 張、Google 宣傳圖 1 張，共 18 張 PNG。此包供審閱，不是最終可提交素材。
+- GitHub Actions secrets 清單於本次再次唯讀核對，仍只有 `SUPABASE_ACCESS_TOKEN`。簽署與商店上傳所需的 Apple／Google secrets 尚未設定，因此 TestFlight 與 Google Play 內測上傳仍無法執行。
+
 盤點日期：2026-09-30
 程式基準：App／原生專案參考 `26df781`、Android 生成專案 `8462837`、iOS 生成專案 `a51264c`（由 CI 更新 Xcode 專案檔）、提醒修補 `1561879`；商店素材草稿收錄於 `21bb172`、`9caa2eb` 與 `34cd406`。
 本文件描述程式、GitHub CI 和部署狀態；不代表已建立完整商店商品、上傳簽署二進位檔或送審。
