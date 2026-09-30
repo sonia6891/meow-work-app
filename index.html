@@ -6,6 +6,18 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>
+function markNativeAndroid(){
+  try{
+    if(window.Capacitor&&window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='android'){
+      document.documentElement.classList.add('android-native');
+    }
+  }catch(e){}
+}
+markNativeAndroid();
+document.addEventListener('DOMContentLoaded',markNativeAndroid,{once:true});
+setTimeout(markNativeAndroid,250);
+</script>
 <meta name="theme-color" content="#f7b342">
 <meta name="application-name" content="喵的，又要上班了">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -5378,6 +5390,26 @@ html.dark .holiday-tag{
 }
 </style>
 
+
+<style id="android-system-navigation-clearance-v258">
+@media(max-width:760px){
+  html.android-native{
+    --android-nav-clearance:max(24px, env(safe-area-inset-bottom));
+    --nav-h:calc(64px + var(--android-nav-clearance));
+  }
+  html.android-native .bottom-nav{
+    height:var(--nav-h)!important;
+    padding:5px 7px calc(5px + var(--android-nav-clearance))!important;
+  }
+  html.android-native .main{
+    padding-bottom:calc(var(--nav-h) + 15px)!important;
+  }
+  html.android-native[data-active-tab="dashboard"] .main{
+    height:calc(100dvh - var(--nav-h))!important;
+    padding-bottom:0!important;
+  }
+}
+</style>
 
 <style id="attendance-tabs-hero-v257">
 @media(max-width:760px){
