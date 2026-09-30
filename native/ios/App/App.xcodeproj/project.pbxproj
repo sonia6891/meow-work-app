@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		02E2945E9B282AEC527F632D /* WidgetAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E195162A6EC0AA1EA1A93FB1 /* WidgetAssets.xcassets */; };
+		2BE2CC34C97019F50BA0E61E /* WidgetAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7B599D0A2488886D72FA36BD /* WidgetAssets.xcassets */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
-		499F57A9705C9A6EDB10CEAF /* MeowDateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFCA6AFF86EAA03F518D9D6 /* MeowDateWidget.swift */; };
+		430C4F3BCF77238B911DA0C7 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9383D7F663EC7E462E836322 /* Foundation.framework */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -17,30 +17,30 @@
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
-		5575507F7D5F25D5CB861EC8 /* MeowDateWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 41DD3F24F4CC35B635D8A878 /* MeowDateWidget.appex */; };
+		717B14297888CB74C2B6932E /* MeowDateWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 09ED1FD1E95BFEC578F8A50E /* MeowDateWidget.appex */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A15100000000000000000001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A15100000000000000000002 /* PrivacyInfo.xcprivacy */; };
-		A6B9FB4DD716A943837D36C8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E1CE0F643D2EE2EA8C428D4 /* Foundation.framework */; };
+		D0A23E51EF40DB1842C159DE /* MeowDateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB0D578F549A618124C877DE /* MeowDateWidget.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		04EB41D8C183137FAF2F6924 /* PBXContainerItemProxy */ = {
+		4A31AC0ACE8D458C11884070 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 35EAE63D71488633CE82DF5F;
+			remoteGlobalIDString = 0EA6D229197955A01973DDD7;
 			remoteInfo = MeowDateWidget;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		505FB90E8CECFA295855098B /* Embed Foundation Extensions */ = {
+		6A5AF6794D9283D892BFF97C /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				5575507F7D5F25D5CB861EC8 /* MeowDateWidget.appex in Embed Foundation Extensions */,
+				717B14297888CB74C2B6932E /* MeowDateWidget.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,10 +48,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2E1CE0F643D2EE2EA8C428D4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		09ED1FD1E95BFEC578F8A50E /* MeowDateWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MeowDateWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B642435906E729F11F49D4E /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
-		316380A4447C223F787EBB83 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		41DD3F24F4CC35B635D8A878 /* MeowDateWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MeowDateWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -60,11 +59,12 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		7B599D0A2488886D72FA36BD /* WidgetAssets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = WidgetAssets.xcassets; sourceTree = "<group>"; };
+		9383D7F663EC7E462E836322 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		A15100000000000000000002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		DCFCA6AFF86EAA03F518D9D6 /* MeowDateWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeowDateWidget.swift; sourceTree = "<group>"; };
-		E195162A6EC0AA1EA1A93FB1 /* WidgetAssets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = WidgetAssets.xcassets; sourceTree = "<group>"; };
+		DB0D578F549A618124C877DE /* MeowDateWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MeowDateWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,25 +76,33 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		74C86FC14682C4128623869A /* Frameworks */ = {
+		FC6DE32B8503CBBDDA3A893F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A6B9FB4DD716A943837D36C8 /* Foundation.framework in Frameworks */,
+				430C4F3BCF77238B911DA0C7 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		500B3132914787D77765DE4B /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9383D7F663EC7E462E836322 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
-				BD76CC5EBAD7E71B7473EF33 /* MeowDateWidget */,
-				EA289AC3C87D3A1C360BAA29 /* Frameworks */,
+				AD156A4FA287AF0CFF88EE0D /* MeowDateWidget */,
+				E6D094C025B22F39B25666E2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -102,7 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
-				41DD3F24F4CC35B635D8A878 /* MeowDateWidget.appex */,
+				09ED1FD1E95BFEC578F8A50E /* MeowDateWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,29 +132,21 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		6DB092035C70A459CAE6401A /* iOS */ = {
+		AD156A4FA287AF0CFF88EE0D /* MeowDateWidget */ = {
 			isa = PBXGroup;
 			children = (
-				2E1CE0F643D2EE2EA8C428D4 /* Foundation.framework */,
-			);
-			name = iOS;
-			sourceTree = "<group>";
-		};
-		BD76CC5EBAD7E71B7473EF33 /* MeowDateWidget */ = {
-			isa = PBXGroup;
-			children = (
-				DCFCA6AFF86EAA03F518D9D6 /* MeowDateWidget.swift */,
-				316380A4447C223F787EBB83 /* Info.plist */,
-				E195162A6EC0AA1EA1A93FB1 /* WidgetAssets.xcassets */,
+				DB0D578F549A618124C877DE /* MeowDateWidget.swift */,
+				1B642435906E729F11F49D4E /* Info.plist */,
+				7B599D0A2488886D72FA36BD /* WidgetAssets.xcassets */,
 			);
 			name = MeowDateWidget;
 			path = MeowDateWidget;
 			sourceTree = "<group>";
 		};
-		EA289AC3C87D3A1C360BAA29 /* Frameworks */ = {
+		E6D094C025B22F39B25666E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6DB092035C70A459CAE6401A /* iOS */,
+				500B3132914787D77765DE4B /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -154,13 +154,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		35EAE63D71488633CE82DF5F /* MeowDateWidget */ = {
+		0EA6D229197955A01973DDD7 /* MeowDateWidget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 35F9B589C3C2B1735D02BD09 /* Build configuration list for PBXNativeTarget "MeowDateWidget" */;
+			buildConfigurationList = AE71EA6222DDAAE23BC1BD9A /* Build configuration list for PBXNativeTarget "MeowDateWidget" */;
 			buildPhases = (
-				804DD68E92530BC5D0E1DDDE /* Sources */,
-				74C86FC14682C4128623869A /* Frameworks */,
-				D2D87C7B321A7EABB688238A /* Resources */,
+				B12B4045D237BE39087C2763 /* Sources */,
+				FC6DE32B8503CBBDDA3A893F /* Frameworks */,
+				E0B326A25FE5CB9AABA6369A /* Resources */,
 			);
 			buildRules = (
 			);
@@ -168,7 +168,7 @@
 			);
 			name = MeowDateWidget;
 			productName = MeowDateWidget;
-			productReference = 41DD3F24F4CC35B635D8A878 /* MeowDateWidget.appex */;
+			productReference = 09ED1FD1E95BFEC578F8A50E /* MeowDateWidget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		504EC3031FED79650016851F /* App */ = {
@@ -178,12 +178,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
-				505FB90E8CECFA295855098B /* Embed Foundation Extensions */,
+				6A5AF6794D9283D892BFF97C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				AD2A139EA76F287B72AC1A90 /* PBXTargetDependency */,
+				247E51999912F2E4F754C766 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -226,7 +226,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
-				35EAE63D71488633CE82DF5F /* MeowDateWidget */,
+				0EA6D229197955A01973DDD7 /* MeowDateWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -246,11 +246,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D2D87C7B321A7EABB688238A /* Resources */ = {
+		E0B326A25FE5CB9AABA6369A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02E2945E9B282AEC527F632D /* WidgetAssets.xcassets in Resources */,
+				2BE2CC34C97019F50BA0E61E /* WidgetAssets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,22 +266,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		804DD68E92530BC5D0E1DDDE /* Sources */ = {
+		B12B4045D237BE39087C2763 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				499F57A9705C9A6EDB10CEAF /* MeowDateWidget.swift in Sources */,
+				D0A23E51EF40DB1842C159DE /* MeowDateWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AD2A139EA76F287B72AC1A90 /* PBXTargetDependency */ = {
+		247E51999912F2E4F754C766 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = MeowDateWidget;
-			target = 35EAE63D71488633CE82DF5F /* MeowDateWidget */;
-			targetProxy = 04EB41D8C183137FAF2F6924 /* PBXContainerItemProxy */;
+			target = 0EA6D229197955A01973DDD7 /* MeowDateWidget */;
+			targetProxy = 4A31AC0ACE8D458C11884070 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -460,28 +460,7 @@
 			};
 			name = Release;
 		};
-		9E7AB54AB27134A4B30E732D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = MeowDateWidget/MeowDateWidget.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MeowDateWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.lumilab.meowwork.widget;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		CEE29C87000DB19745D1178E /* Release */ = {
+		56ED6E66B787A3699B9FE643 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -503,18 +482,30 @@
 			};
 			name = Release;
 		};
+		8BB8DEC96ADA563003F84A6A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = MeowDateWidget/MeowDateWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MeowDateWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lumilab.meowwork.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		35F9B589C3C2B1735D02BD09 /* Build configuration list for PBXNativeTarget "MeowDateWidget" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CEE29C87000DB19745D1178E /* Release */,
-				9E7AB54AB27134A4B30E732D /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		504EC2FF1FED79650016851F /* Build configuration list for PBXProject "App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -529,6 +520,15 @@
 			buildConfigurations = (
 				504EC3171FED79650016851F /* Debug */,
 				504EC3181FED79650016851F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AE71EA6222DDAAE23BC1BD9A /* Build configuration list for PBXNativeTarget "MeowDateWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56ED6E66B787A3699B9FE643 /* Release */,
+				8BB8DEC96ADA563003F84A6A /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
