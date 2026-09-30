@@ -165,7 +165,7 @@ jobs:
           grep -Fq 'request.recognitionLanguages = isPayslipNumericPass ? ["en-US"] : ["zh-Hant", "en-US"]' ios/App/App/SceneDelegate.swift
           grep -Fq 'request.minimumTextHeight = isPayslipNumericPass ? 0.0015 : (isPayslip ? 0.0025 : 0.008)' ios/App/App/SceneDelegate.swift
           grep -Fq 'let candidateLimit = isPayslipNumericPass ? 3 : 1' ios/App/App/SceneDelegate.swift
-          grep -q 'request.customWords = [' ios/App/App/SceneDelegate.swift
+          grep -Fq 'request.customWords = [' ios/App/App/SceneDelegate.swift
           grep -Fq "purpose:'payslip-numeric'" www/index.html
           grep -Fq 'function fusePayslipVisionNumericData' www/index.html
           grep -q 'MeowSpeechPlugin' ios/App/App/SceneDelegate.swift
