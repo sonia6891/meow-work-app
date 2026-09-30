@@ -1,0 +1,59 @@
+name: Capture native iOS App Store screenshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Prepare native app
+        working-directory: native
+        run: |
+          npm ci
+          npm run sync:web
+          node scripts/patch-ios-bridge.mjs
+          npx cap sync ios
+
+      - name: Create simulator and build app
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNTIME_ID="$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; print(next(r["identifier"] for r in json.load(sys.stdin)["runtimes"] if r.get("isAvailable") and "iOS" in r["identifier"]))')"
+          DEVICE_TYPE='com.apple.CoreSimulator.SimDeviceType.iPhone-11-Pro-Max'
+          if ! xcrun simctl list devicetypes | grep -q 'iPhone 11 Pro Max'; then
+            DEVICE_TYPE='com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max'
+          fi
+          DEVICE_ID="$(xcrun simctl create 'Meow Work Store Capture' "$DEVICE_TYPE" "$RUNTIME_ID")"
+          echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$DEVICE_ID"
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          xcodebuild -project native/ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+            -derivedDataPath "$RUNNER_TEMP/meow-derived" CODE_SIGNING_ALLOWED=NO build
+          echo "APP_PATH=$RUNNER_TEMP/meow-derived/Build/Products/Debug-iphonesimulator/App.app" >> "$GITHUB_ENV"
+
+      - name: Capture actual native screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p store-assets/native-ios
+          xcrun simctl status_bar "$DEVICE_ID" override --time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
+          xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+          xcrun simctl launch "$DEVICE_ID" com.lumilab.meowwork
+          sleep 15
+          xcrun simctl io "$DEVICE_ID" screenshot store-assets/native-ios/home-original.png
+          sips -g pixelWidth -g pixelHeight store-assets/native-ios/home-original.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-ios-store-screenshot
+          path: store-assets/native-ios/home-original.png
