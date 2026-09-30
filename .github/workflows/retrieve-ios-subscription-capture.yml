@@ -2,6 +2,11 @@ name: Retrieve native iOS subscription capture
 
 on:
   workflow_dispatch:
+    inputs:
+      run_id:
+        description: Capture workflow run ID
+        required: true
+        type: string
 
 permissions:
   actions: read
@@ -17,7 +22,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: native-ios-subscription-review-screen
-          run-id: 36676494478
+          run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
           path: store-assets/native-ios
       - name: Save captures for review
