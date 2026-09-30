@@ -5341,6 +5341,43 @@ html.dark .holiday-tag{
 }
 </style>
 
+<style id="android-mobile-width-fix-v257">
+@media(max-width:760px){
+  .app,.shell,.main,#page-dashboard.active,.mobile-dashboard-approved{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  html[data-active-tab="dashboard"] .mobile-dashboard-approved{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .mobile-dashboard-approved>*,.mda-worktype-row,.mda-kpis,.mda-next-shift,.mda-leave-shell,.mda-leave-grid,.mda-reminder{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  .mda-kpi strong{
+    max-width:100%;
+    overflow-wrap:anywhere;
+    white-space:normal;
+  }
+  .mda-next-shift>span:not(.mda-next-icon):not(.mda-next-pill):not(.mda-chevron){
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .bottom-nav{
+    width:100%!important;
+    max-width:100%!important;
+    z-index:1000!important;
+    pointer-events:auto!important;
+    box-sizing:border-box!important;
+  }
+  .bottom-nav button{pointer-events:auto!important;touch-action:manipulation}
+}
+</style>
+
 
 <style id="attendance-tabs-hero-v257">
 @media(max-width:760px){
