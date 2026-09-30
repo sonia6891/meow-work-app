@@ -1,0 +1,53 @@
+name: Capture Android store screenshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Sync Android web bundle
+        working-directory: native
+        run: |
+          npm ci
+          npm run sync:web
+          node scripts/patch-android-billing.mjs
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: native/android
+        run: ./gradlew --no-daemon assembleDebug
+      - name: Capture from Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          script: |
+            mkdir -p store-assets/native-android
+            adb install native/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -n com.lumilab.meowwork/.MainActivity
+            sleep 25
+            adb shell screencap -p /sdcard/home.png
+            adb pull /sdcard/home.png store-assets/native-android/home-original.png
+            adb shell uiautomator dump /sdcard/window.xml || true
+            adb pull /sdcard/window.xml store-assets/native-android/window.xml || true
+            adb logcat -d -s chromium:V AndroidRuntime:E Capacitor:V > store-assets/native-android/logcat.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-android-store-capture
+          path: store-assets/native-android/
+          if-no-files-found: error
+          retention-days: 14
