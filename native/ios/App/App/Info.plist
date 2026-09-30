@@ -20,6 +20,17 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.lumilab.meowwork.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.lumilab.meowwork</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -74,16 +85,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.lumilab.meowwork.auth</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.lumilab.meowwork</string>
-			</array>
-		</dict>
-	</array>
 </dict>
 </plist>
