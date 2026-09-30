@@ -24,6 +24,7 @@
 - Capacitor Android 專案已生成在 `native/android/`；本機 `cap add android`、插件同步、Billing 及 API 36 patch 均成功。GitHub run `36645468550` 的 `assembleDebug` 已成功。
 - Google／LINE OAuth 已加入 Capacitor 系統瀏覽器＋原生 callback scheme，並配置 Android intent filter；須在 Supabase Auth redirect allowlist 加入 `com.lumilab.meowwork://auth/callback`，且在 iOS／Android 實機分別驗證 Google、LINE 登入回呼後，才能解除此項送審阻擋。
 - 預期沿用包名 `com.lumilab.meowwork` 及兩個相同商品 ID；建立 Play Console App 後需確認包名可用並建立 base plan 與三天 trial offer。
+- Play Console 帳戶目前要求完成開發者帳戶設定；Google 正在審核已提交的身分文件，電話驗證需等文件核准後進行，建立 App 按鈕目前停用。Google 核准後才能建立正式 App／訂閱商品並啟用內測發佈。
 - 2026-08-31 起 Google Play 新 App 與更新須 target Android 16 / API 36 以上；正式產生 Android 專案時必須固定符合此提交門檻。[官方規定](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en)
 - 上架前需 Play Console 內部／封閉測試軌、App signing、Data safety、帳號刪除入口、政策頁、支援聯絡資料、內容分級、商店素材與 Play Billing 沙盒測試。
 
@@ -37,7 +38,7 @@
 ## 目前需要的帳號端設定
 
 1. Apple Developer/App Store Connect：團隊、正式 App 記錄、訂閱群組／商品／試用、簽署、測試者及真實支援與審查聯絡資料。
-2. Google Play Console/Cloud：開發者與 App 記錄、第一次 AAB 手動上傳（若 Play API 尚未啟用該套件）、訂閱/base plan/offer、Play App Signing、Google Play Developer API service account、Pub/Sub topic 與 RTDN。
+2. Google Play Console/Cloud：先等開發者身分文件審核通過，再完成電話驗證；目前「建立 App」停用。通過後建立 App 記錄、第一次 AAB 手動上傳（若 Play API 尚未啟用該套件）、訂閱/base plan/offer、Play App Signing、Google Play Developer API service account、Pub/Sub topic 與 RTDN。
 3. `SUPABASE_ACCESS_TOKEN` GitHub secret 已由使用者設定；Supabase 部署 workflow #10、#12 成功，已部署薪資單驗證、計費設定、App Store 驗證／通知與 Google Play 驗證／RTDN functions。固定 Play package name 已由程式預設並在線上 `billing-config` 讀回確認。Play Console 建立後仍需在 Supabase secrets 設定 `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`（具 Android Publisher 權限的服務帳號 JSON）、`GOOGLE_PLAY_RTDN_AUDIENCE`（Pub/Sub push audience）與 `GOOGLE_PLAY_RTDN_SERVICE_ACCOUNT_EMAIL`（Pub/Sub OIDC 身分）。金鑰不能寫入 Git。
 4. Google Play 驗證與 RTDN functions 已部署；線上查詢目前為 `package_name=com.lumilab.meowwork`、`credentials_configured=false`、`notifications_configured=false`，故 `production_server_verification_ready=false`，安全維持未就緒。RTDN function 必須停用 Supabase gateway JWT 驗證，因 endpoint 會自行驗 Google OIDC token；正式連接 Play Console 後，Pub/Sub 需設定相同 audience 及服務帳號。
 5. Android bootstrap CI `36645468550` 已成功；安裝 Play 內測版後，在實機逐項驗證新購、試用、待處理付款、續訂、退款、取消、到期、恢復、帳號刪除。
