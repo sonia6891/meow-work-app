@@ -148,7 +148,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     check('未登入一定顯示登入頁', await guest.evaluate(() => window.__accountV119.openWelcome()));
     check('網頁登入頁保留 Google、LINE 兩個登入按鈕', await guest.locator('#welcomeGoogle, #welcomeLine').count() === 2);
     check('Apple 登入在網頁版隱藏，只留給 iPhone 原生 App', await guest.locator('#welcomeApple').isHidden());
-    check('沒有訪客登入入口', await guest.locator('#welcomeGuest').count() === 0);
+    check('訪客可選擇先使用而不登入', await guest.locator('#welcomeGuest').count() === 1);
     check('沒有公開 Email 或 OTP 入口', await guest.locator('#welcomeEmail, #emailLoginInput, #emailOtpInput, #sendEmailOtp, #verifyEmailOtp').count() === 0);
     await guest.locator('#welcomeGoogle').click();
     check('Google 按鈕使用 google provider', await guest.evaluate(() => window.__accountTest.oauth.at(-1).provider === 'google'));

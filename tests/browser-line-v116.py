@@ -57,7 +57,7 @@ with sync_playwright() as p:
 
  ctx=context();page=page_for(ctx)
  check('未登入時一定顯示登入框',opened(page))
- check('公開登入頁沒有訪客入口',page.locator('#welcomeGuest').count()==0)
+ check('公開登入頁提供訪客入口',page.locator('#welcomeGuest').count()==1)
  check('公開登入頁沒有 Email 入口',page.locator('#welcomeEmail').count()==0)
  check('Google 登入按鈕存在',page.locator('#welcomeGoogle').is_visible())
  check('LINE 登入按鈕存在',page.locator('#welcomeLine').is_visible())
