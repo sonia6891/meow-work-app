@@ -64,7 +64,8 @@ jobs:
           </script>
           '''
           assert '</body>' in html
-          path.write_text(html.replace('</body>', automation + '</body>'), encoding='utf-8')
+          before_body, closing_body = html.rsplit('</body>', 1)
+          path.write_text(before_body + automation + '</body>' + closing_body, encoding='utf-8')
           PY
           node scripts/patch-ios-bridge.mjs
           npx cap sync ios
