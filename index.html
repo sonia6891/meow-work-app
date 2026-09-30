@@ -119,6 +119,7 @@ svg.icon{width:1em;height:1em;display:block;fill:none;stroke:currentColor;stroke
 .meow-assistant-fab b{display:block;margin:-1px 0 0;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid var(--mobile-line,#dfc7b3);box-shadow:0 5px 14px rgba(68,48,35,.16);font-size:12px;font-weight:950;line-height:1.15;white-space:nowrap;text-align:center;pointer-events:none}
 .meow-assistant-fab.is-dragging{box-shadow:none;transform:scale(.97)}
 @media(max-width:760px){.meow-assistant-fab{min-width:92px;min-height:108px;padding:7px 9px 6px}.meow-assistant-fab img{width:78px;max-height:84px}.meow-assistant-fab b{font-size:11px;padding:5px 9px}}
+ html.itemized-review-open[data-active-tab="salary"] .meow-assistant-fab{display:none!important}
 .meow-assistant-dialog{position:fixed;inset:auto 18px 88px auto;width:min(390px,calc(100vw - 20px));max-width:none;max-height:min(70dvh,610px);margin:0;padding:0;border:0;border-radius:18px;background:transparent;overflow:visible;z-index:120}
 .meow-assistant-dialog::backdrop{display:none}
 .meow-assistant-sheet{background:var(--mobile-surface,#fff);border:1px solid var(--mobile-line,#eadfd6);border-radius:20px;padding:12px;box-shadow:0 18px 54px rgba(58,39,29,.22);max-height:min(70dvh,610px);overflow:auto}
@@ -10210,6 +10211,7 @@ function renderItemizedComparison(mc,mm){
   placeProPanel('itemized_salary_compare','itemizedComparePanel');
   const unlocked=canUse('itemized_salary_compare');
   if(!unlocked)itemizedOpen=false;
+  document.documentElement.classList.toggle('itemized-review-open',unlocked&&itemizedOpen);
   $('itemizedComparePanel').classList.toggle('hidden',!unlocked||!itemizedOpen);
   if(!unlocked||!itemizedOpen)return;
 
