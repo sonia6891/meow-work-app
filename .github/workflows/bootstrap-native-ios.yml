@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   bootstrap:
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     steps:
       - name: Checkout
         uses: actions/checkout@v6
