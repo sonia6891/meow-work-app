@@ -37,8 +37,9 @@ jobs:
             const upgrade = document.getElementById('accountUpgrade');
             if (!booting && welcome && welcome.open && guest && guest.onclick) guest.click();
             if (!booting && (!welcome || !welcome.open) && dialog && !dialog.open) {
-              if (settings && settings.onclick) settings.click();
-              if (upgrade && upgrade.onclick) upgrade.click();
+              if (settings) settings.click();
+              if (typeof openProPlanDialog === 'function') openProPlanDialog();
+              else if (upgrade) upgrade.click();
             }
             if (dialog && dialog.open) { clearInterval(planTimer); return; }
             if (++planAttempts >= 80) clearInterval(planTimer);
