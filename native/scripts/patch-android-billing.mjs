@@ -84,6 +84,13 @@ if (!/targetSdkVersion\s*=\s*36/.test(variables) || !/compileSdkVersion\s*=\s*36
 writeFileSync(variablesGradle, variables);
 
 let manifest = readFileSync(manifestPath, 'utf8');
+if (!manifest.includes('xmlns:tools="http://schemas.android.com/tools"')) {
+  manifest = manifest.replace(/<manifest\b([^>]*)>/, '<manifest$1 xmlns:tools="http://schemas.android.com/tools">');
+}
+const exactAlarmPermission = '<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />';
+if (!manifest.includes('android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove"')) {
+  manifest = manifest.replace('</manifest>', `    ${exactAlarmPermission}\n</manifest>`);
+}
 const oauthFilter = `<intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -94,5 +101,6 @@ if (!manifest.includes('android:scheme="com.lumilab.meowwork"')) {
   manifest = manifest.replace(/(<activity\b[\s\S]*?<\/activity>)/, (activity) => activity.replace('</activity>', `${oauthFilter}\n        </activity>`));
 }
 if (!manifest.includes('android:scheme="com.lumilab.meowwork"')) throw new Error('Could not register the native OAuth callback URL scheme.');
+if (!manifest.includes('android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove"')) throw new Error('Could not remove the unused exact-alarm permission.');
 writeFileSync(manifestPath, manifest);
-console.log(`Configured Play Billing 9.1.0, API 36, and native bridge in ${android}`);
+console.log(`Configured Play Billing 9.1.0, API 36, native bridge, and non-exact reminder permissions in ${android}`);

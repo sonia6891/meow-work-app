@@ -8502,7 +8502,32 @@ async function syncNativePaydayWidget(){
 }
 function reminderBridge(){
   const bridge=window.MeowReminder||(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.MeowReminder);
-  return bridge&&typeof bridge.schedule==='function'?bridge:null;
+  if(bridge&&typeof bridge.schedule==='function')return bridge;
+  const capacitor=window.Capacitor;
+  let localNotifications=capacitor&&typeof capacitor.getPlatform==='function'&&capacitor.getPlatform()==='android'&&capacitor.Plugins&&capacitor.Plugins.LocalNotifications;
+  if(!localNotifications&&capacitor&&typeof capacitor.getPlatform==='function'&&capacitor.getPlatform()==='android'&&typeof capacitor.registerPlugin==='function')localNotifications=capacitor.registerPlugin('LocalNotifications');
+  if(!localNotifications||typeof localNotifications.schedule!=='function')return null;
+  return{
+    getPermissionStatus:async()=>({granted:(await localNotifications.checkPermissions()).display==='granted'}),
+    requestPermission:async()=>({granted:(await localNotifications.requestPermissions()).display==='granted'}),
+    schedule:async({id,title,body,fireAt})=>{
+      if(!androidReminderChannelReady){
+        await localNotifications.createChannel({id:'meow-work-reminders',name:'行程與待辦提醒',importance:3});
+        androidReminderChannelReady=true;
+      }
+      return localNotifications.schedule({notifications:[{
+        id:androidReminderNotificationId(id),title,body,channelId:'meow-work-reminders',
+        schedule:{at:new Date(fireAt)},isExactNotification:false
+      }]});
+    },
+    cancel:async({id})=>localNotifications.cancel({notifications:[{id:androidReminderNotificationId(id)}]})
+  };
+}
+let androidReminderChannelReady=false;
+function androidReminderNotificationId(value){
+  let hash=0x811c9dc5;
+  for(let index=0;index<String(value||'').length;index++)hash=Math.imul(hash^String(value).charCodeAt(index),0x01000193);
+  return(hash>>>1)||1;
 }
 function reminderId(kind,id){
   return 'meow.'+(kind==='todo'?'todo':'event')+'.'+String(id||'').replace(/[^A-Za-z0-9._-]/g,'_');
@@ -8555,7 +8580,8 @@ async function scheduleItemReminder(item,{requestPermission=true}={}){
     if(!permission.granted){
       if(requestPermission&&!reminderPermissionWarned){
         reminderPermissionWarned=true;
-        alert('已儲存，但 iPhone 通知權限尚未開啟。可到「設定 → 通知 → 喵的，又要上班了」開啟通知。');
+        const isAndroid=window.Capacitor&&typeof window.Capacitor.getPlatform==='function'&&window.Capacitor.getPlatform()==='android';
+        alert(isAndroid?'已儲存，但通知權限尚未開啟。請到 Android 系統設定中的「應用程式通知」允許「喵的，又要上班了」通知。':'已儲存，但通知權限尚未開啟。請到 iPhone「設定 → 通知 → 喵的，又要上班了」開啟通知。');
       }
       return{scheduled:false,denied:true};
     }

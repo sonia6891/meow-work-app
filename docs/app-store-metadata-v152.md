@@ -90,7 +90,7 @@ Pro：
 刪除 App 帳號不會自動取消 Apple 訂閱；App 內會提示使用者另外管理 App Store 訂閱。
 
 通知：
-行程可設定提前提醒；待辦可設定前一天提醒。通知為 iOS 本機通知。
+行程可設定提前提醒；待辦可設定前一天提醒。iOS 與 Android 版均使用本機通知，並依平台請求通知權限。
 
 智慧匯入班表：
 使用 Apple Vision 在 iPhone 本機辨識班表圖片，不經 OpenAI API，也不會把班表原始圖片傳到 Supabase。

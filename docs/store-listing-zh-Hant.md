@@ -29,7 +29,7 @@
 
 - App 名稱：喵的，又要上班了
 - 簡短說明：輪班班表、出勤、請假、加班與薪資試算，幫你把工作日常整理清楚。
-- 完整說明：使用上方「App Store 描述」段落。上架前確認 Google Play 顯示的訂閱名稱、價格及試用條件與 Play Console 商品設定相符。
+- 完整說明：使用上方「App Store 描述」段落；最後一段的付款說明改為：「免費方案的工作資料保存在裝置本機。符合資格的 Pro 訂閱可使用雲端同步與備份等付費功能。月繳、年繳、免費試用資格與實際價格，請以 Google Play 購買畫面顯示為準；訂閱會依商店條款自動續訂，並可在 Google Play 的『付款與訂閱』中管理或取消。」
 - 支援網址：`https://sonia6891.github.io/meow-work-app/support.html`
 - 隱私權政策網址：`https://sonia6891.github.io/meow-work-app/privacy.html`
 
