@@ -570,7 +570,10 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         check('新增待辦未填資料也能用叉叉關閉', !(await page.locator('#todoDialog').evaluate(x=>x.open)));
         await page.locator('#v219QuickTodoCard').click();
         await page.locator('#todoTitle').fill('測試繳費');
-        await page.locator('#todoDate').fill('2026-10-01');
+        const reminderTestDate = new Date();
+        reminderTestDate.setDate(reminderTestDate.getDate() + 7);
+        const reminderTestDateValue = [reminderTestDate.getFullYear(), String(reminderTestDate.getMonth() + 1).padStart(2, '0'), String(reminderTestDate.getDate()).padStart(2, '0')].join('-');
+        await page.locator('#todoDate').fill(reminderTestDateValue);
         await page.locator('#todoTime').fill('18:30');
         await page.locator('#todoNote').fill('瀏覽器自動測試');
         await page.locator('#saveTodo').click();
