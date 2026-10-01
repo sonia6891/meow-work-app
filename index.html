@@ -8082,7 +8082,7 @@ function overtimeRateSummary(){const r=overtimeRates();return r.mode==='unselect
 function overtimeFormulaDetail(mc){const r=overtimeRates(),h=mc.hourly,total=mc.overtimeHours;if(r.mode==='unselected')return '尚未計算；請先選擇公司加班費率';const rows=Object.entries(state.dayStatus||{}).filter(([d,st])=>d.startsWith(monthKey(mc.y,mc.m)+'-')&&st&&st.type==='overtime');if(!rows.length){if(r.mode==='fixed')return money(h)+' × '+r.regularFirst.toFixed(2)+' × '+total+' 小時 ＝ '+money(mc.otPay);if(r.mode==='legal'||r.mode==='custom'){const a=Math.min(total,2),b=Math.max(total-2,0);return (a?money(h)+' × '+r.regularFirst.toFixed(2)+' × '+a+' 小時':'')+(a&&b?' ＋ ':'')+(b?money(h)+' × '+r.regularLater.toFixed(2)+' × '+b+' 小時':'')+' ＝ '+money(mc.otPay)}}const parts=rows.map(([d,st])=>{const hrs=effectiveDayStatusHours(st),kind=st.overtimeKind||'regular';if(r.mode==='fixed')return d.slice(5)+'：'+money(h)+' × '+r.regularFirst.toFixed(2)+' × '+hrs+' 小時';if(kind==='rest'){const a=Math.min(hrs,2),b=Math.min(Math.max(hrs-2,0),6),c=Math.max(hrs-8,0);return d.slice(5)+' 休息日：'+[a?money(h)+'×'+r.restFirst.toFixed(2)+'×'+a:'',b?money(h)+'×'+r.restLater.toFixed(2)+'×'+b:'',c?money(h)+'×'+r.restOver8.toFixed(2)+'×'+c:''].filter(Boolean).join(' ＋ ')}if(kind==='holiday')return d.slice(5)+' 假日：'+money(h)+' × '+r.holiday.toFixed(2)+' × '+hrs+' 小時';const a=Math.min(hrs,2),b=Math.max(hrs-2,0);return d.slice(5)+' 平日：'+[a?money(h)+'×'+r.regularFirst.toFixed(2)+'×'+a:'',b?money(h)+'×'+r.regularLater.toFixed(2)+'×'+b:''].filter(Boolean).join(' ＋ ')});return parts.join('<br>　')+'<br>　合計 ＝ '+money(mc.otPay)}
 
 function overtimeHourlyDisplay(baseHourly){const r=overtimeRates();if(r.mode==='unselected')return{label:'基礎時薪',main:baseHourly,sub:'尚未選擇加班費率'};if(r.mode==='fixed')return{label:'實際加班時薪',main:baseHourly*r.regularFirst,sub:'基礎時薪 '+money(baseHourly)+' × '+r.regularFirst.toFixed(2)};if(r.mode==='legal')return{label:'加班分段時薪',main:null,sub:'前 2 小時 '+money(baseHourly*r.regularFirst)+'／時・第 3～4 小時 '+money(baseHourly*r.regularLater)+'／時'};return{label:'加班分段時薪',main:null,sub:'前 2 小時 '+money(baseHourly*r.regularFirst)+'／時・第 3～4 小時 '+money(baseHourly*r.regularLater)+'／時'}}
-function renderHeroProfile(){const av=state.profile.avatar||DEFAULT_AVATAR,name=state.profile.name||'喵星人';$('profilePreview').src=av;if($('heroAvatar'))$('heroAvatar').src=av;if($('sideAvatar'))$('sideAvatar').src=av;if($('desktopHeaderAvatar'))$('desktopHeaderAvatar').src=av;if($('desktopProfileName'))$('desktopProfileName').textContent=name;if($('sideUserName'))$('sideUserName').textContent=name;$('profileName').textContent=name}
+function renderHeroProfile(){const av=state.profile.avatar||DEFAULT_AVATAR,name=state.profile.name||'喵星人';$('profilePreview').src=av;if($('heroAvatar'))$('heroAvatar').src=av;if($('sideAvatar'))$('sideAvatar').src=av;if($('desktopHeaderAvatar'))$('desktopHeaderAvatar').src=av;if($('v219SettingsAvatar'))$('v219SettingsAvatar').src=av;if($('desktopProfileName'))$('desktopProfileName').textContent=name;if($('sideUserName'))$('sideUserName').textContent=name;$('profileName').textContent=name}
 function saveAccountUsername(){
   const input=$('accountUsername');if(!input)return;
   const clean=String(input.value||'').trim().replace(/\s+/g,' ').slice(0,24);
@@ -11438,8 +11438,7 @@ function renderV219ItineraryBoard(){
 function renderV219SettingsHeader(){
   if($('v219SettingsName'))$('v219SettingsName').textContent=state.profile.name||'喵星人';
   if($('v219SettingsAvatar')){
-    const src=state.profile&&state.profile.avatar;
-    if(src)$('v219SettingsAvatar').src=src;
+    $('v219SettingsAvatar').src=state.profile.avatar||DEFAULT_AVATAR;
   }
 }
 function renderV219ReferenceArchitecture(){
