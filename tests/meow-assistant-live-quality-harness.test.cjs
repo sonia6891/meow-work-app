@@ -1,7 +1,7 @@
 const fs=require('fs');
 const assert=require('assert');
 
-const html=fs.readFileSync('index.html','utf8');
+const html=fs.readFileSync('index.html','utf8').replace(/\r\n/g,'\n');
 
 assert(html.includes('MEOW_ASSISTANT_LIVE_QUALITY_CASES'),'live quality corpus missing');
 assert(html.includes('runMeowAssistantLiveQualityTest'),'live quality runner missing');

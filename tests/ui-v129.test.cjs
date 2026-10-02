@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const html=fs.readFileSync('index.html','utf8');
+const html=fs.readFileSync('index.html','utf8').replace(/\r\n/g,'\n');
 
 const build=html.match(/<meta name="meow-ui-build" content="v(\d+)[^"]*">/);
 assert(build && Number(build[1])>=129,'expected v129+ UI build');
