@@ -5843,6 +5843,30 @@ html.dark .meow-welcome.welcome-auto-login .welcome-login-mini-head b{color:#fff
 html.dark #page-settings #refAccountCard .ref-settings-icon.crown{background:#423322!important;color:#edc179!important;border-color:#72583a!important;}
 #page-settings #refAccountCard .ref-settings-icon:is(.google,.line,.crown) svg{width:27px!important;height:27px!important;filter:none!important;}
 </style>
+<style id="pro-pricing-design-v265">
+#proPlanDialog{width:min(620px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:26px!important;padding:0!important;overflow-y:auto!important;background:#fffcf7!important;color:#503326!important;border:1px solid #ecdccc!important;}
+#proPlanDialog .dialog-head{padding:22px 22px 12px!important;position:relative;}
+#proPlanDialog .ref-pro-dialog-hero{margin:0 20px 16px;padding:14px 18px;border-radius:20px;background:#fff3e5;min-height:112px;display:flex;align-items:center;gap:16px;}
+#proPlanDialog .ref-pro-dialog-hero img{width:82px;height:88px;object-fit:contain;}
+#proPlanDialog .ref-pro-dialog-hero b{font-size:18px;}
+#proPlanDialog .ref-pro-dialog-hero span{font-size:12px;line-height:1.6;}
+#proPlanDialog .dialog-body{padding:0 20px 22px!important;max-height:none!important;overflow:visible!important;}
+#proPlanDialog .plan-compare{max-height:none!important;overflow:visible!important;margin-top:18px;}
+.pro-pricing{padding:0 20px;}
+.pro-price-intro{display:grid;gap:5px;margin-bottom:16px;}.pro-price-intro>span{font-size:12px;color:#99755d;}.pro-price-intro>b{font-size:21px;line-height:1.4;}
+.pro-price-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.pro-price-card{position:relative;padding:22px 16px 16px;border:1px solid #e5d6c6;border-radius:20px;background:#fff;}.pro-price-year{background:#fff0d2;border-color:#dcae59;}
+.pro-price-label{font-size:15px;font-weight:800;}.pro-price-value{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;margin-top:14px;}.pro-price-value strong{font-size:32px;letter-spacing:-1.2px;line-height:1.1;}.pro-price-value>span{font-size:12px;color:#8b6e54;}
+.pro-price-card p{font-size:11px;color:#8b6e54;margin:12px 0 0;}.pro-price-tag{white-space:nowrap;position:absolute;right:12px;top:-10px;background:#885522;color:#fff8eb;padding:5px 10px;border-radius:20px;font-size:10px;font-weight:800;}
+.pro-free-note{display:grid;gap:5px;margin-top:14px;padding:14px 16px;background:#f4eee5;border-radius:14px;}.pro-free-note b{font-size:13px;}.pro-free-note span{font-size:11px;line-height:1.65;color:#806957;}
+.pro-price-trial{font-size:12px;line-height:1.7;margin:15px 0 5px;color:#775942;}.pro-price-store{font-size:10px;line-height:1.6;color:#977c66;margin:0;}
+html.dark #proPlanDialog{background:#241d18!important;color:#f8e8d7!important;border-color:#614a37!important;}
+html.dark #proPlanDialog .dialog-head b,html.dark #proPlanDialog .ref-pro-dialog-hero b{color:#ffead1!important;}
+html.dark #proPlanDialog .ref-pro-dialog-hero{background:#35291f!important;}html.dark #proPlanDialog .ref-pro-dialog-hero span{color:#cdb098!important;}
+html.dark .pro-price-card{background:#30261f;border-color:#624e3e;}html.dark .pro-price-year{background:#44321d;border-color:#a88143;}html.dark .pro-free-note{background:#32281f;}
+html.dark .pro-price-value>span,html.dark .pro-price-card p,html.dark .pro-free-note span,html.dark .pro-price-trial,html.dark .pro-price-intro>span{color:#cfb49a;}
+@media(max-width:350px){.pro-price-grid{grid-template-columns:1fr;}.pro-price-card{padding:22px 12px 14px;}.pro-price-value strong{font-size:27px;}.pro-price-grid{gap:8px;}.pro-price-intro>b{font-size:18px;}}
+</style>
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -6595,7 +6619,7 @@ html.dark #page-settings #refAccountCard .ref-settings-icon.crown{background:#42
           <div class="subscription-legal-links">
             <a href="./terms.html">服務條款</a><span>・</span><a href="./privacy.html">隱私權政策</a>
           </div>
-          <div class="billing-unavailable" id="billingUnavailable">目前為網頁預覽版，不會進行付款。正式 iOS／Android 版將由 App Store／Google Play 安全完成訂閱，不使用綠界。</div>
+          <div class="billing-unavailable" id="billingUnavailable">目前是網頁預覽，不會進行付款。請在正式 iOS／Android App 透過 App Store／Google Play 訂閱。</div>
           <div class="settings-actions hidden" id="cancelBillingActions" style="margin-top:8px">
             <button type="button" class="btn danger" id="cancelProBilling">管理／取消訂閱</button>
           </div>
@@ -6616,9 +6640,19 @@ html.dark #page-settings #refAccountCard .ref-settings-icon.crown{background:#42
           <button type="button" class="dialog-close" id="proPlanDialogClose" aria-label="關閉">×</button>
         </div>
         <div class="ref-pro-dialog-hero">
-          <img src="./assets/meow-assistant-pro-v169.webp?v=169" alt="" aria-hidden="true">
-          <div><b>你目前是 Free 方案</b><span>升級 Pro 後可使用更多智慧工作功能</span></div>
+          <img src="./assets/meow-assistant-fab-v257.png?v=257" alt="" aria-hidden="true">
+          <div><b id="proDialogPlanTitle">你目前是 Free 方案</b><span>升級 Pro 後可使用更多智慧工作功能</span></div>
         </div>
+        <section class="pro-pricing" aria-label="Pro 方案費用">
+          <div class="pro-price-intro"><span>選一個適合你的節奏</span><b>把工作大小事，交給喵助理</b></div>
+          <div class="pro-price-grid">
+            <article class="pro-price-card"><span class="pro-price-label">月繳 Pro</span><div class="pro-price-value"><strong id="proMonthlyPrice">NT$99</strong><span>／月</span></div><p>每月付款，彈性安排</p></article>
+            <article class="pro-price-card pro-price-year"><span class="pro-price-tag">長期使用更划算</span><span class="pro-price-label">年繳 Pro</span><div class="pro-price-value"><strong id="proYearlyPrice">NT$790</strong><span>／年</span></div><p>一次支付全年費用</p></article>
+          </div>
+          <div class="pro-free-note"><b>Free 免費方案 · NT$0</b><span>基本排班、行程待辦與薪資試算，持續免費使用。</span></div>
+          <p class="pro-price-trial">首次符合資格可享 3 天免費試用；試用結束後依所選方案自動續訂。可在商店管理或取消訂閱。</p>
+          <p class="pro-price-store">價格與試用資格以 App Store／Google Play 購買畫面為準。</p>
+        </section>
         <div class="dialog-body" id="proPlanDialogContent"></div>
       </dialog>
 
@@ -11278,6 +11312,10 @@ function renderProPlanSettings(){
 
   const plan=currentPlan();
   const developer=plan==='developer',pro=developer||plan==='pro';
+  if($('proMonthlyPrice'))$('proMonthlyPrice').textContent=storeDisplayPrice('monthly');
+  if($('proYearlyPrice'))$('proYearlyPrice').textContent=storeDisplayPrice('yearly');
+  if($('proDialogPlanTitle'))$('proDialogPlanTitle').textContent=developer?'開發者方案已啟用':pro?'你的 Pro 方案已啟用':'你目前是 Free 方案';
+
   badge.textContent=developer?'開發者':pro?(DEV_TESTING_ENABLED?'Pro 測試':'Pro'):'Free';
   badge.classList.toggle('pro',pro);
   if(detailBadge){detailBadge.textContent=badge.textContent;detailBadge.classList.toggle('pro',pro)}
