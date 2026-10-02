@@ -139,7 +139,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     check('舊版雲端備份使用獨立唯讀資料表', html.includes("from('user_legacy_exports').select('payload,original_updated_at')"));
     check('單一雲端還原會自動檢查舊版備份，不再要求使用者另外開檔', html.includes('async function restoreLegacyCloud()') && html.includes("return await restoreLegacyCloud()") && html.includes('不需要另外開啟 JSON 檔'));
     check('參考圖 AI 班表匯入入口已恢復', html.includes('id="aiScheduleCard"') && html.includes('id="aiScheduleUpload"') && html.includes('id="aiScheduleFileInputV219"'));
-    check('浮動喵助理使用核准透明 PNG 素材', html.includes('./assets/meow-assistant-fab-v257.png?v=257') && html.includes('<b>喵助理</b></button>'));
+    check('浮動喵助理使用核准透明 PNG 素材', html.includes('./assets/meow-assistant-fab-v269.png?v=269') && html.includes('<b>喵助理</b></button>'));
     check('喵助理語音會先寫入輸入框再自動送出', html.includes("input.value=text") && html.includes("setTimeout(()=>{if(token===meowAssistantRecognitionToken)void previewMeowAssistant()},120)"));
     check('喵助理文字位於貓咪下方且拖曳熱區加大', html.includes('flex-direction:column') && html.includes('min-width:98px;min-height:118px'));
     check('喵助理正式 iPhone 版使用原生語音辨識', html.includes('function meowSpeechBridge()') && html.includes("nativeBridge.recognize({locale:'zh-TW'})"));
@@ -526,7 +526,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.waitForTimeout(80);
 
         check('手機排班頁隱藏 AI 班表匯入入口', !(await page.locator('#aiScheduleCard').isVisible()));
-        check('浮動喵助理顯示定稿圖與名稱', await page.locator('#meowAssistantFab img').getAttribute('src')==='./assets/meow-assistant-fab-v257.png?v=257' && (await page.locator('#meowAssistantFab').innerText()).includes('喵助理') && await page.locator('#meowAssistantFab img').evaluate(img=>img.complete&&img.naturalWidth>0));
+        check('浮動喵助理顯示定稿圖與名稱', await page.locator('#meowAssistantFab img').getAttribute('src')==='./assets/meow-assistant-fab-v269.png?v=269' && (await page.locator('#meowAssistantFab').innerText()).includes('喵助理') && await page.locator('#meowAssistantFab img').evaluate(img=>img.complete&&img.naturalWidth>0));
 
         await page.evaluate(() => window.__accountV119.attendance());
         await page.waitForTimeout(120);
