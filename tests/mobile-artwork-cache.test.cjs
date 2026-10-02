@@ -14,6 +14,9 @@ for(const url of current){
  total+=bytes;
 }
 assert.ok(total<1200000,'Total phone artwork must stay under 1.2 MB');
-assert.match(html,/sw\.js\?v=272/);
-assert.match(sw,/meow-work-pwa-v272/);
+const release=html.match(/const APP_RELEASE_VERSION='(\d+)'/)[1];
+assert.ok(html.includes("register('./sw.js?v='+APP_RELEASE_VERSION"));
+assert.ok(sw.includes('meow-work-pwa-v'+release));
+assert.ok(JSON.parse(fs.readFileSync('manifest.webmanifest','utf8')).start_url.endsWith('?v='+release));
+assert.ok(html.includes("textContent='版本資訊・v'+APP_RELEASE_VERSION"));
 console.log('PASS five mobile artwork files exist, are precached, and total '+total+' bytes');
