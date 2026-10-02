@@ -5816,6 +5816,7 @@ html.dark .holiday-tag{
 <style id="hero-full-frame-v259">
 @media(max-width:760px){
  .hero-wrap{aspect-ratio:2.5;border:0!important;outline:0!important;box-shadow:none!important;}
+ .hero-wrap,.hero-wrap>picture .hero-mobile,.hero-wrap>.hero-mobile-dark{border-radius:18px!important;-webkit-clip-path:inset(0 round 18px);clip-path:inset(0 round 18px);}
  .hero-wrap>picture .hero-mobile{width:100%!important;height:100%!important;margin-left:0!important;position:absolute!important;inset:0;object-fit:fill!important;border:0!important;}
  html.dark .hero-wrap>picture{display:none!important;}
  html.dark .hero-wrap .hero-mobile-dark{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;margin:0!important;object-fit:fill!important;object-position:center!important;border:0!important;}
@@ -14610,7 +14611,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden||DEV_TESTIN
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=269',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=270',{updateViaCache:'none'});
       await reg.update();
       // Activate the new worker without reloading the page the user is actively using.
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});

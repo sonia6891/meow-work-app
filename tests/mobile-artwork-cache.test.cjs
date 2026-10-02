@@ -14,6 +14,6 @@ for(const url of current){
  total+=bytes;
 }
 assert.ok(total<1200000,'Total phone artwork must stay under 1.2 MB');
-assert.match(html,/sw\.js\?v=269/);
-assert.match(sw,/meow-work-pwa-v269/);
+assert.match(html,/sw\.js\?v=270/);
+assert.match(sw,/meow-work-pwa-v270/);
 console.log('PASS five mobile artwork files exist, are precached, and total '+total+' bytes');
