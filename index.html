@@ -5815,9 +5815,10 @@ html.dark .holiday-tag{
 </style>
 <style id="hero-full-frame-v259">
 @media(max-width:760px){
- .hero-wrap>picture .hero-mobile{width:100%!important;margin-left:0!important;}
+ .hero-wrap{aspect-ratio:2.5;}
+ .hero-wrap>picture .hero-mobile{width:100%!important;height:100%!important;margin-left:0!important;position:absolute!important;inset:0;object-fit:contain!important;}
  html.dark .hero-wrap>picture{display:none!important;}
- html.dark .hero-wrap .hero-mobile-dark{position:relative!important;left:0!important;top:0!important;width:100%!important;height:auto!important;margin:0!important;object-fit:contain!important;object-position:center!important;}
+ html.dark .hero-wrap .hero-mobile-dark{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;margin:0!important;object-fit:contain!important;object-position:center!important;}
 }
 </style>
 </head>
