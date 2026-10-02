@@ -1,0 +1,10 @@
+const status = JSON.parse(process.env.STATUS_JSON);
+const esc = value => String(value ?? '—').replaceAll('|', '\\|').replaceAll('\n', ' ');
+console.log(`# App Store Connect 狀態\n\n查詢時間：${esc(status.queriedAt)}  `);
+console.log(`App：${esc(status.app.name)}（${esc(status.app.bundleId)}）\n`);
+console.log('## App Store 版本\n\n| 版本 | 平台 | 狀態 | 發布方式 |\n|---|---|---|---|');
+for (const item of status.appStoreVersions) console.log(`| ${esc(item.versionString)} | ${esc(item.platform)} | ${esc(item.appVersionState)} | ${esc(item.releaseType)} |`);
+console.log('\n## 最近 builds / TestFlight\n\n| Marketing version | Build | 上傳時間 | 處理狀態 | Internal testing | External testing | 到期 |\n|---|---|---|---|---|---|---|');
+for (const item of status.builds) console.log(`| ${esc(item.marketingVersion?.version ?? item.marketingVersion)} | ${esc(item.buildNumber)} | ${esc(item.uploadedDate)} | ${esc(item.processingState)} | ${esc(item.internalBetaState)} | ${esc(item.externalBetaState)} | ${esc(item.expired)} |`);
+console.log('\n## App Review submissions\n\n| Submission | 送出時間 | 狀態 | Items |\n|---|---|---|---|');
+for (const item of status.reviewSubmissions) console.log(`| ${esc(item.id)} | ${esc(item.submittedDate)} | ${esc(item.state)} | ${esc(item.items.map(row => row.state ?? row.itemType).join(', '))} |`);

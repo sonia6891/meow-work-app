@@ -1,0 +1,44 @@
+name: App Store Connect release status
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-store-connect-status
+  cancel-in-progress: false
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Query App Store Connect
+        id: status
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          ASC_APP_ID: '6817588985'
+        run: node scripts/app-store-connect-status.mjs
+
+      - name: Write workflow summary
+        if: always() && steps.status.outcome == 'success'
+        env:
+          STATUS_JSON: ${{ steps.status.outputs.status_json }}
+        run: node scripts/render-app-store-status.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload status snapshot
+        if: always() && steps.status.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-store-connect-status-${{ github.run_id }}
+          path: app-store-status.json
+          if-no-files-found: error
+          retention-days: 30
