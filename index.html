@@ -5869,6 +5869,25 @@ html.dark .pro-price-card{background:#30261f;border-color:#624e3e;}html.dark .pr
 html.dark .pro-price-value>span,html.dark .pro-price-card p,html.dark .pro-free-note span,html.dark .pro-price-trial,html.dark .pro-price-intro>span{color:#cfb49a;}
 @media(max-width:350px){.pro-price-grid{grid-template-columns:1fr;}.pro-price-card{padding:22px 12px 14px;}.pro-price-value strong{font-size:27px;}.pro-price-grid{gap:8px;}.pro-price-intro>b{font-size:18px;}}
 </style>
+<style id="salary-reconcile-layout-v272">
+#salaryProPane>.salary-section{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;}
+#salaryProPane>.salary-section>.salary-section-title{margin:4px 0 8px;font-size:20px;}
+#salaryProPane .salary-reconcile-intro{margin:0 0 16px;line-height:1.65;max-width:56ch;}
+#salaryProPane .pro-smart-hero{padding:18px!important;border-radius:20px!important;}
+#salaryProPane .pro-smart-title{align-items:flex-start;flex-wrap:wrap;}
+#salaryProPane .pro-smart-kicker{font-size:17px;line-height:1.45;}
+#salaryProPane .pro-badge{position:static!important;max-width:100%;font-size:11px;}
+#salaryProPane .pro-smart-lead{margin:8px 0 14px!important;color:var(--mobile-muted,var(--muted));font-weight:500;}
+#salaryProPane .pro-smart-points{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:0 0 18px;font-size:12px;line-height:1.5;}
+#salaryProPane .pro-smart-points span{padding:8px 0;border-bottom:1px solid var(--mobile-line,var(--line));}
+#salaryProPane .pro-start-btn{margin:0!important;min-height:48px;box-shadow:none!important;}
+#salaryProPane .pro-recent-card{margin-top:16px;padding:16px;border-radius:20px;}
+#salaryProPane .pro-recent-head{align-items:flex-start;gap:12px;}
+#salaryProPane .pro-recent-head span{display:block;margin-top:4px;font-size:12px;line-height:1.5;}
+#salaryProPane .pro-recent-head button{flex-shrink:0;min-height:36px;padding:4px 0 4px 8px;font-size:12px;}
+#salaryProPane .pro-recent-empty{padding:20px 8px;font-size:13px;line-height:1.6;}
+@media(max-width:360px){#salaryProPane .pro-smart-points{font-size:11px;gap:8px;}}
+</style>
 </head>
 <body>
 <div id="app-splash" aria-hidden="true"><img src="./splash-v183.jpg?v=183" alt=""></div>
@@ -6387,14 +6406,14 @@ html.dark .pro-price-value>span,html.dark .pro-price-card p,html.dark .pro-free-
       <div class="salary-pane hidden" id="salaryProPane">
       <div class="salary-section">
         <div class="salary-section-title"><span class="paw">🐾</span>智慧薪資對帳</div>
-        <div class="hint" style="margin-bottom:10px">免費版先看總額有沒有差；Pro 再幫你找出差在哪一項。</div>
+        <div class="hint salary-reconcile-intro">上傳薪資單，核對實發金額與加扣項；有差異或資料不清楚的地方，會集中標示。</div>
         <div class="pro-grid smart-payroll-shell">
           <div class="pro-card pro-smart-hero" data-pro-feature="payslip_scan">
             
-            <div class="pro-smart-title"><div><span class="pro-smart-kicker">🐾 智慧薪資對帳</span></div><span class="pro-badge">🔒 Pro</span></div>
-            <p class="pro-smart-lead">讀每一份辛苦，不只看總額。上傳薪資單後，系統會逐項核對並把需要你確認的地方集中列出。</p>
+            <div class="pro-smart-title"><div><span class="pro-smart-kicker">核對本月薪資</span></div><span class="pro-badge">🔒 Pro</span></div>
+            <p class="pro-smart-lead">拍照或選擇圖片開始，完成後先查看需要確認的項目。</p>
             <div class="pro-smart-points">
-              <span>◉ 三層交叉檢查</span><span>◉ 逐項找差異與漏項</span><span>◉ 額外加項／扣項自動列示</span><span>◉ 歷史對帳可回看</span>
+              <span>✓ 交叉檢查金額</span><span>✓ 找出差異與漏項</span><span>✓ 整理加項與扣項</span><span>✓ 保留歷次結果</span>
             </div>
             <button type="button" class="pro-start-btn" data-pro-action="payslip_scan">開始對帳</button>
           </div>
@@ -6409,7 +6428,7 @@ html.dark .pro-price-value>span,html.dark .pro-price-card p,html.dark .pro-free-
         <div class="payslip-scan-panel hidden" id="payslipScanPanel">
           <div class="scan-head smart-scan-head">
             <div>
-              <b>智慧薪資對帳 <span class="salary-tab-tier pro">Pro</span></b>
+              <b>薪資單辨識 <span class="salary-tab-tier pro">Pro</span></b>
               <div class="hint">正在進行三層交叉檢查。照片不會顯示在畫面上；完成後只呈現薪資項目、金額與需要確認的差異。</div>
             </div>
             <button type="button" class="btn" id="closePayslipScan">返回</button>
@@ -6444,7 +6463,7 @@ html.dark .pro-price-value>span,html.dark .pro-price-card p,html.dark .pro-free-
         </div>
         <div class="itemized-panel hidden smart-itemized" id="itemizedComparePanel">
           <div class="itemized-head smart-itemized-head">
-            <div><b>智慧薪資對帳 <span class="salary-tab-tier pro">Pro</span></b><div class="hint">先看需要處理的項目；一致項目收在下方，不讓畫面被資料塞滿。</div></div>
+            <div><b>逐項對帳結果 <span class="salary-tab-tier pro">Pro</span></b><div class="hint">先看需要處理的項目；一致項目收在下方，不讓畫面被資料塞滿。</div></div>
             <button type="button" class="btn" id="closeItemizedCompare">收起</button>
           </div>
           <div class="itemized-summary smart-summary">
@@ -14612,7 +14631,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden||DEV_TESTIN
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installHint').textContent='可以直接安裝到主畫面'});$('installApp').onclick=async()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(ios){alert('iPhone：請使用 Safari 開啟，點分享，再選「加入主畫面」。');return}if(deferredPrompt){deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null}else alert('請用 Chrome 或 Edge 的瀏覽器選單，選擇「安裝應用程式／加入主畫面」。')};if('serviceWorker'in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=271',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=272',{updateViaCache:'none'});
       await reg.update();
       // Activate the new worker without reloading the page the user is actively using.
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
