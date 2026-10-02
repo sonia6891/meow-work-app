@@ -441,14 +441,19 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         const darkHero=await page.evaluate(()=>{
           const wrap=document.querySelector('.hero-wrap'),image=document.querySelector('.hero-mobile-dark');
           const ws=getComputedStyle(wrap),is=getComputedStyle(image);
-          return{background:ws.backgroundColor,filter:is.filter,opacity:is.opacity};
+          const box=wrap.getBoundingClientRect(),art=image.getBoundingClientRect();
+          return{background:ws.backgroundColor,filter:is.filter,opacity:is.opacity,width:box.width,height:box.height,artWidth:art.width,artHeight:art.height,border:ws.borderTopWidth,loaded:image.complete&&image.naturalWidth>0};
         });
-        check('深色 Hero 底色與頁面同為咖啡棕', /rgb\(24, 18, 15\)/.test(darkHero.background));
-        check('深色 Hero 圖片套用咖啡暖色融合', darkHero.filter!=='none' && Number(darkHero.opacity)<1);
+        check('深色 Hero 圖片載入且沒有多餘邊框', darkHero.loaded && darkHero.border==='0px');
+        check('深色 Hero 完整填滿固定比例圖卡', Math.abs(darkHero.width/darkHero.height-2.5)<0.02 && Math.abs(darkHero.width-darkHero.artWidth)<1 && Math.abs(darkHero.height-darkHero.artHeight)<1);
+        check('深色 Hero 保留核准原圖色彩', darkHero.filter==='none' && Number(darkHero.opacity)===1);
         await page.screenshot({ path:path.join(out,'v257-dark-attendance-390.png'), fullPage:true });
 
         await page.evaluate(() => window.__accountV119.theme('light'));
         await page.waitForTimeout(80);
+
+        const lightHero=await page.locator('.hero-wrap').boundingBox();
+        check('深淺色 Hero 寬高一致', Math.abs(lightHero.width-darkHero.width)<1 && Math.abs(lightHero.height-darkHero.height)<1);
 
         // v255: verify the actual 390px dark mobile visuals, not only CSS source presence.
         await page.evaluate(() => window.__accountV119.theme('dark'));
