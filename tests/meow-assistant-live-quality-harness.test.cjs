@@ -1,7 +1,7 @@
 const fs=require('fs');
 const assert=require('assert');
 
-const html=fs.readFileSync('index.html','utf8');
+const html=fs.readFileSync('index.html','utf8').replace(/\r\n/g,'\n');
 
 assert(html.includes('MEOW_ASSISTANT_LIVE_QUALITY_CASES'),'live quality corpus missing');
 assert(html.includes('runMeowAssistantLiveQualityTest'),'live quality runner missing');
@@ -10,8 +10,9 @@ assert(html.includes("invokeUserFunction('meow-assistant-route'"),'live self-tes
 assert(html.includes('window.meowAssistantLastLiveQualityReport'),'live report storage missing');
 assert(html.includes("'meow-assistant-live-quality-report'"),'local live report persistence missing');
 assert(html.includes('/^正在執行喵助理真實 OpenAI 語意測試/'),'self-test progress must be excluded from memory');
-assert(html.includes('id="meowAiTestProgress"'),'visible progress bar missing');
-assert(html.includes('id="meowAiTestProgressText"'),'visible progress text missing');
+assert(!html.includes('id="meowAiTestProgress"'),'removed settings quality-test progress bar must stay absent');
+assert(!html.includes('id="meowAiTestProgressText"'),'removed settings quality-test progress text must stay absent');
+assert(!html.includes('id="meowAiTestRun"'),'removed settings quality-test entry must stay absent');
 assert(html.includes('setMeowAssistantLiveQualityUi'),'live test UI state helper missing');
 assert(html.includes("run.textContent=running?'測試中…':'執行正式測試'"),'test button loading state missing');
 assert(html.includes('routeMeowAssistantWithAILiveQuality'),'live test must preserve routing errors instead of swallowing them');

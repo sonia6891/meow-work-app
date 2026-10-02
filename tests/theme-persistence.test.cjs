@@ -3,7 +3,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const html=fs.readFileSync('index.html','utf8');
+const html=fs.readFileSync('index.html','utf8').replace(/\r\n/g,'\n');
 const pick=(pattern)=>{const match=html.match(pattern);assert.ok(match,`Missing source anchor: ${pattern}`);return match[1]};
 const boot=pick(/<script id="meow-theme-boot">\n([\s\S]*?)\n<\/script>/);
 const helpers=pick(/(\/\/ Device-local appearance is authoritative[\s\S]*?\/\/ End device-local appearance\.)/);

@@ -139,7 +139,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
     check('舊版雲端備份使用獨立唯讀資料表', html.includes("from('user_legacy_exports').select('payload,original_updated_at')"));
     check('單一雲端還原會自動檢查舊版備份，不再要求使用者另外開檔', html.includes('async function restoreLegacyCloud()') && html.includes("return await restoreLegacyCloud()") && html.includes('不需要另外開啟 JSON 檔'));
     check('參考圖 AI 班表匯入入口已恢復', html.includes('id="aiScheduleCard"') && html.includes('id="aiScheduleUpload"') && html.includes('id="aiScheduleFileInputV219"'));
-    check('浮動喵助理使用定稿厭世喵素材', html.includes('./assets/meow-assistant-pro-v169.webp?v=169') && html.includes('<b>喵助理</b></button>'));
+    check('浮動喵助理使用核准透明 PNG 素材', html.includes('./assets/meow-assistant-fab-v269.png?v=269') && html.includes('<b>喵助理</b></button>'));
     check('喵助理語音會先寫入輸入框再自動送出', html.includes("input.value=text") && html.includes("setTimeout(()=>{if(token===meowAssistantRecognitionToken)void previewMeowAssistant()},120)"));
     check('喵助理文字位於貓咪下方且拖曳熱區加大', html.includes('flex-direction:column') && html.includes('min-width:98px;min-height:118px'));
     check('喵助理正式 iPhone 版使用原生語音辨識', html.includes('function meowSpeechBridge()') && html.includes("nativeBridge.recognize({locale:'zh-TW'})"));
@@ -441,14 +441,19 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         const darkHero=await page.evaluate(()=>{
           const wrap=document.querySelector('.hero-wrap'),image=document.querySelector('.hero-mobile-dark');
           const ws=getComputedStyle(wrap),is=getComputedStyle(image);
-          return{background:ws.backgroundColor,filter:is.filter,opacity:is.opacity};
+          const box=wrap.getBoundingClientRect(),art=image.getBoundingClientRect();
+          return{background:ws.backgroundColor,filter:is.filter,opacity:is.opacity,width:box.width,height:box.height,artWidth:art.width,artHeight:art.height,border:ws.borderTopWidth,loaded:image.complete&&image.naturalWidth>0};
         });
-        check('深色 Hero 底色與頁面同為咖啡棕', /rgb\(24, 18, 15\)/.test(darkHero.background));
-        check('深色 Hero 圖片套用咖啡暖色融合', darkHero.filter!=='none' && Number(darkHero.opacity)<1);
+        check('深色 Hero 圖片載入且沒有多餘邊框', darkHero.loaded && darkHero.border==='0px');
+        check('深色 Hero 完整填滿固定比例圖卡', Math.abs(darkHero.width/darkHero.height-2.5)<0.02 && Math.abs(darkHero.width-darkHero.artWidth)<1 && Math.abs(darkHero.height-darkHero.artHeight)<1);
+        check('深色 Hero 保留核准原圖色彩', darkHero.filter==='none' && Number(darkHero.opacity)===1);
         await page.screenshot({ path:path.join(out,'v257-dark-attendance-390.png'), fullPage:true });
 
         await page.evaluate(() => window.__accountV119.theme('light'));
         await page.waitForTimeout(80);
+
+        const lightHero=await page.locator('.hero-wrap').boundingBox();
+        check('深淺色 Hero 寬高一致', Math.abs(lightHero.width-darkHero.width)<1 && Math.abs(lightHero.height-darkHero.height)<1);
 
         // v255: verify the actual 390px dark mobile visuals, not only CSS source presence.
         await page.evaluate(() => window.__accountV119.theme('dark'));
@@ -521,7 +526,7 @@ async function openPage(browser, base, width, user = null, billingConfigured = t
         await page.waitForTimeout(80);
 
         check('手機排班頁隱藏 AI 班表匯入入口', !(await page.locator('#aiScheduleCard').isVisible()));
-        check('浮動喵助理顯示定稿圖與名稱', await page.locator('#meowAssistantFab img').getAttribute('src')==='./assets/meow-assistant-pro-v169.webp?v=169' && (await page.locator('#meowAssistantFab').innerText()).includes('喵助理') && await page.locator('#meowAssistantFab img').evaluate(img=>img.complete&&img.naturalWidth>0));
+        check('浮動喵助理顯示定稿圖與名稱', await page.locator('#meowAssistantFab img').getAttribute('src')==='./assets/meow-assistant-fab-v269.png?v=269' && (await page.locator('#meowAssistantFab').innerText()).includes('喵助理') && await page.locator('#meowAssistantFab img').evaluate(img=>img.complete&&img.naturalWidth>0));
 
         await page.evaluate(() => window.__accountV119.attendance());
         await page.waitForTimeout(120);

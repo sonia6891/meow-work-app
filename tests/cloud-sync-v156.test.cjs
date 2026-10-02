@@ -65,7 +65,8 @@ assert(
   html.includes("data.app&&data.app!=='喵的，又要上班了'"),
   'Backup import must reject oversized files and backups for another app.'
 );
-const swRegisterVersion=(html.match(/register\('\.\/sw\.js\?v=(\d+)'/)||[])[1];
+const swRegisterVersion=(html.match(/const APP_RELEASE_VERSION='(\d+)'/)||[])[1];
+assert(html.includes("register('./sw.js?v='+APP_RELEASE_VERSION"),'Service worker registration must use the shared release version.');
 assert(
   Number(swRegisterVersion)>=265 &&
   !html.includes('meow-sw-reloaded-') &&

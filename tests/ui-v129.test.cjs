@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const html=fs.readFileSync('index.html','utf8');
+const html=fs.readFileSync('index.html','utf8').replace(/\r\n/g,'\n');
 
 const build=html.match(/<meta name="meow-ui-build" content="v(\d+)[^"]*">/);
 assert(build && Number(build[1])>=129,'expected v129+ UI build');
@@ -35,10 +35,10 @@ assert(html.includes('id="settingsScheduleSummary"'));
 assert.equal(ids.settingsAiImport||0,0,'settings page must not advertise removed AI schedule import');
 assert(html.includes('Free／Pro 方案比較'),'Free/Pro comparison dialog missing');
 assert(html.includes('薪資單三層交叉檢查'),'Pro comparison must include three-layer payslip verification');
-assert(html.includes("appearanceOpen?'⌄':'›'"),'appearance fold state missing');
-assert(html.includes("schedulePrefsOpen?'⌄':'›'"),'schedule preference fold state missing');
-assert(html.includes("workSettingsOpen?'⌄':'›'"),'work settings fold state missing');
-assert(html.includes("dataSyncOpen?'⌄':'›'"),'data management fold state missing');
+assert(html.includes("$('toggleAppearance').setAttribute('aria-expanded',String(appearanceOpen))") && html.includes("$('appearanceFoldState').innerHTML='<svg"),'appearanceFoldState must preserve SVG and accessible expanded state');
+assert(html.includes("$('toggleSchedulePrefs').setAttribute('aria-expanded',String(schedulePrefsOpen))") && html.includes("$('schedulePrefsFoldState').innerHTML='<svg"),'schedulePrefsFoldState must preserve SVG and accessible expanded state');
+assert(html.includes("$('toggleWorkSettings').setAttribute('aria-expanded',String(workSettingsOpen))") && html.includes("$('workSettingsFoldState').innerHTML='<svg"),'workSettingsFoldState must preserve SVG and accessible expanded state');
+assert(html.includes("$('toggleDataSync').setAttribute('aria-expanded',String(dataSyncOpen))") && html.includes("$('dataSyncFoldState').innerHTML='<svg"),'dataSyncFoldState must preserve SVG and accessible expanded state');
 assert(html.includes('grid-template-columns:26px minmax(0,1fr) 96px'),'settings fold header alignment grid missing');
 assert(html.includes('./assets/meow-assistant-pro-v169.webp?v=169'),'final Meow Assistant mascot asset missing');
 assert(html.includes('<b>喵助理</b></button>'),'floating Meow Assistant label missing');
