@@ -7111,7 +7111,7 @@ const FEATURE_CATALOG={
   meow_schedule_assistant:{label:'喵助理・排班指令',tier:'pro'}
 };
 const DEV_TESTING_ENABLED=false;
-let devMode=DEV_TESTING_ENABLED,devPlan='free',serverPlan='free',developerAccess=false,serverAccessTier='free',entitlementStatus='free',entitlementUntil=null,trialStartedAt=null,billingProvider=null,providerSubscriptionId=null,cancelAtPeriodEnd=false,canceledAt=null,billingConfigured=false,billingMonthly=99,billingYearly=790,billingTrialDays=3,billingStoreProvider='app_store_play',billingHistory=[],storeProductsById={},storeProductsLoaded=false;
+let devMode=DEV_TESTING_ENABLED,devPlan='free',serverPlan='free',developerAccess=false,serverAccessTier='free',entitlementStatus='free',entitlementUntil=null,trialStartedAt=null,billingProvider=null,providerSubscriptionId=null,cancelAtPeriodEnd=false,canceledAt=null,billingConfigured=false,billingMonthly=99,billingYearly=790,billingTrialDays=3,billingStoreProvider='app_store_play',billingHistory=[],storeProductsById={},storeProductsLoaded=false,storeProductsFailed=false;
 if(DEV_TESTING_ENABLED){
   try{
     const stored=localStorage.getItem(DEV_PLAN_KEY);
@@ -11222,8 +11222,8 @@ function storeProductForPlan(plan){
 function storeDisplayPrice(plan){
   const product=storeProductForPlan(plan);
   if(product&&product.displayPrice)return String(product.displayPrice);
-  const fallback=plan==='yearly'?Number(billingYearly||790):Number(billingMonthly||99);
-  return 'NT\u0024'+fallback.toLocaleString('zh-TW');
+  if(!storeBillingBridge())return '以商店顯示價格為準';
+  return storeProductsLoaded||storeProductsFailed?'價格暫時無法取得':'價格載入中…';
 }
 function storeIntroEligible(plan){
   const product=storeProductForPlan(plan);
@@ -11249,9 +11249,13 @@ async function loadNativeStoreProducts(){
     });
     storeProductsById=next;
     storeProductsLoaded=true;
+    storeProductsFailed=false;
     renderProPlanSettings();
   }catch(e){
+    storeProductsById={};
     storeProductsLoaded=false;
+    storeProductsFailed=true;
+    renderProPlanSettings();
   }
 }
 async function startStoreSubscription(plan){
@@ -11364,8 +11368,9 @@ function renderProPlanSettings(){
   badge.classList.toggle('pro',pro);
   if(detailBadge){detailBadge.textContent=badge.textContent;detailBadge.classList.toggle('pro',pro)}
 
+  const priceSummary='月繳 '+escapeHtml(storeDisplayPrice('monthly'))+'／月・年繳 '+escapeHtml(storeDisplayPrice('yearly'))+'／年';
   if(!authUser){
-    box.innerHTML='<b>目前：Free</b>登入後可選擇月繳 NT$99 或年繳 NT$790；首次符合資格可享 3 天免費試用。';
+    box.innerHTML='<b>目前：Free</b>登入後可選擇'+priceSummary+'；首次符合資格可享 3 天免費試用。';
   }else if(developer){
     box.innerHTML='<b>開發者帳號・全部功能永久解鎖</b>不受 Pro 訂閱到期影響；商店訂閱狀態仍獨立保留，不會用開發者權限偽造付款紀錄。';
   }else if(pro){
@@ -11376,7 +11381,7 @@ function renderProPlanSettings(){
     box.innerHTML='<b>目前：Free</b>此帳號已使用過免費試用；可直接選擇月繳或年繳 Pro。';
   }else{
     const storeName=storeBillingBridge()?storePlatformName():'App Store／Google Play';
-    box.innerHTML='<b>目前：Free</b>月繳 NT$99／月・年繳 NT$790／年；首次符合資格可享 3 天免費試用。訂閱由 '+storeName+' 管理。';
+    box.innerHTML='<b>目前：Free</b>'+priceSummary+'；首次符合資格可享 3 天免費試用。訂閱由 '+storeName+' 管理。';
   }
 
   if(live){

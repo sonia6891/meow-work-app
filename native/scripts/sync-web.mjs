@@ -15,6 +15,7 @@ const files = [
   'manifest.webmanifest',
   'sw.js',
   'privacy.html',
+  'delete-account.html',
   'terms.html',
   'support.html',
   'workcat-home-v12.png',
